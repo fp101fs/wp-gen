@@ -1,0 +1,723 @@
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Star, Eye, Search, X, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { supabase } from './supabaseClient';
+import Header from './Header';
+import FeaturesModal from './FeaturesModal';
+import MyExtensions from './MyExtensions';
+import PageContainer from './components/PageContainer';
+
+// Sorting configuration
+const SORT_OPTIONS = [
+  { value: 'favorites_desc', label: '# Favorites (Most)', field: 'favorite_count', direction: 'desc' },
+  { value: 'favorites_asc', label: '# Favorites (Least)', field: 'favorite_count', direction: 'asc' },
+  { value: 'revisions_desc', label: '# Revisions (Most)', field: 'revision_count', direction: 'desc' },
+  { value: 'revisions_asc', label: '# Revisions (Least)', field: 'revision_count', direction: 'asc' },
+  { value: 'name_asc', label: 'Title (A-Z)', field: 'name', direction: 'asc' },
+  { value: 'name_desc', label: 'Title (Z-A)', field: 'name', direction: 'desc' },
+  { value: 'created_desc', label: 'Date Created (Newest)', field: 'created_at', direction: 'desc' },
+  { value: 'created_asc', label: 'Date Created (Oldest)', field: 'created_at', direction: 'asc' },
+];
+
+const LetterSquare = ({ title }) => {
+  const firstLetter = title.charAt(0).toUpperCase();
+  const lastLetter = title.charAt(title.length - 1).toUpperCase();
+  
+  const getColorFromLetter = (letter) => {
+    const code = letter.charCodeAt(0);
+    const hue = (code * 137.508) % 360;
+    return `hsl(${hue}, 70%, 60%)`;
+  };
+  
+  const color1 = getColorFromLetter(firstLetter);
+  const color2 = getColorFromLetter(lastLetter);
+  
+  return (
+    <div 
+      className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
+      style={{
+        background: `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`
+      }}
+    >
+      {firstLetter}
+    </div>
+  );
+};
+
+function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowLoginModal }) {
+  const [extensions, setExtensions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
+  const [showMyExtensions, setShowMyExtensions] = useState(false);
+  const [userExtensions, setUserExtensions] = useState([]);
+  
+  // Filter states
+  const [viewMode, setViewMode] = useState(defaultViewMode); // 'my' or 'all'
+  const [favoriteFilter, setFavoriteFilter] = useState('all'); // 'favorites' or 'all'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState(new Set()); // Database favorites state
+  const [previewExtension, setPreviewExtension] = useState(null);
+  const [lastLocationChange, setLastLocationChange] = useState(Date.now());
+  
+  // Sorting states
+  const [sortBy, setSortBy] = useState('favorites_desc'); // Default to favorites descending
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const sortDropdownRef = useRef(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+
+  useEffect(() => {
+    fetchExtensions();
+  }, [session, viewMode, lastLocationChange]);
+
+  // Listen for forced refresh events from navigation
+  useEffect(() => {
+    const handleForceRefresh = (event) => {
+      const { viewMode: newViewMode } = event.detail;
+      setViewMode(newViewMode);
+      setFavoriteFilter('all');
+      setSearchQuery('');
+      setLastLocationChange(Date.now());
+    };
+
+    window.addEventListener('forceGalleryRefresh', handleForceRefresh);
+    return () => {
+      window.removeEventListener('forceGalleryRefresh', handleForceRefresh);
+    };
+  }, []);
+
+  // Close sort dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if click is outside both the button and the dropdown (which is portaled)
+      const isClickInsideButton = sortDropdownRef.current && sortDropdownRef.current.contains(event.target);
+      const isClickInsideDropdown = event.target.closest('[data-sort-dropdown]');
+      
+      if (!isClickInsideButton && !isClickInsideDropdown) {
+        setShowSortDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Fetch user favorites when session is available
+  useEffect(() => {
+    if (session) {
+      fetchUserFavorites();
+    } else {
+      setFavorites(new Set());
+    }
+  }, [session]);
+
+  // Ensure viewMode is set correctly when location changes
+  useEffect(() => {
+    // Determine viewMode based on current path
+    const correctViewMode = location.pathname === '/my-extensions' ? 'my' : 'all';
+    setViewMode(correctViewMode);
+    setLastLocationChange(Date.now());
+    
+    // Reset other filters when navigation occurs
+    setFavoriteFilter('all');
+    setSearchQuery('');
+  }, [location.pathname]);
+
+  // Also set viewMode when defaultViewMode prop changes (for initial load)
+  useEffect(() => {
+    setViewMode(defaultViewMode);
+  }, [defaultViewMode]);
+
+  const fetchExtensions = async () => {
+    setLoading(true);
+    try {
+      // If viewing "My Extensions" but not logged in, return empty array
+      if (viewMode === 'my' && !session) {
+        setExtensions([]);
+        setLoading(false);
+        return;
+      }
+      
+      let query = supabase
+        .from('extensions')
+        .select('*');
+      
+      if (viewMode === 'my' && session) {
+        query = query.eq('user_id', session.user.id);
+      } else if (viewMode === 'all') {
+        query = query.eq('is_public', true);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching extensions:', error);
+      } else {
+        // Debug: Log the actual data received from database
+        console.log('GalleryPage data received:', data?.slice(0, 2)); // Log first 2 items
+        console.log('First item favorite_count:', data?.[0]?.favorite_count);
+        // Batch processing approach for revision counts - much faster than N+1 queries
+        
+        // Step 1: Get unique user IDs from all extensions (filter out null values)
+        const uniqueUserIds = [...new Set((data || []).map(ext => ext.user_id))].filter(userId => userId != null);
+        
+        // Step 2: Fetch all extensions for all unique users in batch queries
+        const allUserExtensionsMap = new Map();
+        
+        if (uniqueUserIds.length > 0) {
+          await Promise.all(
+            uniqueUserIds.map(async (userId) => {
+              const { data: userExtensions, error: userError } = await supabase
+                .from('extensions')
+                .select('id, parent_id, user_id')
+                .eq('user_id', userId);
+              
+              if (!userError && userExtensions) {
+                allUserExtensionsMap.set(userId, userExtensions);
+              }
+            })
+          );
+        }
+        
+        // Step 3: Calculate revision counts using cached data
+        const extensionsWithRevisionCounts = (data || []).map((extension) => {
+          // Skip revision counting for extensions with null user_id
+          if (!extension.user_id) {
+            return { ...extension, revision_count: 0 };
+          }
+          
+          const allUserExtensions = allUserExtensionsMap.get(extension.user_id) || [];
+          
+          // Count only descendants of THIS specific extension
+          const descendants = [];
+          const processedIds = new Set();
+          
+          // Helper function to find direct children
+          const findDirectChildren = (parentId) => {
+            return allUserExtensions.filter(ext => ext.parent_id === parentId);
+          };
+          
+          // Recursively find all descendants starting from this extension
+          const addDescendantsRecursively = (parentId) => {
+            const children = findDirectChildren(parentId);
+            for (const child of children) {
+              if (!processedIds.has(child.id)) {
+                descendants.push(child);
+                processedIds.add(child.id);
+                // Recursively add this child's descendants
+                addDescendantsRecursively(child.id);
+              }
+            }
+          };
+          
+          // Add all descendants starting from this extension
+          addDescendantsRecursively(extension.id);
+          
+          // Count is just the number of descendants
+          const revisionCount = descendants.length;
+          return { ...extension, revision_count: revisionCount };
+        });
+        
+        setExtensions(extensionsWithRevisionCounts);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserFavorites = async () => {
+    if (!session) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('extension_id')
+        .eq('user_id', session.user.id);
+      
+      if (error) {
+        console.error('Error fetching favorites:', error);
+      } else {
+        const favoriteIds = new Set(data.map(fav => fav.extension_id));
+        setFavorites(favoriteIds);
+      }
+    } catch (err) {
+      console.error('Error fetching favorites:', err);
+    }
+  };
+
+  const createPreviewHtml = (extension) => {
+    if (!extension || !extension.files) return '';
+
+    const htmlFile = Object.keys(extension.files).find(name => name.endsWith('.html'));
+    if (!htmlFile) {
+      return '<div style="padding: 20px; font-family: Arial; color: #333;">Preview unavailable: No HTML file found.</div>';
+    }
+
+    let html = extension.files[htmlFile];
+    const cssFile = Object.keys(extension.files).find(name => name.endsWith('.css'));
+    const css = cssFile ? extension.files[cssFile] : '';
+
+    html = html.replace(/<link.*rel="stylesheet".*>/g, '');
+
+    const fallbackCss = `
+      body {
+        margin: 0;
+        padding: 10px;
+        font-family: Arial, sans-serif;
+        background-color: #ffffff;
+        color: #333333;
+      }
+    `;
+    const combinedCss = fallbackCss + '\n' + (css || '');
+
+    if (html.includes('</head>')) {
+      return html.replace('</head>', `<style>${combinedCss}</style></head>`);
+    } else {
+      return `<!DOCTYPE html><html><head><style>${combinedCss}</style></head><body>${html}</body></html>`;
+    }
+  };
+
+  // Filtered extensions based on all filters
+  const filteredExtensions = useMemo(() => {
+    let filtered = extensions;
+
+    // Apply favorite filter
+    if (favoriteFilter === 'favorites') {
+      filtered = filtered.filter(ext => favorites.has(ext.id));
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(ext => 
+        ext.name.toLowerCase().includes(query) ||
+        ext.description.toLowerCase().includes(query) ||
+        (ext.prompt && ext.prompt.toLowerCase().includes(query)) ||
+        (ext.revision_prompt && ext.revision_prompt.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply sorting
+    const sortOption = SORT_OPTIONS.find(option => option.value === sortBy);
+    if (sortOption) {
+      filtered = [...filtered].sort((a, b) => {
+        let aValue, bValue;
+        
+        if (sortOption.field === 'favorite_count') {
+          aValue = a.favorite_count || 0;
+          bValue = b.favorite_count || 0;
+        } else if (sortOption.field === 'revision_count') {
+          aValue = a.revision_count || 0;
+          bValue = b.revision_count || 0;
+        } else if (sortOption.field === 'created_at') {
+          aValue = new Date(a.created_at);
+          bValue = new Date(b.created_at);
+        } else {
+          aValue = a[sortOption.field] || '';
+          bValue = b[sortOption.field] || '';
+        }
+        
+        // Handle string comparisons
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          aValue = aValue.toLowerCase();
+          bValue = bValue.toLowerCase();
+        }
+        
+        if (sortOption.direction === 'asc') {
+          return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        } else {
+          return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+        }
+      });
+    }
+
+    return filtered;
+  }, [extensions, favoriteFilter, searchQuery, favorites, sortBy]);
+
+  const toggleFavorite = async (extensionId) => {
+    if (!session) {
+      onShowLoginModal();
+      return;
+    }
+    
+    const isFavorited = favorites.has(extensionId);
+    
+    try {
+      if (isFavorited) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('extension_id', extensionId);
+        
+        if (error) {
+          console.error('Error removing from favorites:', error);
+        } else {
+          setFavorites(prev => {
+            const newFavorites = new Set(prev);
+            newFavorites.delete(extensionId);
+            return newFavorites;
+          });
+          // Note: Database trigger will update favorite_count automatically, but for immediate UI feedback:
+          setExtensions(prev => prev.map(ext => 
+            ext.id === extensionId 
+              ? { ...ext, favorite_count: Math.max(0, (ext.favorite_count || 1) - 1) }
+              : ext
+          ));
+        }
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('favorites')
+          .insert([{
+            user_id: session.user.id,
+            extension_id: extensionId
+          }]);
+        
+        if (error) {
+          console.error('Error adding to favorites:', error);
+        } else {
+          setFavorites(prev => {
+            const newFavorites = new Set(prev);
+            newFavorites.add(extensionId);
+            return newFavorites;
+          });
+          // Note: Database trigger will update favorite_count automatically, but for immediate UI feedback:
+          setExtensions(prev => prev.map(ext => 
+            ext.id === extensionId 
+              ? { ...ext, favorite_count: (ext.favorite_count || 0) + 1 }
+              : ext
+          ));
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+    }
+  };
+
+  const handleSelectExtension = (extension) => {
+    setShowMyExtensions(false);
+    navigate(`/extension/${extension.id}`);
+  };
+
+  const handleViewExtension = (extension) => {
+    navigate(`/extension/${extension.id}`);
+  };
+
+  return (
+    <PageContainer>
+      <Header 
+        onShowFeaturesModal={() => setShowFeaturesModal(true)}
+        onShowLoginModal={onShowLoginModal}
+      />
+      <div>
+          <h1 className="text-4xl font-bold text-white mb-4 text-center">
+            Extension Gallery
+          </h1>
+          <p className="text-xl text-gray-300 text-center max-w-2xl mx-auto">
+            Explore and Revise - or "Remix" - any extension.
+          </p>
+
+        {/* Filter Controls */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-xl mb-8">
+          {sessionLoading ? (
+            <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+              {/* Loading placeholders for filter controls */}
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-40 h-10 bg-gray-600 rounded-lg animate-pulse"></div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-10 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-32 h-10 bg-gray-600 rounded-lg animate-pulse"></div>
+              </div>
+              <div className="w-60 h-10 bg-gray-600 rounded-lg animate-pulse"></div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-32 h-10 bg-gray-600 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+              
+              {/* View Mode Toggle */}
+              <div className="flex items-center space-x-2">
+                <span className="text-white text-sm font-medium">View:</span>
+                <div className="bg-gray-800 rounded-lg p-1 flex">
+                  <button
+                    onClick={() => setViewMode('my')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      viewMode === 'my'
+                        ? 'bg-purple-600 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    My Extensions
+                  </button>
+                  <button
+                    onClick={() => setViewMode('all')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      viewMode === 'all'
+                        ? 'bg-purple-600 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    All
+                  </button>
+                </div>
+              </div>
+
+              {/* Favorites Toggle */
+              <div className="flex items-center space-x-2">
+                <span className="text-white text-sm font-medium">Show:</span>
+                <div className="bg-gray-800 rounded-lg p-1 flex">
+                  <button
+                    onClick={() => setFavoriteFilter('all')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      favoriteFilter === 'all'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setFavoriteFilter('favorites')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      favoriteFilter === 'favorites'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    Favorites
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Input */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search by name, prompt, or description..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Sort Dropdown */}
+              <div className="relative z-50">
+                <div className="flex items-center space-x-2">
+                  <span className="text-white text-sm font-medium">Sort:</span>
+                  <div className="relative" ref={sortDropdownRef}>
+                    <button
+                      onClick={() => {
+                        if (!showSortDropdown && sortDropdownRef.current) {
+                          const rect = sortDropdownRef.current.getBoundingClientRect();
+                          setDropdownPosition({
+                            top: rect.bottom + 8,
+                            right: window.innerWidth - rect.right
+                          });
+                        }
+                        setShowSortDropdown(!showSortDropdown);
+                      }}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                    >
+                      <ArrowUpDown className="w-4 h-4" />
+                      <span className="text-sm">
+                        {SORT_OPTIONS.find(option => option.value === sortBy)?.label || 'Sort by...'}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Extension Cards Grid */}
+        <div className="mb-8">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading extensions...</p>
+            </div>
+          ) : filteredExtensions.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg mb-4">
+                {searchQuery.trim()
+                  ? 'No extensions match your filters.'
+                  : favoriteFilter === 'favorites'
+                    ? !session
+                      ? "You must log in to view your favorite extensions."
+                      : 'No favorite extensions found.'
+                    : viewMode === 'my' 
+                      ? !session 
+                        ? "You must log in and create an extension to view your extensions."
+                        : "You haven't created any extensions yet."
+                      : 'No public extensions available.'
+                }
+              </p>
+              {!session && (viewMode === 'my' || favoriteFilter === 'favorites') && (
+                <button
+                  onClick={onShowLoginModal}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  {viewMode === 'my' ? 'Log In to View Your Extensions' : 'Log In to View Your Favorites'}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredExtensions.map((extension) => (
+                <div
+                  key={extension.id}
+                  className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-105"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start space-x-3 flex-1 mr-2 min-w-0">
+                      <LetterSquare title={extension.name} />
+                      <h3 className="text-lg font-semibold text-white flex-1 min-w-0 line-clamp-2 leading-tight text-center">
+                        {extension.name}
+                      </h3>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={() => toggleFavorite(extension.id)}
+                        className="flex-shrink-0 p-1 hover:bg-white/10 rounded transition-colors"
+                        aria-label={session ? (favorites.has(extension.id) ? 'Remove from favorites' : 'Add to favorites') : 'Login to favorite this extension'}
+                      >
+                        <Star 
+                          className={`w-7 h-7 ${
+                            favorites.has(extension.id) 
+                              ? 'text-yellow-400 fill-current' 
+                              : 'text-gray-400 hover:text-yellow-400'
+                          }`} 
+                        />
+                      </button>
+                      <span className="text-lg text-gray-400 mt-1">
+                        {extension.favorite_count || 0}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-3 h-16 overflow-hidden">
+                    {extension.description}
+                  </p>
+                  
+                  <div className="space-y-3">
+                    {/* Top row: # Revisions and Version */}
+                    <div className="flex items-center justify-between">
+                      <div className="text-xl text-gray-400">
+                        <span className="text-gray-200">{extension.revision_count || 0}</span> revisions
+                      </div>
+                      <div className="text-xl text-yellow-400">
+                        v{extension.version || '1.0'}
+                      </div>
+                    </div>
+                    
+                    {/* Bottom row: Preview and View buttons */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setPreviewExtension(extension)}
+                        className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>Preview</span>
+                      </button>
+                      <button
+                        onClick={() => handleViewExtension(extension)}
+                        className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>View</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+      </div>
+      <FeaturesModal isOpen={showFeaturesModal} onClose={() => setShowFeaturesModal(false)} />
+      <MyExtensions 
+        isOpen={showMyExtensions} 
+        onClose={() => setShowMyExtensions(false)} 
+        extensions={userExtensions} 
+        onSelectExtension={handleSelectExtension} 
+      />
+
+      {/* Preview Modal */}
+      {previewExtension && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4"
+          onClick={() => setPreviewExtension(null)}
+        >
+          <div 
+            className="bg-gray-800 rounded-lg shadow-2xl w-full max-w-6xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+              <h3 className="text-xl font-bold text-white">Preview: {previewExtension.name}</h3>
+              <button onClick={() => setPreviewExtension(null)} className="text-gray-400 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4 bg-white" style={{ height: '70vh' }}>
+              <iframe
+                srcDoc={createPreviewHtml(previewExtension)}
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                title={`Preview of ${previewExtension.name}`}
+                sandbox="allow-scripts allow-modals"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Sort Dropdown Portal */}
+      {showSortDropdown && createPortal(
+        <div 
+          data-sort-dropdown
+          className="fixed w-56 bg-gray-800 border border-gray-600 rounded-lg shadow-2xl"
+          style={{ 
+            top: dropdownPosition.top + 'px',
+            right: dropdownPosition.right + 'px',
+            zIndex: 99999
+          }}
+        >
+          {SORT_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => {
+                setSortBy(option.value);
+                setShowSortDropdown(false);
+              }}
+              className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                sortBy === option.value ? 'bg-purple-600 text-white' : 'text-gray-300'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
+    </PageContainer>
+  );
+}
+
+export default GalleryPage;

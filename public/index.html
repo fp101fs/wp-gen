@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Optimized Google Analytics -->
+    <script>
+      // Load Google Analytics only after page load to avoid blocking
+      window.addEventListener('load', function() {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + ('%REACT_APP_GA_TRACKING_ID%' || 'G-X3N949QEJF');
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        const trackingId = '%REACT_APP_GA_TRACKING_ID%' || 'G-X3N949QEJF';
+        gtag('config', trackingId);
+      });
+    </script>
+
+    <meta charset="utf-8" />
+    <!-- Favicons -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/icons/plugpress-icon-16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/icons/plugpress-icon-32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="%PUBLIC_URL%/icons/plugpress-icon-64.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="%PUBLIC_URL%/icons/plugpress-icon-128.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/icons/plugpress-icon-192.png">
+    <link rel="icon" type="image/png" sizes="256x256" href="%PUBLIC_URL%/icons/plugpress-icon-256.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="%PUBLIC_URL%/icons/plugpress-icon-512.png">
+
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/icons/plugpress-icon-180.png">
+
+    <!-- Additional Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#7C3AED" />
+
+    <!-- Primary Meta Tags -->
+    <title>PlugPress - AI WordPress Plugin Builder | Create Plugins in Minutes</title>
+    <meta name="title" content="PlugPress - AI WordPress Plugin Builder | Create Plugins in Minutes" />
+    <meta name="description" content="Build WordPress plugins instantly with AI. No coding required. Generate, revise, and download professional WordPress plugins in minutes. Free to start." />
+    <meta name="keywords" content="wordpress plugin builder, AI plugin generator, wordpress plugin creator, no-code plugin development, wordpress plugin development" />
+    <meta name="author" content="PlugPress.org" />
+    <meta name="application-name" content="PlugPress" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://plugpress.org/" />
+    <meta property="og:title" content="PlugPress - AI WordPress Plugin Builder | Create Plugins in Minutes" />
+    <meta property="og:description" content="Build WordPress plugins instantly with AI. No coding required. Generate, revise, and download professional WordPress plugins in minutes. Free to start." />
+    <meta property="og:image" content="https://plugpress.org/plugpress.webp" />
+    <meta property="og:site_name" content="PlugPress.org" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://plugpress.org/" />
+    <meta property="twitter:title" content="PlugPress - AI WordPress Plugin Builder | Create Plugins in Minutes" />
+    <meta property="twitter:description" content="Build WordPress plugins instantly with AI. No coding required. Generate, revise, and download professional WordPress plugins in minutes. Free to start." />
+    <meta property="twitter:image" content="https://plugpress.org/plugpress.webp" />
+
+    <!-- Performance optimizations -->
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//js.stripe.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Preload critical images -->
+    <link rel="preload" href="%PUBLIC_URL%/plugpress.webp" as="image" type="image/webp" />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://plugpress.org/#webapp",
+          "name": "PlugPress",
+          "url": "https://plugpress.org",
+          "description": "AI-powered WordPress plugin builder that generates professional plugins in minutes",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "creator": {
+            "@type": "Organization",
+            "@id": "https://plugpress.org/#organization"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://plugpress.org/#organization",
+          "name": "PlugPress.org",
+          "url": "https://plugpress.org",
+          "logo": "https://plugpress.org/plugpress.webp",
+          "description": "AI-powered WordPress plugin development platform",
+          "foundingDate": "2024",
+          "sameAs": []
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "PlugPress WordPress Plugin Builder",
+          "operatingSystem": "Web Browser",
+          "applicationCategory": "DeveloperApplication",
+          "description": "Generate WordPress plugins using artificial intelligence",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "featureList": [
+            "AI-powered plugin generation",
+            "No coding required",
+            "Instant download",
+            "Professional templates",
+            "Revision system"
+          ]
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

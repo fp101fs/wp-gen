@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Build
+build/
+dist/
+
+# Debug/Logs
+*.log
+dev.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# SQL debug files (development only)
+check_*.sql
+debug_*.sql
+fix_*.sql
+disable_*.sql

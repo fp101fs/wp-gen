@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google OAuth Serverless Setup Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+            color: #333;
+        }
+        h1 {
+            color: #4285f4;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c4043;
+            margin-top: 30px;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .note {
+            background-color: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .important {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .flow-diagram {
+            background-color: #e3f2fd;
+            border-left: 5px solid #4285f4;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .tip {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚀 Google OAuth Serverless Setup Guide for Chrome Extensions</h1>
+
+<p>This guide shows you how to implement secure Google OAuth authentication in your Chrome extension using a serverless backend to keep your client secret safe.</p>
+
+<h2>What You'll Build</h2>
+<ul>
+    <li>A serverless function on Vercel that securely exchanges OAuth codes for access tokens</li>
+    <li>A Chrome extension that authenticates users with Google</li>
+    <li>Access to user profile information (name, email, profile picture)</li>
+    <li>A secure architecture that keeps secrets on the server</li>
+</ul>
+
+<h2>Prerequisites</h2>
+<ul>
+    <li>A <strong>Google Account</strong></li>
+    <li>A <strong>GitHub, GitLab, or Bitbucket</strong> account</li>
+    <li>A <strong>Vercel</strong> account (free tier works perfectly)</li>
+</ul>
+
+<div class="flow-diagram">
+<strong>📋 Understanding the OAuth Flow:</strong><br><br>
+1. User clicks "Sign in with Google" in your extension<br>
+2. Extension launches Google OAuth authorization page<br>
+3. User signs in and authorizes your app<br>
+4. Google redirects to your Vercel URL with authorization code<br>
+5. <strong>Chrome intercepts</strong> this redirect BEFORE it reaches your server<br>
+6. Extension extracts the code from the intercepted URL<br>
+7. Extension POSTs code to your Vercel serverless function<br>
+8. Serverless function exchanges code for access token (CLIENT_SECRET stays secure)<br>
+9. Serverless function fetches user info from Google APIs<br>
+10. Serverless function returns user data to extension<br>
+11. Extension stores and displays user information
+</div>
+
+<hr>
+
+<h2>Step 1: Set Up Google Cloud Project</h2>
+
+<ol>
+    <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+    <li>Click <strong>"Select a project"</strong> at the top, then <strong>"New Project"</strong></li>
+    <li>Name your project (e.g., "My Extension OAuth")</li>
+    <li>Click <strong>"Create"</strong></li>
+</ol>
+
+<h3>Enable Required APIs</h3>
+<ol start="5">
+    <li>In the left sidebar, go to <strong>"APIs & Services"</strong> → <strong>"Library"</strong></li>
+    <li>Search for <strong>"Google+ API"</strong> (or "People API") and click it</li>
+    <li>Click <strong>"Enable"</strong></li>
+</ol>
+
+<h3>Create OAuth Credentials</h3>
+<ol start="8">
+    <li>In the left sidebar, go to <strong>"APIs & Services"</strong> → <strong>"Credentials"</strong></li>
+    <li>Click <strong>"Create Credentials"</strong> → <strong>"OAuth client ID"</strong></li>
+    <li>If prompted, configure the OAuth consent screen:
+        <ul>
+            <li>Choose <strong>"External"</strong> user type</li>
+            <li>Fill in app name, user support email, and developer email</li>
+            <li>Click <strong>"Save and Continue"</strong> through the steps</li>
+        </ul>
+    </li>
+    <li>For application type, select <strong>"Web application"</strong></li>
+    <li>Name it (e.g., "Extension OAuth Client")</li>
+    <li><strong>Leave "Authorized redirect URIs" empty for now</strong> - we'll add it after deploying to Vercel</li>
+    <li>Click <strong>"Create"</strong></li>
+    <li><strong>Copy and save</strong> both the <strong>Client ID</strong> and <strong>Client Secret</strong></li>
+</ol>
+
+<hr>
+
+<h2>Step 2: Create the Serverless Function</h2>
+
+<ol>
+    <li><strong>Create a new repository</strong> on GitHub (e.g., <code>google-oauth-checker</code>)</li>
+    <li>Click <strong>"Add file"</strong> → <strong>"Create new file"</strong></li>
+    <li>Type <code>api/google-auth.js</code> as the filename</li>
+    <li><strong>Paste the following code:</strong></li>
+</ol>
+
+<pre><code>// api/google-auth.js
+
+import fetch from 'node-fetch';
+
+// Environment variables - will be set securely in Vercel
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+
+export default async (req, res) => {
+  // Verify environment variables are configured
+  if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI) {
+    return res.status(500).json({ 
+      status: 'error', 
+      message: 'Server configuration error: Missing environment variables.' 
+    });
+  }
+
+  // Only accept POST requests from the extension
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      status: 'error', 
+      message: 'Method Not Allowed' 
+    });
+  }
+
+  // Extract the authorization code from request
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ 
+      status: 'error', 
+      message: 'Missing authorization code' 
+    });
+  }
+  
+  try {
+    // --- STEP A: Exchange Authorization Code for Access Token ---
+    // This MUST happen on the server to keep CLIENT_SECRET secure
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code: code,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code',
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      const error = await tokenResponse.json();
+      console.error('Google Token Error:', error);
+      return res.status(401).json({ 
+        status: 'error', 
+        message: 'Failed to get access token from Google.',
+        details: error 
+      });
+    }
+
+    const tokenData = await tokenResponse.json();
+    const ACCESS_TOKEN = tokenData.access_token;
+
+    // --- STEP B: Use Access Token to Fetch User Information ---
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+      },
+    });
+
+    if (!userInfoResponse.ok) {
+      const error = await userInfoResponse.json();
+      console.error('Google UserInfo Error:', error);
+      return res.status(500).json({ 
+        status: 'error', 
+        message: 'Failed to fetch user data from Google.' 
+      });
+    }
+
+    const userData = await userInfoResponse.json();
+    
+    // --- STEP C: Return User Data to Extension ---
+    return res.status(200).json({
+      status: 'success',
+      message: 'Authentication successful.',
+      user: {
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        picture: userData.picture,
+        verified_email: userData.verified_email
+      },
+      // Optionally return the access token if your extension needs it
+      // access_token: ACCESS_TOKEN
+    });
+
+  } catch (error) {
+    console.error('Server error during Google authentication:', error);
+    return res.status(500).json({ 
+      status: 'error', 
+      message: 'An unexpected server error occurred.',
+      details: error.message 
+    });
+  }
+};</code></pre>
+
+<ol start="5">
+    <li><strong>Commit the file</strong></li>
+</ol>
+
+<hr>
+
+<h2>Step 3: Deploy to Vercel</h2>
+
+<ol>
+    <li>Log in to <a href="https://vercel.com" target="_blank">Vercel</a></li>
+    <li>Click <strong>"Add New"</strong> → <strong>"Project"</strong></li>
+    <li>Import your <code>google-oauth-checker</code> repository</li>
+    <li>Click <strong>"Deploy"</strong></li>
+    <li><strong>Save your deployment URL</strong> (e.g., <code>https://google-oauth-checker.vercel.app</code>)</li>
+</ol>
+
+<hr>
+
+<h2>Step 4: Configure Environment Variables</h2>
+
+<ol>
+    <li>In Vercel Dashboard, go to your project</li>
+    <li>Click <strong>"Settings"</strong> → <strong>"Environment Variables"</strong></li>
+    <li>Add these three variables:</li>
+</ol>
+
+<table>
+    <thead>
+        <tr>
+            <th>Variable Name</th>
+            <th>Value</th>
+            <th>Environments</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>GOOGLE_CLIENT_ID</code></td>
+            <td>Your Google OAuth Client ID</td>
+            <td>Production, Preview</td>
+        </tr>
+        <tr>
+            <td><code>GOOGLE_CLIENT_SECRET</code></td>
+            <td>Your Google OAuth Client Secret</td>
+            <td>Production, Preview</td>
+        </tr>
+        <tr>
+            <td><code>GOOGLE_REDIRECT_URI</code></td>
+            <td><code>https://YOUR-VERCEL-URL.vercel.app/api/google-auth</code></td>
+            <td>Production, Preview</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="note">
+    <strong>Example:</strong> If your Vercel URL is <code>https://google-oauth-checker.vercel.app</code>, set:<br>
+    <code>GOOGLE_REDIRECT_URI</code> = <code>https://google-oauth-checker.vercel.app/api/google-auth</code>
+</div>
+
+<ol start="4">
+    <li>Click <strong>"Save"</strong> for each variable</li>
+    <li>Go to <strong>"Deployments"</strong>, click the three dots on the latest deployment, and <strong>"Redeploy"</strong></li>
+</ol>
+
+<hr>
+
+<h2>Step 5: Update Google Cloud Credentials</h2>
+
+<ol>
+    <li>Go back to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+    <li>Navigate to <strong>"APIs & Services"</strong> → <strong>"Credentials"</strong></li>
+    <li>Click on your OAuth 2.0 Client ID</li>
+    <li>Under <strong>"Authorized redirect URIs"</strong>, click <strong>"Add URI"</strong></li>
+    <li>Paste your complete Vercel endpoint:<br>
+        <code>https://YOUR-VERCEL-URL.vercel.app/api/google-auth</code>
+    </li>
+    <li>Click <strong>"Save"</strong></li>
+</ol>
+
+<div class="important">
+    <strong>⚠️ Critical:</strong> The redirect URI in Google Cloud Console must <em>exactly</em> match your <code>GOOGLE_REDIRECT_URI</code> in Vercel.
+</div>
+
+<hr>
+
+<h2>Step 6: Create Your Chrome Extension</h2>
+
+<h3>A. Manifest File (<code>manifest.json</code>)</h3>
+
+<pre><code>{
+  "manifest_version": 3,
+  "name": "Google OAuth Extension",
+  "version": "1.0",
+  "description": "Authenticate users with Google OAuth",
+  "permissions": [
+    "identity",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://YOUR-VERCEL-URL.vercel.app/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
+</code></pre>
+
+<div class="note">
+    <strong>Replace:</strong> <code>YOUR-VERCEL-URL.vercel.app</code> with your actual Vercel domain
+</div>
+
+<h3>B. Popup HTML (<code>popup.html</code>)</h3>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Google Sign In&lt;/title&gt;
+    &lt;style&gt;
+        body { 
+            width: 350px; 
+            padding: 20px; 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+        }
+        #status {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            min-height: 40px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        button.sign-out {
+            background: #ea4335;
+            margin-top: 10px;
+        }
+        button.sign-out:hover {
+            background: #d33426;
+        }
+        .loading {
+            color: #666;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h2&gt;🔐 Google Authentication&lt;/h2&gt;
+    &lt;div id="status" class="loading"&gt;Checking status...&lt;/div&gt;
+    &lt;button id="signInButton" style="display: none;"&gt;
+        &lt;svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"&gt;
+            &lt;path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/&gt;
+            &lt;path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/&gt;
+            &lt;path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/&gt;
+            &lt;path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.428 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/&gt;
+        &lt;/svg&gt;
+        Sign in with Google
+    &lt;/button&gt;
+    &lt;button id="signOutButton" class="sign-out" style="display: none;"&gt;Sign Out&lt;/button&gt;
+    &lt;script src="popup.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h3>C. Popup Logic (<code>popup.js</code>)</h3>
+
+<pre><code>// popup.js
+
+// --- CONFIGURATION (Replace with your actual values) ---
+const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+const SERVERLESS_ENDPOINT = "https://YOUR-VERCEL-URL.vercel.app/api/google-auth";
+const REDIRECT_URI = SERVERLESS_ENDPOINT;
+
+// Google OAuth scopes - request basic profile information
+const GOOGLE_SCOPES = [
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile'
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const statusDiv = document.getElementById('status');
+    const signInButton = document.getElementById('signInButton');
+    const signOutButton = document.getElementById('signOutButton');
+
+    signInButton.addEventListener('click', signInWithGoogle);
+    signOutButton.addEventListener('click', signOut);
+    
+    // Check if user is already signed in
+    checkAuthStatus();
+
+    async function checkAuthStatus() {
+        // Check if we have stored user data
+        chrome.storage.local.get(['user'], (result) => {
+            if (result.user) {
+                displayUserInfo(result.user);
+            } else {
+                statusDiv.textContent = "Not signed in";
+                signInButton.style.display = 'block';
+            }
+        });
+    }
+
+    async function signInWithGoogle() {
+        statusDiv.innerHTML = '<span class="loading">Connecting to Google...</span>';
+        signInButton.style.display = 'none';
+
+        // Step 1: Build Google OAuth authorization URL
+        const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+        authUrl.searchParams.append('response_type', 'code');
+        authUrl.searchParams.append('client_id', GOOGLE_CLIENT_ID);
+        authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
+        authUrl.searchParams.append('scope', GOOGLE_SCOPES.join(' '));
+        authUrl.searchParams.append('access_type', 'online');
+        authUrl.searchParams.append('prompt', 'select_account');
+
+        try {
+            // Step 2: Launch OAuth flow
+            chrome.identity.launchWebAuthFlow({
+                'url': authUrl.toString(),
+                'interactive': true
+            }, async (redirectUrl) => {
+                // Handle user cancellation or errors
+                if (chrome.runtime.lastError || !redirectUrl) {
+                    statusDiv.textContent = "Sign in cancelled or failed";
+                    signInButton.style.display = 'block';
+                    console.error('Auth flow error:', chrome.runtime.lastError);
+                    return;
+                }
+
+                // Step 3: Extract authorization code
+                const url = new URL(redirectUrl);
+                const code = url.searchParams.get('code');
+                
+                if (!code) {
+                    statusDiv.textContent = "Error: No authorization code received";
+                    signInButton.style.display = 'block';
+                    return;
+                }
+
+                statusDiv.innerHTML = '<span class="loading">Verifying with server...</span>';
+
+                // Step 4: Send code to serverless function
+                try {
+                    const response = await fetch(SERVERLESS_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ code: code })
+                    });
+
+                    const result = await response.json();
+
+                    // Step 5: Handle response
+                    if (response.ok && result.status === 'success') {
+                        // Store user data
+                        chrome.storage.local.set({ user: result.user }, () => {
+                            displayUserInfo(result.user);
+                        });
+                    } else {
+                        statusDiv.textContent = `Error: ${result.message || 'Authentication failed'}`;
+                        signInButton.style.display = 'block';
+                    }
+                } catch (fetchError) {
+                    statusDiv.textContent = "Error communicating with server";
+                    signInButton.style.display = 'block';
+                    console.error('Fetch error:', fetchError);
+                }
+            });
+        } catch (error) {
+            statusDiv.textContent = "Authentication error occurred";
+            signInButton.style.display = 'block';
+            console.error('Auth error:', error);
+        }
+    }
+
+    function displayUserInfo(user) {
+        statusDiv.innerHTML = `
+            &lt;div class="user-info"&gt;
+                &lt;img src="${user.picture}" alt="Profile"&gt;
+                &lt;div&gt;
+                    &lt;strong&gt;${user.name}&lt;/strong&gt;&lt;br&gt;
+                    &lt;small&gt;${user.email}&lt;/small&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        `;
+        signInButton.style.display = 'none';
+        signOutButton.style.display = 'block';
+    }
+
+    function signOut() {
+        chrome.storage.local.remove(['user'], () => {
+            statusDiv.textContent = "Signed out successfully";
+            signInButton.style.display = 'block';
+            signOutButton.style.display = 'none';
+        });
+    }
+});
+</code></pre>
+
+<div class="tip">
+    <strong>💡 Tip:</strong> You can find your complete Google Client ID in the Google Cloud Console. It will look like: <code>123456789-abc123def456.apps.googleusercontent.com</code>
+</div>
+
+<hr>
+
+<h2>Step 7: Test Your Extension</h2>
+
+<ol>
+    <li>Open Chrome and go to <code>chrome://extensions/</code></li>
+    <li>Enable <strong>"Developer mode"</strong> (toggle in top right)</li>
+    <li>Click <strong>"Load unpacked"</strong></li>
+    <li>Select your extension folder</li>
+    <li>Click the extension icon in your toolbar</li>
+    <li>Click <strong>"Sign in with Google"</strong></li>
+    <li>Choose your Google account and authorize</li>
+    <li>You should see your profile information!</li>
+</ol>
+
+<hr>
+
+<h2>Security Best Practices</h2>
+
+<ul>
+    <li>✅ <strong>CLIENT_SECRET is secure:</strong> It never leaves your Vercel server</li>
+    <li>✅ <strong>CLIENT_ID is public:</strong> Safe to include in extension code</li>
+    <li>✅ <strong>User data stored locally:</strong> Uses chrome.storage.local for persistence</li>
+    <li>⚠️ <strong>Token handling:</strong> Access tokens are processed server-side only</li>
+    <li>⚠️ <strong>Scopes:</strong> Only request the minimum scopes you need</li>
+</ul>
+
+<hr>
+
+<h2>Advanced: Adding More Google API Access</h2>
+
+<p>To access other Google services (Gmail, Drive, Calendar, etc.), you need to:</p>
+
+<ol>
+    <li><strong>Enable the API</strong> in Google Cloud Console:
+        <ul>
+            <li>Go to "APIs & Services" → "Library"</li>
+            <li>Search for the API you need</li>
+            <li>Click "Enable"</li>
+        </ul>
+    </li>
+    <li><strong>Add appropriate scopes</strong> in <code>popup.js</code>:</li>
+</ol>
+
+<pre><code>// Example: Access Gmail and Google Drive
+const GOOGLE_SCOPES = [
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+  'https://www.googleapis.com/auth/gmail.readonly',
+  'https://www.googleapis.com/auth/drive.readonly'
+];</code></pre>
+
+<ol start="3">
+    <li><strong>Update consent screen</strong> in Google Cloud Console to include these scopes</li>
+    <li><strong>Optionally return access_token</strong> from your serverless function if your extension needs to make API calls</li>
+</ol>
+
+<div class="note">
+    <strong>Note:</strong> If you return the access token to your extension, store it securely and never expose it in logs or error messages.
+</div>
+
+<hr>
+
+<h2>Common Issues & Solutions</h2>
+
+<h3>Error: "redirect_uri_mismatch"</h3>
+<ul>
+    <li>Check that redirect URI in Google Cloud Console exactly matches <code>GOOGLE_REDIRECT_URI</code> in Vercel</li>
+    <li>Ensure there are no trailing slashes</li>
+    <li>Verify you're using <code>https://</code> not <code>http://</code></li>
+</ul>
+
+<h3>Error: "invalid_client"</h3>
+<ul>
+    <li>Double-check your Client ID and Client Secret</li>
+    <li>Ensure environment variables are set correctly in Vercel</li>
+    <li>Redeploy after setting environment variables</li>
+</ul>
+
+<h3>Sign in window doesn't open</h3>
+<ul>
+    <li>Check browser console for errors</li>
+    <li>Verify <code>identity</code> permission is in manifest.json</li>
+    <li>Ensure <code>host_permissions</code> includes your Vercel URL</li>
+</ul>
+
+<h3>User info not displaying</h3>
+<ul>
+    <li>Check that Google+ API or People API is enabled</li>
+    <li>Verify the scopes include userinfo.email and userinfo.profile</li>
+    <li>Check browser console and Vercel logs for errors</li>
+</ul>
+
+<hr>
+
+<h2>Additional Resources</h2>
+
+<ul>
+    <li><a href="https://developers.google.com/identity/protocols/oauth2" target="_blank">Google OAuth 2.0 Documentation</a></li>
+    <li><a href="https://developer.chrome.com/docs/extensions/reference/identity/" target="_blank">Chrome Identity API</a></li>
+    <li><a href="https://developers.google.com/identity/protocols/oauth2/scopes" target="_blank">Google OAuth Scopes</a></li>
+    <li><a href="https://vercel.com/docs/functions/serverless-functions" target="_blank">Vercel Serverless Functions</a></li>
+</ul>
+
+<hr>
+
+<h2>What's Next?</h2>
+
+<p>Now that you have Google authentication working, you can:</p>
+<ul>
+    <li>Add more Google API integrations (Gmail, Calendar, Drive)</li>
+    <li>Implement token refresh for long-lived sessions</li>
+    <li>Add user-specific features based on their Google account</li>
+    <li>Store user preferences in Chrome storage</li>
+    <li>Build features that sync across devices using Google account</li>
+</ul>
+
+</body>
+</html>

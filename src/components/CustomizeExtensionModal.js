@@ -1,0 +1,634 @@
+import React, { useState } from 'react';
+import { X, AlertCircle, CheckCircle, Loader, Download, Palette, FileText, Eye } from 'lucide-react';
+import { useTokenContext } from '../contexts/TokenContext';
+import IconSelector from './IconSelector';
+import {
+  generateIconSetFromLucide,
+  generateIconSetFromUpload,
+  generateDefaultIconSet
+} from '../utils/IconProcessor';
+
+function CustomizeExtensionModal({
+  isOpen,
+  onClose,
+  extension,
+  extensionFiles,
+  session
+}) {
+  // Context
+  const {
+    generateWithTokens,
+    currentTokens,
+    planName,
+    showUpgradePromptAction
+  } = useTokenContext();
+
+  // State
+  const [currentStep, setCurrentStep] = useState(1); // 1: Icon, 2: Metadata, 3: Confirm
+  const [selectedIcon, setSelectedIcon] = useState(null);
+  const [iconType, setIconType] = useState('lucide'); // Start with 'Choose Icon' tab
+  const [customIconFile, setCustomIconFile] = useState(null);
+  const [customIconPreview, setCustomIconPreview] = useState(null);
+
+  const [metadata, setMetadata] = useState({
+    name: extension?.name || '',
+    description: extension?.description || '',
+    author: 'PlugPress User',
+    version: extension?.version || '1.0'
+  });
+
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Validation
+  const validateMetadata = () => {
+    const errors = [];
+
+    if (!metadata.name || metadata.name.trim().length === 0) {
+      errors.push('Extension name is required');
+    }
+    if (metadata.name.length > 100) {
+      errors.push('Extension name must be under 100 characters');
+    }
+
+    if (!metadata.description || metadata.description.trim().length === 0) {
+      errors.push('Description is required');
+    }
+    if (metadata.description.length > 500) {
+      errors.push('Description must be under 500 characters');
+    }
+
+    const versionRegex = /^\d+\.\d+(\.\d+)?$/;
+    if (!versionRegex.test(metadata.version)) {
+      errors.push('Version must be in format X.Y or X.Y.Z (e.g., 1.0 or 1.0.0)');
+    }
+
+    if (metadata.author && metadata.author.length > 100) {
+      errors.push('Author name must be under 100 characters');
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  };
+
+  // Handle custom icon upload
+  const handleCustomIconUpload = (file) => {
+    setCustomIconFile(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCustomIconPreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Generate customized extension ZIP
+  const generateCustomExtensionZip = async (iconSet) => {
+    // Dynamic import of JSZip
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+
+    const safeVersion = metadata.version.replace(/\./g, '_');
+    const folderName = `${metadata.name.replace(/[^a-zA-Z0-9]/g, '_')}_v${safeVersion}_customized`;
+
+    // Update manifest.json with icons and metadata
+    const manifest = JSON.parse(extensionFiles['manifest.json'] || '{}');
+
+    manifest.name = metadata.name;
+    manifest.description = metadata.description;
+    manifest.version = metadata.version;
+    if (metadata.author) {
+      manifest.author = metadata.author;
+    }
+
+    // Add icons section
+    if (iconSet) {
+      manifest.icons = {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+      };
+    }
+
+    // Remove default_icon from action if it exists
+    if (manifest.action && manifest.action.default_icon) {
+      delete manifest.action.default_icon;
+    }
+
+    const updatedManifest = JSON.stringify(manifest, null, 2);
+
+    // Add all existing files (except manifest)
+    Object.entries(extensionFiles).forEach(([filename, content]) => {
+      if (filename !== 'manifest.json' && content && typeof content === 'string') {
+        zip.file(`${folderName}/${filename}`, content);
+      }
+    });
+
+    // Add updated manifest
+    zip.file(`${folderName}/manifest.json`, updatedManifest);
+
+    // Add icon files if provided
+    if (iconSet) {
+      Object.entries(iconSet).forEach(([size, base64Data]) => {
+        // Remove data:image/png;base64, prefix for ZIP
+        const base64 = base64Data.split(',')[1];
+        zip.file(`${folderName}/icons/icon${size}.png`, base64, { base64: true });
+      });
+    }
+
+    // Add README with customization info
+    const readme = `${metadata.name} v${metadata.version}
+${metadata.description}
+
+This plugin has been customized with:
+- Custom icon (${iconSet ? '3 sizes: 16x16, 48x48, 128x128' : 'default'})
+- Custom metadata (name, description, version${metadata.author ? ', author' : ''})
+
+Installation Instructions:
+1. Go to WordPress Admin > Plugins > Add New > Upload Plugin
+2. Choose the ZIP file and click Install Now
+3. Activate the plugin after installation
+
+Generated by PlugPress.org - Plugin Customization Feature
+Customized on: ${new Date().toLocaleString()}
+`;
+
+    zip.file(`${folderName}/README.txt`, readme);
+
+    // Generate ZIP blob
+    const blob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+
+    return blob;
+  };
+
+  // Download blob as file
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Handle customize and download
+  const handleCustomizeAndDownload = async () => {
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Validate metadata
+      const validation = validateMetadata();
+      if (!validation.valid) {
+        setError(validation.errors.join('. '));
+        setIsProcessing(false);
+        return;
+      }
+
+      // Generate icon set based on selection
+      let iconSet = null;
+      if (iconType === 'lucide' && selectedIcon) {
+        iconSet = await generateIconSetFromLucide(selectedIcon);
+      } else if (iconType === 'custom' && customIconFile) {
+        iconSet = await generateIconSetFromUpload(customIconFile);
+      } else {
+        // No icon selected, use default PlugPress icon
+        iconSet = await generateDefaultIconSet();
+      }
+
+      // Generate ZIP and deduct credit
+      const result = await generateWithTokens(
+        async () => {
+          const zipBlob = await generateCustomExtensionZip(iconSet);
+
+          // Verify ZIP is valid
+          if (!(zipBlob instanceof Blob)) {
+            throw new Error('ZIP generation produced invalid result');
+          }
+
+          if (zipBlob.size === 0) {
+            throw new Error('ZIP file is empty');
+          }
+
+          return {
+            success: true,
+            data: zipBlob,
+            extensionId: extension.id
+          };
+        },
+        `Extension customization: ${metadata.name}`,
+        1 // Cost: 1 credit
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || 'Customization failed');
+      }
+
+      // Download the ZIP
+      const filename = `${metadata.name.replace(/[^a-zA-Z0-9]/g, '_')}_customized.zip`;
+      downloadBlob(result.data, filename);
+
+      // Show success message
+      setShowSuccess(true);
+      setTimeout(() => {
+        onClose();
+        resetModal();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Customization error:', error);
+      setError(error.message || 'An error occurred during customization');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Reset modal state
+  const resetModal = () => {
+    setCurrentStep(1);
+    setSelectedIcon(null);
+    setIconType('lucide'); // Reset to 'Choose Icon' tab
+    setCustomIconFile(null);
+    setCustomIconPreview(null);
+    setMetadata({
+      name: extension?.name || '',
+      description: extension?.description || '',
+      author: 'PlugPress User',
+      version: extension?.version || '1.0'
+    });
+    setError(null);
+    setShowSuccess(false);
+  };
+
+  // Handle close
+  const handleClose = () => {
+    if (isProcessing) return;
+
+    // Confirm if user has made changes
+    if (currentStep > 1 || selectedIcon || customIconFile) {
+      if (!window.confirm('Are you sure? Your customization will be lost.')) {
+        return;
+      }
+    }
+
+    onClose();
+    setTimeout(resetModal, 300);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-16">
+      <div className="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
+        {/* Header */}
+        <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex items-center justify-between z-10">
+          <div className="flex items-center gap-3">
+            <Palette className="w-6 h-6 text-purple-400" />
+            <h2 className="text-2xl font-bold text-white">Customize Extension</h2>
+          </div>
+          <button
+            onClick={handleClose}
+            disabled={isProcessing}
+            className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="m-6 bg-green-500/20 border border-green-500 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-6 h-6 text-green-400" />
+              <div>
+                <p className="text-green-400 font-semibold">Customization Complete!</p>
+                <p className="text-green-300 text-sm">Your customized extension is downloading now.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && !showSuccess && (
+          <div className="m-6 bg-red-500/20 border border-red-500 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-red-400 font-medium">{error}</p>
+                <p className="text-red-300 text-sm mt-1">
+                  Don't worry - no credits were deducted.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step Indicators */}
+        {!showSuccess && (
+          <div className="flex items-center justify-center gap-4 p-6 border-b border-gray-700">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex items-center gap-2">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                    currentStep >= step
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-700 text-gray-400'
+                  }`}
+                >
+                  {step}
+                </div>
+                <span
+                  className={`text-sm ${
+                    currentStep >= step ? 'text-white' : 'text-gray-400'
+                  }`}
+                >
+                  {step === 1 ? 'Icon' : step === 2 ? 'Metadata' : 'Confirm'}
+                </span>
+                {step < 3 && <div className="w-12 h-0.5 bg-gray-700" />}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Content */}
+        {!showSuccess && (
+          <div className="p-6">
+            {/* Step 1: Icon Selection */}
+            {currentStep === 1 && (
+              <div>
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
+                    <Palette className="w-5 h-5" />
+                    Choose Your Icon
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Select an icon for your extension. {planName === 'free' ? 'Upgrade to access more icons.' : `You have access to ${planName === 'unlimited' ? 'all icons + custom uploads' : '1,400+ Lucide icons'}.`}
+                  </p>
+                </div>
+
+                <IconSelector
+                  planName={planName}
+                  selectedIcon={selectedIcon}
+                  onSelectIcon={setSelectedIcon}
+                  iconType={iconType}
+                  onIconTypeChange={setIconType}
+                  customIconFile={customIconFile}
+                  onCustomIconUpload={handleCustomIconUpload}
+                  customIconPreview={customIconPreview}
+                  onShowUpgradePrompt={showUpgradePromptAction}
+                />
+
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setCurrentStep(2)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  >
+                    Next: Edit Metadata
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Metadata Editor */}
+            {currentStep === 2 && (
+              <div>
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Edit Metadata
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Customize your extension's information
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-white font-medium mb-2">
+                      Extension Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={metadata.name}
+                      onChange={(e) => {
+                        setMetadata({ ...metadata, name: e.target.value });
+                        if (error) setError(null);
+                      }}
+                      maxLength={100}
+                      className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 ${
+                        metadata.name.length > 100 ? 'border-red-500' : 'border-gray-600'
+                      }`}
+                      placeholder="My Awesome Extension"
+                    />
+                    <p className="text-gray-400 text-sm mt-1">
+                      {metadata.name.length}/100 characters
+                    </p>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-white font-medium mb-2">
+                      Description *
+                    </label>
+                    <textarea
+                      value={metadata.description}
+                      onChange={(e) => {
+                        setMetadata({ ...metadata, description: e.target.value });
+                        if (error) setError(null);
+                      }}
+                      maxLength={500}
+                      rows={4}
+                      className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 resize-none ${
+                        metadata.description.length > 500 ? 'border-red-500' : 'border-gray-600'
+                      }`}
+                      placeholder="This extension helps you..."
+                    />
+                    <p className="text-gray-400 text-sm mt-1">
+                      {metadata.description.length}/500 characters
+                    </p>
+                  </div>
+
+                  {/* Author */}
+                  <div className="relative">
+                    <label className="block text-white font-medium mb-2">
+                      Author (Optional) {planName !== 'unlimited' && <span className="text-yellow-400 text-sm ml-2">(Max Plan Only)</span>}
+                    </label>
+                    <input
+                      type="text"
+                      value={metadata.author}
+                      onChange={(e) => setMetadata({ ...metadata, author: e.target.value })}
+                      maxLength={100}
+                      disabled={planName !== 'unlimited'}
+                      className={`w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 ${
+                        planName !== 'unlimited' ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      placeholder={planName !== 'unlimited' ? 'Upgrade to Max to customize' : 'Your Name'}
+                    />
+                    {planName !== 'unlimited' && (
+                      <p className="text-gray-400 text-sm mt-1">
+                        Upgrade to Max plan to customize the author metadata
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Version */}
+                  <div>
+                    <label className="block text-white font-medium mb-2">
+                      Version *
+                    </label>
+                    <input
+                      type="text"
+                      value={metadata.version}
+                      onChange={(e) => {
+                        setMetadata({ ...metadata, version: e.target.value });
+                        if (error) setError(null);
+                      }}
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
+                      placeholder="1.0.0"
+                    />
+                    <p className="text-gray-400 text-sm mt-1">
+                      Format: X.Y or X.Y.Z (e.g., 1.0 or 1.0.0)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => setCurrentStep(3)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  >
+                    Next: Review & Confirm
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Preview & Confirm */}
+            {currentStep === 3 && (
+              <div>
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    Review & Confirm
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Review your customization before generating
+                  </p>
+                </div>
+
+                {/* Preview */}
+                <div className="bg-gray-800 rounded-lg p-6 mb-6">
+                  <h4 className="text-white font-semibold mb-4">Preview</h4>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Icon Preview */}
+                    <div>
+                      <p className="text-gray-400 text-sm mb-3">Icon</p>
+                      <div className="bg-gray-900 rounded-lg p-6 flex items-center justify-center">
+                        {iconType === 'custom' && customIconPreview ? (
+                          <img src={customIconPreview} alt="Custom icon" className="w-24 h-24 rounded-lg" />
+                        ) : (
+                          <div className="text-center">
+                            <p className="text-white font-medium">
+                              {iconType === 'lucide' ? selectedIcon : 'Default PlugPress Icon'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Metadata Preview */}
+                    <div>
+                      <p className="text-gray-400 text-sm mb-3">Metadata</p>
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="text-gray-400">Name:</span>
+                          <span className="text-white ml-2">{metadata.name}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Version:</span>
+                          <span className="text-white ml-2">{metadata.version}</span>
+                        </div>
+                        {metadata.author && (
+                          <div>
+                            <span className="text-gray-400">Author:</span>
+                            <span className="text-white ml-2">{metadata.author}</span>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-gray-400">Description:</span>
+                          <p className="text-white mt-1">{metadata.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Credit Info */}
+                <div className="bg-purple-900/30 border border-purple-500/30 rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white font-medium">Credit Cost</p>
+                      <p className="text-gray-400 text-sm">1 credit will be deducted from your balance</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-purple-400 text-2xl font-bold">1 Credit</p>
+                      <p className="text-gray-400 text-sm">Current: {currentTokens} credits</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => setCurrentStep(2)}
+                    disabled={isProcessing}
+                    className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleCustomizeAndDownload}
+                    disabled={isProcessing}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-5 h-5" />
+                        Generate & Download
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default CustomizeExtensionModal;

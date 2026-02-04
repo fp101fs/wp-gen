@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patreon Serverless Setup Guide (Corrected)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+            color: #333;
+        }
+        h1 {
+            color: #1a73e8;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3c4043;
+            margin-top: 30px;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .important {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .flow-diagram {
+            background-color: #e7f3ff;
+            border-left: 5px solid #1a73e8;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚀 Patreon Serverless Setup Guide for Chrome Extensions</h1>
+
+<p>This guide shows you how to deploy and configure a secure serverless function to check a user's Patreon status for your Chrome extension, using only a web browser.</p>
+
+<h2>Prerequisites</h2>
+<ul>
+    <li>A <strong>Patreon Creator Account</strong> and an <strong>Application</strong> registered in the Patreon Developer Portal</li>
+    <li>A <strong>GitHub, GitLab, or Bitbucket</strong> account (to host your code)</li>
+    <li>A <strong>Vercel</strong> account (free tier is sufficient)</li>
+</ul>
+
+<div class="flow-diagram">
+<strong>📋 Understanding the OAuth Flow:</strong><br><br>
+1. User clicks "Login with Patreon" in your extension<br>
+2. Extension launches Patreon OAuth authorization page<br>
+3. User authorizes your app on Patreon<br>
+4. Patreon redirects to your Vercel URL with authorization code<br>
+5. <strong>Chrome intercepts</strong> this redirect BEFORE it reaches your server<br>
+6. Extension extracts the code from the intercepted URL<br>
+7. Extension POSTs code to your Vercel serverless function<br>
+8. Serverless function exchanges code for access token (CLIENT_SECRET stays secure)<br>
+9. Serverless function checks user's membership status with Patreon API<br>
+10. Serverless function returns result to extension<br>
+11. Extension displays access status to user
+</div>
+
+<hr>
+
+<h2>Step 1: Create the Project and Code Files on GitHub</h2>
+
+<ol>
+    <li><strong>Create a New Repository</strong> on your Git provider (e.g., GitHub). Name it something descriptive, like <code>patreon-checker</code>.</li>
+    <li><strong>Create the Code File:</strong> In your new repository, click the <strong>"Add file"</strong> button, then <strong>"Create new file"</strong>:
+        <ul>
+            <li>Type <code>api/patreon-check.js</code> in the filename field (this creates the folder and file)</li>
+        </ul>
+    </li>
+    <li><strong>Paste the Serverless Code</strong> into the <code>api/patreon-check.js</code> file:</li>
+</ol>
+
+<pre><code>// api/patreon-check.js
+
+import fetch from 'node-fetch';
+
+// Environment variables - these will be set securely in Vercel (Step 3)
+const CLIENT_ID = process.env.PATREON_CLIENT_ID;
+const CLIENT_SECRET = process.env.PATREON_CLIENT_SECRET;
+const REDIRECT_URI = process.env.PATREON_REDIRECT_URI;
+
+export default async (req, res) => {
+  // Verify environment variables are configured
+  if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI) {
+    return res.status(500).json({ 
+      status: 'error', 
+      message: 'Server configuration error: Missing environment variables.' 
+    });
+  }
+
+  // Only accept POST requests from the extension
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      status: 'error', 
+      message: 'Method Not Allowed' 
+    });
+  }
+
+  // Extract the authorization code and required tier ID from request
+  const { code, requiredTierId } = req.body;
+
+  if (!code || !requiredTierId) {
+    return res.status(400).json({ 
+      status: 'error', 
+      message: 'Missing required data: code or requiredTierId' 
+    });
+  }
+  
+  try {
+    // --- STEP A: Exchange Authorization Code for Access Token ---
+    // This MUST happen on the server to keep CLIENT_SECRET secure
+    const tokenResponse = await fetch('https://www.patreon.com/api/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code: code,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code',
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      const error = await tokenResponse.json();
+      console.error('Patreon Token Error:', error);
+      return res.status(401).json({ 
+        status: 'error', 
+        message: 'Failed to get access token from Patreon.',
+        details: error 
+      });
+    }
+
+    const tokenData = await tokenResponse.json();
+    const ACCESS_TOKEN = tokenData.access_token;
+
+    // --- STEP B: Use Access Token to Fetch User's Membership Data ---
+    const userMembershipUrl = new URL('https://www.patreon.com/api/oauth2/v2/identity');
+    userMembershipUrl.searchParams.append('fields[user]', 'full_name');
+    userMembershipUrl.searchParams.append('include', 'memberships');
+    userMembershipUrl.searchParams.append('fields[member]', 'currently_entitled_tiers');
+
+    const identityResponse = await fetch(userMembershipUrl.toString(), {
+      headers: {
+        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+      },
+    });
+
+    if (!identityResponse.ok) {
+      const error = await identityResponse.json();
+      console.error('Patreon Identity Error:', error);
+      return res.status(500).json({ 
+        status: 'error', 
+        message: 'Failed to fetch user data from Patreon.' 
+      });
+    }
+
+    const identityData = await identityResponse.json();
+    
+    // --- STEP C: Check if User is a Patron of the Required Tier ---
+    let isPatron = false;
+    const memberships = identityData.included || [];
+
+    for (const item of memberships) {
+      if (item.type === 'member') {
+        const tiers = item.relationships?.currently_entitled_tiers?.data || [];
+        if (tiers.some(tier => tier.id === requiredTierId)) {
+          isPatron = true;
+          break;
+        }
+      }
+    }
+
+    // --- STEP D: Return Result to Extension ---
+    if (isPatron) {
+      return res.status(200).json({
+        status: 'success',
+        message: 'Patron status confirmed.',
+        isPatron: true,
+        userName: identityData.data.attributes.full_name,
+      });
+    } else {
+      return res.status(200).json({
+        status: 'access_denied',
+        message: 'User is not a patron of the required tier.',
+        isPatron: false,
+      });
+    }
+
+  } catch (error) {
+    console.error('Server error during Patreon check:', error);
+    return res.status(500).json({ 
+      status: 'error', 
+      message: 'An unexpected server error occurred.',
+      details: error.message 
+    });
+  }
+};</code></pre>
+
+<ol start="4">
+    <li><strong>Commit the file</strong> (click the "Commit new file" button on GitHub).</li>
+</ol>
+
+<hr>
+
+<h2>Step 2: Deploy to Vercel</h2>
+
+<ol>
+    <li><strong>Log in to Vercel</strong> at <a href="https://vercel.com">vercel.com</a></li>
+    <li>On the Vercel Dashboard, click <strong>"Add New"</strong> → <strong>"Project"</strong></li>
+    <li><strong>Import Git Repository:</strong> Connect Vercel to your Git provider (if needed), and select the <strong><code>patreon-checker</code></strong> repository</li>
+    <li><strong>Deploy:</strong> Click the <strong>"Deploy"</strong> button. Vercel automatically recognizes the serverless function in the <code>api</code> folder and deploys it</li>
+    <li><strong>Save the URL:</strong> After deployment, Vercel will give you a <strong>public URL</strong> (e.g., <code>https://patreon-checker.vercel.app</code>). <strong>Copy this URL - you'll need it in the next steps.</strong></li>
+</ol>
+
+<hr>
+
+<h2>Step 3: Configure Secure Environment Variables</h2>
+
+<div class="important">
+    <strong>🔒 Security Critical:</strong> Never put your CLIENT_SECRET in your code! These environment variables keep your secrets secure on the server.
+</div>
+
+<ol>
+    <li>In the Vercel Dashboard, go to your deployed project</li>
+    <li>Click the <strong>"Settings"</strong> tab, then select <strong>"Environment Variables"</strong> from the left sidebar</li>
+    <li>Add the following three variables:</li>
+</ol>
+
+<table>
+    <thead>
+        <tr>
+            <th>Variable Name</th>
+            <th>Value</th>
+            <th>Environments</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>PATREON_CLIENT_ID</code></td>
+            <td>Your Patreon Client ID from the Developer Portal</td>
+            <td>Production, Preview</td>
+        </tr>
+        <tr>
+            <td><code>PATREON_CLIENT_SECRET</code></td>
+            <td>Your Patreon Client Secret from the Developer Portal</td>
+            <td>Production, Preview</td>
+        </tr>
+        <tr>
+            <td><code>PATREON_REDIRECT_URI</code></td>
+            <td><code>https://YOUR-VERCEL-URL.vercel.app/api/patreon-check</code></td>
+            <td>Production, Preview</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="note">
+    <strong>Example PATREON_REDIRECT_URI:</strong><br>
+    If your Vercel URL is <code>https://patreon-checker.vercel.app</code>, then set:<br>
+    <code>https://patreon-checker.vercel.app/api/patreon-check</code>
+</div>
+
+<ol start="4">
+    <li>Click <strong>"Save"</strong> for each variable</li>
+    <li><strong>Redeploy:</strong> Go to the <strong>"Deployments"</strong> tab, click the <strong>three-dot menu</strong> next to the latest deployment, then select <strong>"Redeploy"</strong> to load the new environment variables</li>
+</ol>
+
+<hr>
+
+<h2>Step 4: Configure Patreon Developer Portal</h2>
+
+<ol>
+    <li>Go to the <strong>Patreon Developer Portal</strong> at <a href="https://www.patreon.com/portal/registration/register-clients">patreon.com/portal</a></li>
+    <li>Open your application settings</li>
+    <li>In the <strong>"Redirect URIs"</strong> section, add the exact URI you set in Vercel:<br>
+        <code>https://YOUR-VERCEL-URL.vercel.app/api/patreon-check</code>
+    </li>
+    <li>Save the changes</li>
+</ol>
+
+<div class="important">
+    <strong>⚠️ Important:</strong> The redirect URI in Patreon must <em>exactly</em> match the <code>PATREON_REDIRECT_URI</code> environment variable in Vercel, including the protocol (https://) and path (/api/patreon-check).
+</div>
+
+<hr>
+
+<h2>Step 5: Implement in Your Chrome Extension</h2>
+
+<h3>A. Update the Manifest (<code>manifest.json</code>)</h3>
+
+<pre><code>{
+  "manifest_version": 3,
+  "name": "Patreon Checker Extension",
+  "version": "1.0",
+  "description": "Check Patreon membership status",
+  "permissions": [
+    "identity"
+  ],
+  "host_permissions": [
+    "https://YOUR-VERCEL-URL.vercel.app/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
+</code></pre>
+
+<div class="note">
+    <strong>Replace:</strong> <code>https://YOUR-VERCEL-URL.vercel.app</code> with your actual Vercel domain.
+</div>
+
+<h3>B. Create the HTML Popup (<code>popup.html</code>)</h3>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Patreon Status&lt;/title&gt;
+    &lt;style&gt;
+        body { 
+            width: 300px; 
+            padding: 15px; 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        #status {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #ff424d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #e63946;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h3&gt;Patreon Access Check&lt;/h3&gt;
+    &lt;div id="status"&gt;Checking status...&lt;/div&gt;
+    &lt;button id="loginButton" style="display: none;"&gt;Log in with Patreon&lt;/button&gt;
+    &lt;script src="popup.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h3>C. Implement the Logic (<code>popup.js</code>)</h3>
+
+<pre><code>// popup.js
+
+// --- CONFIGURATION (Replace with your actual values) ---
+const PATREON_CLIENT_ID = "YOUR_PATREON_CLIENT_ID"; 
+const REQUIRED_TIER_ID = "YOUR_PATREON_TIER_ID"; // Get this from your Patreon creator dashboard
+const SERVERLESS_ENDPOINT = "https://YOUR-VERCEL-URL.vercel.app/api/patreon-check";
+
+// The redirect URI must match what's configured in Patreon and Vercel
+const REDIRECT_URI = SERVERLESS_ENDPOINT;
+
+// Required OAuth scopes for checking membership
+const PATREON_SCOPES = [
+  'identity', 
+  'identity[email]', 
+  'identity.memberships'
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const statusDiv = document.getElementById('status');
+    const loginButton = document.getElementById('loginButton');
+
+    loginButton.addEventListener('click', checkPatronStatus);
+    
+    // Check status when popup opens
+    checkPatronStatus();
+
+    async function checkPatronStatus() {
+        statusDiv.textContent = "Connecting to Patreon...";
+        loginButton.style.display = 'none';
+
+        // Step 1: Build Patreon OAuth authorization URL
+        const authUrl = new URL("https://www.patreon.com/oauth2/authorize");
+        authUrl.searchParams.append('response_type', 'code');
+        authUrl.searchParams.append('client_id', PATREON_CLIENT_ID);
+        authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
+        authUrl.searchParams.append('scope', PATREON_SCOPES.join(' '));
+        
+        // Optional but recommended: Add state parameter for CSRF protection
+        // const state = generateRandomState();
+        // authUrl.searchParams.append('state', state);
+
+        try {
+            // Step 2: Launch OAuth flow
+            // Chrome will open a window for user to authorize, then intercept the redirect
+            chrome.identity.launchWebAuthFlow({
+                'url': authUrl.toString(),
+                'interactive': true
+            }, async (redirectUrl) => {
+                // Handle user cancellation or errors
+                if (chrome.runtime.lastError || !redirectUrl) {
+                    statusDiv.textContent = "Login required or denied.";
+                    loginButton.style.display = 'block';
+                    console.error('Auth flow error:', chrome.runtime.lastError);
+                    return;
+                }
+
+                // Step 3: Extract authorization code from the intercepted redirect URL
+                const url = new URL(redirectUrl);
+                const code = url.searchParams.get('code');
+                
+                if (!code) {
+                    statusDiv.textContent = "Error: No authorization code received.";
+                    loginButton.style.display = 'block';
+                    return;
+                }
+
+                statusDiv.textContent = "Validating with server...";
+
+                // Step 4: Send code to serverless function for validation
+                try {
+                    const response = await fetch(SERVERLESS_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            code: code,
+                            requiredTierId: REQUIRED_TIER_ID
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    // Step 5: Display result to user
+                    if (response.ok && result.isPatron) {
+                        statusDiv.innerHTML = `✅ <strong>Access Granted!</strong><br>Welcome, ${result.userName}!`;
+                        loginButton.style.display = 'none';
+                    } else {
+                        statusDiv.textContent = `❌ ${result.message || 'Not a patron of the required tier.'}`;
+                        loginButton.style.display = 'block';
+                    }
+                } catch (fetchError) {
+                    statusDiv.textContent = "Error communicating with server.";
+                    loginButton.style.display = 'block';
+                    console.error('Fetch error:', fetchError);
+                }
+            });
+        } catch (error) {
+            statusDiv.textContent = "Authentication error occurred.";
+            loginButton.style.display = 'block';
+            console.error('Auth error:', error);
+        }
+    }
+});
+</code></pre>
+
+<div class="note">
+    <strong>Finding Your Tier ID:</strong><br>
+    1. Go to your Patreon creator dashboard<br>
+    2. Navigate to "Membership Tiers"<br>
+    3. Click on the tier you want to check<br>
+    4. The tier ID is in the URL: <code>patreon.com/creator/tiers/YOUR_TIER_ID</code>
+</div>
+
+<hr>
+
+<h2>Step 6: Test Your Extension</h2>
+
+<ol>
+    <li>Load your extension in Chrome:
+        <ul>
+            <li>Go to <code>chrome://extensions/</code></li>
+            <li>Enable "Developer mode"</li>
+            <li>Click "Load unpacked"</li>
+            <li>Select your extension folder</li>
+        </ul>
+    </li>
+    <li>Click the extension icon</li>
+    <li>Click "Log in with Patreon" when prompted</li>
+    <li>Authorize the application on Patreon</li>
+    <li>You should see either "Access Granted" or "Access Denied" based on your membership status</li>
+</ol>
+
+<hr>
+
+<h2>Security Notes</h2>
+
+<ul>
+    <li>✅ <strong>CLIENT_SECRET is secure:</strong> It never leaves your Vercel server</li>
+    <li>✅ <strong>CLIENT_ID is public:</strong> It's safe to include in your extension code</li>
+    <li>✅ <strong>Authorization code is single-use:</strong> It can only be exchanged once for an access token</li>
+    <li>⚠️ <strong>Consider adding state parameter:</strong> For production, implement CSRF protection with a random state value</li>
+    <li>⚠️ <strong>Access tokens are sensitive:</strong> They're only handled on your server, never exposed to the extension</li>
+</ul>
+
+<hr>
+
+<h2>Troubleshooting</h2>
+
+<p><strong>Error: "redirect_uri_mismatch"</strong></p>
+<ul>
+    <li>Ensure the redirect URI in Patreon exactly matches your <code>PATREON_REDIRECT_URI</code> in Vercel</li>
+    <li>Check for trailing slashes or typos</li>
+</ul>
+
+<p><strong>Error: "Missing environment variables"</strong></p>
+<ul>
+    <li>Verify all three environment variables are set in Vercel</li>
+    <li>Redeploy after adding environment variables</li>
+</ul>
+
+<p><strong>Login window doesn't appear</strong></p>
+<ul>
+    <li>Check the browser console for errors</li>
+    <li>Ensure <code>identity</code> permission is in manifest.json</li>
+    <li>Verify <code>host_permissions</code> includes your Vercel URL</li>
+</ul>
+
+<hr>
+
+<h2>Additional Resources</h2>
+
+<ul>
+    <li><a href="https://docs.patreon.com/#oauth">Patreon OAuth Documentation</a></li>
+    <li><a href="https://developer.chrome.com/docs/extensions/reference/identity/">Chrome Identity API Documentation</a></li>
+    <li><a href="https://vercel.com/docs/functions/serverless-functions">Vercel Serverless Functions</a></li>
+</ul>
+
+</body>
+</html>

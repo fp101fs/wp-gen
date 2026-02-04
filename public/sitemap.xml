@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://kromio.ai/</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://kromio.ai/kromio.png</image:loc>
+      <image:title>Kromio - AI Chrome Extension Builder</image:title>
+    </image:image>
+  </url>
+  <!-- gallery -->
+  <url>
+    <loc>https://kromio.ai/gallery</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- pricing -->
+  <url>
+    <loc>https://kromio.ai/pricing</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- learn -->
+  <url>
+    <loc>https://kromio.ai/learn</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- submit guide -->
+  <url>
+    <loc>https://kromio.ai/submit-guide</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Quick Start -->
+  <url>
+    <loc>https://kromio.ai/learn/quick-start</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Examples -->
+  <url>
+    <loc>https://kromio.ai/learn/examples</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Getting Started -->
+  <url>
+    <loc>https://kromio.ai/learn/getting-started</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Credits -->
+  <url>
+    <loc>https://kromio.ai/learn/credits</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Features -->
+  <url>
+    <loc>https://kromio.ai/learn/features</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Faq -->
+  <url>
+    <loc>https://kromio.ai/learn/faq</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Troubleshooting -->
+  <url>
+    <loc>https://kromio.ai/learn/troubleshooting</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Tips -->
+  <url>
+    <loc>https://kromio.ai/learn/tips</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Privacy -->
+  <url>
+    <loc>https://kromio.ai/learn/privacy</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Terms -->
+  <url>
+    <loc>https://kromio.ai/learn/terms</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Learn: Submission Guide -->
+  <url>
+    <loc>https://kromio.ai/learn/submission-guide</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Learn: Plasmo Alternatives -->
+  <url>
+    <loc>https://kromio.ai/learn/plasmo-alternatives</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Learn: No Code Chrome Extension Builder -->
+  <url>
+    <loc>https://kromio.ai/learn/no-code-chrome-extension-builder</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Learn: Monetize Chrome Extension -->
+  <url>
+    <loc>https://kromio.ai/learn/monetize-chrome-extension</loc>
+    <lastmod>2025-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Learn: Payment Gateways -->
+  <url>
+    <loc>https://kromio.ai/learn/payment-gateways</loc>
+    <lastmod>2025-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Learn: Submit to Chrome Web Store -->
+  <url>
+    <loc>https://kromio.ai/learn/submit-chrome-web-store</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Learn: Patreon Setup -->
+  <url>
+    <loc>https://kromio.ai/learn/patreon-setup</loc>
+    <lastmod>2025-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Learn: Google Setup -->
+  <url>
+    <loc>https://kromio.ai/learn/google-setup</loc>
+    <lastmod>2025-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>

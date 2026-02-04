@@ -1,0 +1,1 @@
+ALTER TABLE extensions ADD COLUMN is_public BOOLEAN DEFAULT TRUE;
