@@ -18,26 +18,26 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
   // Set page title
   useDocumentTitle('Pricing - PlugPress AI Plugin Builder');
 
-  const handleGetStarted = async (tier) => {
+  const handleGetStarted = async (tier, planType) => {
     if (!session) {
       onShowLoginModal();
       return;
     }
-    
+
     // Handle different tiers
     if (tier === 'Free') {
       // Already on free - redirect to main app
       window.location.href = '/';
       return;
     }
-    
-    // For Pro and Max plans, go directly to Stripe checkout
-    if (tier === 'Pro' || tier === 'Max') {
+
+    // For paid plans, go directly to Stripe checkout
+    if (planType && planType !== 'free') {
       setLoadingPlan(tier);
-      
+
       try {
-        debugLog('🔄 Starting direct checkout for:', tier);
-        
+        debugLog('🔄 Starting direct checkout for:', tier, planType);
+
         // Get current user
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) {
@@ -47,7 +47,6 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
 
         // Get all plans from planService
         const allPlans = planService.getAllPlans();
-        const planType = tier === 'Pro' ? 'pro' : 'unlimited';
         const plan = allPlans[planType];
         
         if (!plan) {
@@ -112,28 +111,46 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
 
   const features = [
     {
-      name: `${parseInt(process.env.REACT_APP_FREE_PLAN_CREDITS) || 5} credits/month`,
-      free: true,
-      pro: '150 credits/month',
-      unlimited: '500 credits/month'
+      name: 'Plugins per month',
+      free: '3 plugins',
+      freelancer: '10 plugins',
+      agency: '50 plugins',
+      enterprise: 'Unlimited'
     },
     {
-      name: 'Icon selection',
-      free: '8 basic icons',
-      pro: 'Choose from 1,850+ Lucide icons',
-      unlimited: 'Choose from 1,850+ Lucide icons'
+      name: 'Team members',
+      free: '1 user',
+      freelancer: '1 user',
+      agency: '5 seats',
+      enterprise: 'Unlimited'
     },
     {
-      name: 'Upload any icon',
+      name: 'Support',
+      free: 'Community',
+      freelancer: 'Email support',
+      agency: 'Priority support',
+      enterprise: 'Dedicated support'
+    },
+    {
+      name: 'White-label option',
       free: false,
-      pro: false,
-      unlimited: true
+      freelancer: false,
+      agency: true,
+      enterprise: true
     },
     {
-      name: 'Change author metadata',
+      name: 'API access',
       free: false,
-      pro: false,
-      unlimited: true
+      freelancer: false,
+      agency: false,
+      enterprise: true
+    },
+    {
+      name: 'Custom branding',
+      free: false,
+      freelancer: false,
+      agency: false,
+      enterprise: true
     }
   ];
 
@@ -142,37 +159,53 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       name: 'Free',
       price: '$0',
       period: 'forever',
-      tokens: `${parseInt(process.env.REACT_APP_FREE_PLAN_CREDITS) || 5} credits/month`,
+      tokens: '3 plugins/month',
       popular: false,
       description: 'Perfect for trying out the platform',
       buttonText: 'Get Started Free',
       buttonStyle: 'bg-gray-600 hover:bg-gray-700 text-white',
-      icon: <Gift className="w-6 h-6" />
+      icon: <Gift className="w-6 h-6" />,
+      planType: 'free'
     },
     {
-      name: 'Pro',
-      price: annualBilling ? '$10' : '$12',
+      name: 'Freelancer',
+      price: annualBilling ? '$82.50' : '$99',
       period: annualBilling ? 'month (billed annually)' : 'month',
-      tokens: '150 credits/month',
-      tokensNote: 'Get 150 credits every month',
+      tokens: '10 plugins/month',
+      tokensNote: 'Single user, Email support',
       popular: true,
-      description: 'Best for creators and developers',
-      buttonText: 'Start Pro Plan',
+      description: 'For individual developers and creators',
+      buttonText: 'Start Freelancer',
       buttonStyle: 'bg-gradient-to-r from-green-600 to-purple-600 hover:from-green-700 hover:to-purple-700 text-white',
-      icon: <Zap className="w-6 h-6" />
+      icon: <Zap className="w-6 h-6" />,
+      planType: 'freelancer'
     },
     {
-      name: 'Max',
-      price: annualBilling ? '$32' : '$39',
+      name: 'Agency',
+      price: annualBilling ? '$249.17' : '$299',
       period: annualBilling ? 'month (billed annually)' : 'month',
-      tokens: '500 credits/month',
-      tokensNote: 'Get 500 credits every month',
+      tokens: '50 plugins/month',
+      tokensNote: '5 team seats, Priority support, White-label',
+      popular: false,
+      description: 'For teams and agencies',
+      buttonText: 'Start Agency',
+      buttonStyle: 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white',
+      icon: <Crown className="w-6 h-6" />,
+      planType: 'agency'
+    },
+    {
+      name: 'Enterprise',
+      price: annualBilling ? '$665.83' : '$799',
+      period: annualBilling ? 'month (billed annually)' : 'month',
+      tokens: 'Unlimited plugins',
+      tokensNote: 'Unlimited team, API access, Dedicated support',
       popular: false,
       bestValue: true,
-      description: 'For power users and businesses',
-      buttonText: 'Start Max Plan',
-      buttonStyle: 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white',
-      icon: <Crown className="w-6 h-6" />
+      description: 'For large teams and businesses',
+      buttonText: 'Start Enterprise',
+      buttonStyle: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white',
+      icon: <Crown className="w-6 h-6" />,
+      planType: 'enterprise'
     }
   ];
 
@@ -222,7 +255,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
         </div>
 
         {/* Pricing Cards */}
-        <div className={`grid grid-cols-1 ${session ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-8 max-w-7xl mx-auto mb-16`}>
+        <div className={`grid grid-cols-1 ${session ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-6 max-w-7xl mx-auto mb-16`}>
           {pricingTiers
             .filter(tier => !(session && tier.name === 'Free'))
             .map((tier, index) => (
@@ -266,7 +299,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
                   <p className="text-gray-300 text-sm">{tier.tokensNote}</p>
                 </div>
                 <button
-                  onClick={() => handleGetStarted(tier.name)}
+                  onClick={() => handleGetStarted(tier.name, tier.planType)}
                   disabled={loadingPlan === tier.name}
                   className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 ${tier.buttonStyle} transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none`}
                 >
@@ -284,7 +317,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
               {/* Features List */}
               <div className="space-y-3">
                 {features.map((feature, featureIndex) => {
-                  const tierKey = tier.name.toLowerCase() === 'max' ? 'unlimited' : tier.name.toLowerCase();
+                  const tierKey = tier.planType || tier.name.toLowerCase();
                   const featureValue = feature[tierKey];
                   const hasFeature = featureValue === true || (typeof featureValue === 'string' && featureValue !== false);
                   const isPartialFeature = typeof featureValue === 'string' && featureValue !== true;
@@ -338,9 +371,9 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-              <h3 className="text-lg font-semibold text-white mb-3">What is a credit?</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">What counts as a plugin?</h3>
               <p className="text-gray-300 text-sm">
-                One credit = one extension generation or revision. Some AI models like Claude Opus 4.1 cost more credits than others. Credits reset to your monthly limit each billing period.
+                Each new plugin generation or major revision counts toward your monthly limit. Minor edits and re-downloads don't count.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
@@ -350,15 +383,15 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-              <h3 className="text-lg font-semibold text-white mb-3">Do unused credits roll over?</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">Do unused plugins roll over?</h3>
               <p className="text-gray-300 text-sm">
-                No, credits reset to your plan's monthly limit each billing period (Free: 5, Pro: 150, Max: 500).
+                No, your plugin limit resets each billing period. Enterprise plans have unlimited plugins.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-              <h3 className="text-lg font-semibold text-white mb-3">Is there a free trial?</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">What's included in annual billing?</h3>
               <p className="text-gray-300 text-sm">
-                The Free plan is always available with 5 credits per month.
+                Annual billing saves you 2 months (about 17% off). You get the same features, just pay less!
               </p>
             </div>
           </div>

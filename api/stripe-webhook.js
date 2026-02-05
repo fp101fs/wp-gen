@@ -283,17 +283,17 @@ async function handleSubscriptionUpdated(subscription) {
  */
 function getPlanTypeFromPriceId(priceId) {
   const priceIdMap = {
-    // Pro plan price IDs
-    'price_1RrxXyLkI17DtQuz0GAfQvbp': 'pro', // monthly (old)
-    'price_1RrxZcLkI17DtQuzMnyIxfWN': 'pro', // yearly (old)
-    'price_1RunrFLkI17DtQuztkMVxVUS': 'pro', // monthly (current)
-    'price_1RunrFLkI17DtQuz73vP08nN': 'pro', // yearly (current)
-    
-    // Unlimited plan price IDs
-    'price_1RrxYgLkI17DtQuzgVyYSyr8': 'unlimited', // monthly (old)
-    'price_1Rrxa7LkI17DtQuz2wvwpedB': 'unlimited', // yearly (old)
-    'price_1Ru8LwLkI17DtQuz8XckTY4d': 'unlimited', // monthly (current)
-    'price_1Runs1LkI17DtQuzoD69LrZP': 'unlimited', // yearly (current)
+    // Freelancer plan price IDs
+    'price_1SxSVzLkI17DtQuz6gzXKUWK': 'freelancer', // monthly
+    'price_1SxSZfLkI17DtQuzSxLw6p3d': 'freelancer', // yearly
+
+    // Agency plan price IDs
+    'price_1SxSc6LkI17DtQuzVwYMUZjJ': 'agency', // monthly
+    'price_1SxScuLkI17DtQuzvuL56xT5': 'agency', // yearly
+
+    // Enterprise plan price IDs
+    'price_1SxSeWLkI17DtQuzl42dIK3X': 'enterprise', // monthly
+    'price_1SxSf8LkI17DtQuzx4nVmb1Y': 'enterprise', // yearly
   };
 
   return priceIdMap[priceId] || null;

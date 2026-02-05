@@ -7,8 +7,9 @@ import { debugLog, debugError } from '../utils/debugUtils'
  */
 export const USER_TYPES = {
   FREE: 'free',
-  PRO: 'pro', 
-  UNLIMITED: 'unlimited'
+  FREELANCER: 'freelancer',
+  AGENCY: 'agency',
+  ENTERPRISE: 'enterprise'
 }
 
 export const SUBSCRIPTION_STATUS = {
@@ -37,14 +38,14 @@ export const PLAN_CONFIG = {
   [USER_TYPES.FREE]: {
     id: 'free',
     name: 'Free',
-    displayName: 'Free Tier',
+    displayName: 'Free',
     description: 'Perfect for trying out the platform',
     price: {
       monthly: 0,
       yearly: 0
     },
     tokens: {
-      included: parseInt(process.env.REACT_APP_FREE_PLAN_CREDITS) || 5,
+      included: 3,
       renewal: 'monthly',
       rollover: false
     },
@@ -58,9 +59,8 @@ export const PLAN_CONFIG = {
       PLAN_FEATURES.EXTENSION_GENERATION
     ],
     restrictions: [
-      'Limited to 3 total extensions',
-      'Basic support only',
-      'Kromio branding included'
+      'Limited to 3 plugins/month',
+      'Community support only'
     ],
     cta: 'Get Started Free',
     popular: false,
@@ -70,57 +70,86 @@ export const PLAN_CONFIG = {
     }
   },
 
-  [USER_TYPES.PRO]: {
-    id: 'pro',
-    name: 'Pro',
-    displayName: 'Pro Plan',
-    description: 'Best for regular creators and developers',
+  [USER_TYPES.FREELANCER]: {
+    id: 'freelancer',
+    name: 'Freelancer',
+    displayName: 'Freelancer',
+    description: 'For individual developers and creators',
     price: {
-      monthly: 12,
-      yearly: 120 // 17% savings (2 months free)
+      monthly: 99,
+      yearly: 990 // 2 months free
     },
     tokens: {
-      included: 150,
+      included: 10,
       renewal: 'monthly',
       rollover: false
     },
     limits: {
-      extensions_per_month: 30,
-      revisions_per_extension: 10,
+      extensions_per_month: 10,
+      revisions_per_extension: -1, // Unlimited
       storage_mb: 500,
-      team_members: 3
+      team_members: 1
+    },
+    features: [
+      PLAN_FEATURES.EXTENSION_GENERATION,
+      PLAN_FEATURES.REVISION_UNLIMITED
+    ],
+    restrictions: [],
+    cta: 'Start Freelancer',
+    popular: true,
+    stripe_price_ids: {
+      monthly: 'price_1SxSVzLkI17DtQuz6gzXKUWK',
+      yearly: 'price_1SxSZfLkI17DtQuzSxLw6p3d'
+    }
+  },
+
+  [USER_TYPES.AGENCY]: {
+    id: 'agency',
+    name: 'Agency',
+    displayName: 'Agency',
+    description: 'For teams and agencies',
+    price: {
+      monthly: 299,
+      yearly: 2990 // 2 months free
+    },
+    tokens: {
+      included: 50,
+      renewal: 'monthly',
+      rollover: false
+    },
+    limits: {
+      extensions_per_month: 50,
+      revisions_per_extension: -1, // Unlimited
+      storage_mb: 2000,
+      team_members: 5
     },
     features: [
       PLAN_FEATURES.EXTENSION_GENERATION,
       PLAN_FEATURES.REVISION_UNLIMITED,
       PLAN_FEATURES.PRIORITY_SUPPORT,
-      PLAN_FEATURES.ADVANCED_ANALYTICS
+      PLAN_FEATURES.CUSTOM_BRANDING,
+      PLAN_FEATURES.TEAM_COLLABORATION
     ],
-    // A simple way to switch between two monthly Stripe price IDs is to comment out the old one and add the new one, like this:
-    // This is useful for testing or temporarily changing the price.
-
     restrictions: [],
-    cta: 'Start Pro Trial',
-    popular: true,
+    cta: 'Start Agency',
+    popular: false,
     stripe_price_ids: {
-      monthly: 'price_1RtrUgLkI17DtQuzr3pWMvce', // Old monthly price ID ($12)
-      //monthly: 'price_1RunrFLkI17DtQuztkMVxVUS', // New monthly price ID ($1)
-      yearly: 'price_1RunrFLkI17DtQuz73vP08nN'
-    },
-    trial_days: 7
+      monthly: 'price_1SxSc6LkI17DtQuzVwYMUZjJ',
+      yearly: 'price_1SxScuLkI17DtQuzvuL56xT5'
+    }
   },
 
-  [USER_TYPES.UNLIMITED]: {
-    id: 'unlimited',
-    name: 'Unlimited',
-    displayName: 'Max Plan',
-    description: 'For power users and businesses',
+  [USER_TYPES.ENTERPRISE]: {
+    id: 'enterprise',
+    name: 'Enterprise',
+    displayName: 'Enterprise',
+    description: 'For large teams and businesses',
     price: {
-      monthly: 39,
-      yearly: 384 // 20% savings  
+      monthly: 799,
+      yearly: 7990 // 2 months free
     },
     tokens: {
-      included: 500,
+      included: -1, // Unlimited
       renewal: 'monthly',
       rollover: false
     },
@@ -128,7 +157,7 @@ export const PLAN_CONFIG = {
       extensions_per_month: -1, // Unlimited
       revisions_per_extension: -1, // Unlimited
       storage_mb: -1, // Unlimited
-      team_members: 10
+      team_members: -1 // Unlimited
     },
     features: [
       PLAN_FEATURES.EXTENSION_GENERATION,
@@ -140,11 +169,11 @@ export const PLAN_CONFIG = {
       PLAN_FEATURES.API_ACCESS
     ],
     restrictions: [],
-    cta: 'Go Max',
+    cta: 'Start Enterprise',
     popular: false,
     stripe_price_ids: {
-      monthly: 'price_1Ru8LwLkI17DtQuz8XckTY4d',
-      yearly: 'price_1Runs1LkI17DtQuzoD69LrZP'
+      monthly: 'price_1SxSeWLkI17DtQuzl42dIK3X',
+      yearly: 'price_1SxSf8LkI17DtQuzx4nVmb1Y'
     }
   }
 }
@@ -476,8 +505,9 @@ class PlanService {
   validateUpgradePath(currentPlan, newPlan) {
     const planHierarchy = {
       [USER_TYPES.FREE]: 0,
-      [USER_TYPES.PRO]: 1,
-      [USER_TYPES.UNLIMITED]: 2
+      [USER_TYPES.FREELANCER]: 1,
+      [USER_TYPES.AGENCY]: 2,
+      [USER_TYPES.ENTERPRISE]: 3
     }
 
     const currentLevel = planHierarchy[currentPlan]
