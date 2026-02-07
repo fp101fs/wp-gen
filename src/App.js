@@ -22,6 +22,7 @@ import UpgradePrompt from './components/UpgradePrompt';
 import PageContainer from './components/PageContainer';
 import { supabase } from './supabaseClient';
 import { debugLog, debugError, debugWarn } from './utils/debugUtils';
+import { estimateCost } from './utils/aiCostEstimator';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -42,11 +43,9 @@ const StoreSubmissionGuide = lazy(() => import('./StoreSubmissionGuide'));
 // Helper function to get display name for AI models
 const getModelDisplayName = (modelId) => {
   const modelNames = {
-    'gemini': 'Gemini 2.5 Pro',
-    'chatgpt': 'ChatGPT 4o',
-    'claude': 'Claude Sonnet 4',
-    'claude-opus': 'Claude Opus 4.1',
-    'claude-sonnet-4-5': 'Claude Sonnet 4.5'
+    'claude-sonnet-4-5': 'Claude Sonnet 4.5',
+    'gemini-pro': 'Gemini Pro',
+    'gemini-flash': 'Gemini Flash'
   };
   return modelNames[modelId] || modelId;
 };
@@ -54,11 +53,9 @@ const getModelDisplayName = (modelId) => {
 // Helper function to get emoji for AI models
 const getModelEmoji = (modelId) => {
   const modelEmojis = {
-    'gemini': '🤖',
-    'chatgpt': '💬',
-    'claude': '🧠',
-    'claude-opus': '🧠',
-    'claude-sonnet-4-5': '🧠'
+    'claude-sonnet-4-5': '🧠',
+    'gemini-pro': '🤖',
+    'gemini-flash': '🤖'
   };
   return modelEmojis[modelId] || '🤖';
 };
@@ -66,11 +63,9 @@ const getModelEmoji = (modelId) => {
 // Helper function to get credit cost for AI models
 const getModelCreditCost = (modelId) => {
   const modelCosts = {
-    'gemini': 1,
-    'chatgpt': 1,
-    'claude': 1,
-    'claude-opus': 20,
-    'claude-sonnet-4-5': 5
+    'claude-sonnet-4-5': 5,
+    'gemini-pro': 1,
+    'gemini-flash': 1
   };
   return modelCosts[modelId] || 1;
 };
@@ -349,53 +344,36 @@ const parseGeminiResponse = (text, parentExtension = null) => {
 };
 
 // Helper function to execute AI generation - extracted from HomePage
-const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtension, uploadedImage, selectedProvider = 'gemini') => {
+const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtension, uploadedImage, selectedProvider = 'claude-sonnet-4-5') => {
   // Determine primary provider and available providers
   const primaryProvider = selectedProvider;
-  
-  // Check if we have API keys for all providers
+
+  // Check if we have API keys for providers
   const hasGeminiKey = !!process.env.REACT_APP_GEMINI_API_KEY;
-  const hasChatGPTKey = !!process.env.REACT_APP_OPENAI_API_KEY;
   const hasClaudeKey = !!process.env.REACT_APP_ANTHROPIC_API_KEY;
-  
+
   // Check if primary provider has API key
-  if (primaryProvider === 'gemini' && !hasGeminiKey) {
+  if ((primaryProvider === 'gemini-pro' || primaryProvider === 'gemini-flash') && !hasGeminiKey) {
     throw new Error('Gemini API key not found. Please add REACT_APP_GEMINI_API_KEY to your .env.local file');
   }
-  if (primaryProvider === 'chatgpt' && !hasChatGPTKey) {
-    throw new Error('OpenAI API key not found. Please add REACT_APP_OPENAI_API_KEY to your .env.local file');
-  }
-  if ((primaryProvider === 'claude' || primaryProvider === 'claude-opus' || primaryProvider === 'claude-sonnet-4-5') && !hasClaudeKey) {
+  if (primaryProvider === 'claude-sonnet-4-5' && !hasClaudeKey) {
     throw new Error('Claude API key not found. Please add REACT_APP_ANTHROPIC_API_KEY to your .env.local file');
   }
 
-  // Smart fallback order based on primary provider selection
+  // Smart fallback order: claude-sonnet-4-5 → gemini-pro → gemini-flash
   let providersToTry = [primaryProvider];
-  
-  // Define quality-based fallback sequences
-  if (primaryProvider === 'gemini') {
-    // Gemini → Claude Sonnet 4 → ChatGPT 4o
-    if (hasClaudeKey) providersToTry.push('claude');
-    if (hasChatGPTKey) providersToTry.push('chatgpt');
-  } else if (primaryProvider === 'claude') {
-    // Claude Sonnet 4 → Gemini → ChatGPT 4o
-    if (hasGeminiKey) providersToTry.push('gemini');
-    if (hasChatGPTKey) providersToTry.push('chatgpt');
-  } else if (primaryProvider === 'claude-opus') {
-    // Claude Opus 4.1 → Gemini → Claude Sonnet 4 → ChatGPT 4o
-    if (hasGeminiKey) providersToTry.push('gemini');
-    if (hasClaudeKey) providersToTry.push('claude');
-    if (hasChatGPTKey) providersToTry.push('chatgpt');
-  } else if (primaryProvider === 'claude-sonnet-4-5') {
-    // Claude Sonnet 4.5 → Gemini → ChatGPT 4o (no Claude Opus 4.1)
-    if (hasGeminiKey) providersToTry.push('gemini');
-    if (hasChatGPTKey) providersToTry.push('chatgpt');
-  } else if (primaryProvider === 'chatgpt') {
-    // ChatGPT 4o → Claude Sonnet 4 → Gemini
-    if (hasClaudeKey) providersToTry.push('claude');
-    if (hasGeminiKey) providersToTry.push('gemini');
+
+  if (primaryProvider === 'claude-sonnet-4-5') {
+    if (hasGeminiKey) providersToTry.push('gemini-pro');
+    if (hasGeminiKey) providersToTry.push('gemini-flash');
+  } else if (primaryProvider === 'gemini-pro') {
+    if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
+    if (hasGeminiKey) providersToTry.push('gemini-flash');
+  } else if (primaryProvider === 'gemini-flash') {
+    if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
+    if (hasGeminiKey) providersToTry.push('gemini-pro');
   }
-  
+
   // Remove duplicates (shouldn't happen, but just in case)
   providersToTry = [...new Set(providersToTry)];
 
@@ -411,24 +389,25 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
 
     try {
       // Retry logic for empty responses per provider
-      const MAX_RETRIES = currentProvider === 'claude-opus' ? 1 : 3;
+      const MAX_RETRIES = 3;
       const RETRY_DELAYS = [1000, 2000, 4000]; // 1s, 2s, 4s
       let extensionData; // Declare outside the loop
-      
+      let apiResult; // Store the raw API result for cost estimation
+
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         let result;
         debugLog(`🚀 Sending request to ${currentProvider.toUpperCase()}... (attempt ${attempt} of ${MAX_RETRIES})`);
-        
+
         // Prepare image data if available
         let imageData = null;
         if (uploadedImage) {
           try {
             imageData = await prepareImageForAPI(uploadedImage);
             debugLog(`Image data prepared: ${imageData.mimeType}, size: ${imageData.size} bytes`);
-            
+
             // Check image size limits (5MB for Claude, 20MB for others)
-            const maxSize = currentProvider === 'claude' ? 5 * 1024 * 1024 : 20 * 1024 * 1024;
+            const maxSize = currentProvider === 'claude-sonnet-4-5' ? 5 * 1024 * 1024 : 20 * 1024 * 1024;
             if (imageData.size > maxSize) {
               console.warn(`⚠️  Image size (${Math.round(imageData.size / 1024 / 1024)}MB) exceeds ${currentProvider} limit. Proceeding without image.`);
               imageData = null;
@@ -528,17 +507,19 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
 
         debugLog('Prompt length:', aiPrompt.length, 'characters');
         debugLog('Full prompt being sent:', aiPrompt);
-        
-        if (currentProvider === 'gemini') {
+
+        if (currentProvider === 'gemini-pro' || currentProvider === 'gemini-flash') {
           const { GoogleGenerativeAI } = await import('@google/generative-ai');
           const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-          
-          debugLog('Making API call to Gemini...');
-          
+          // Use -latest aliases to auto-route to newest versions
+          const modelName = currentProvider === 'gemini-flash' ? 'gemini-flash-latest' : 'gemini-pro-latest';
+          const model = genAI.getGenerativeModel({ model: modelName });
+
+          debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini Flash' : 'Gemini Pro'}...`);
+
           // Prepare content array - include image if available
           const contentArray = [];
-          
+
           if (imageData) {
             debugLog('Adding image to Gemini request');
             contentArray.push({
@@ -548,79 +529,25 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
               }
             });
           }
-          
+
           contentArray.push({ text: aiPrompt });
-          
+
           result = await model.generateContent(contentArray);
-          debugLog('Received result object from Gemini:', result);
-          
-        } else if (currentProvider === 'chatgpt') {
-          const { default: OpenAI } = await import('openai');
-          const openai = new OpenAI({
-            apiKey: process.env.REACT_APP_OPENAI_API_KEY,
-            dangerouslyAllowBrowser: true
-          });
-          
-          debugLog('Making API call to ChatGPT...');
-          
-          // Prepare messages - include image if available
-          const messages = [
-            {
-              role: "system",
-              content: "You are an expert WordPress Developer. Generate high-quality, secure WordPress plugins. You respond only with valid JSON objects as specified."
-            }
-          ];
-          
-          // Prepare user message content
-          const userMessageContent = [];
-          
-          if (imageData) {
-            debugLog('Adding image to ChatGPT request');
-            userMessageContent.push({
-              type: "image_url",
-              image_url: {
-                url: `data:${imageData.mimeType};base64,${imageData.base64}`
-              }
-            });
-          }
-          
-          userMessageContent.push({
-            type: "text",
-            text: aiPrompt
-          });
-          
-          messages.push({
-            role: "user",
-            content: userMessageContent
-          });
-          
-          result = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: messages,
-            temperature: 0.7,
-            max_tokens: 8192  // Increased from 4096 to reduce truncation
-          });
-          debugLog('Received result object from ChatGPT:', result);
-          
-        } else if (currentProvider === 'claude' || currentProvider === 'claude-opus' || currentProvider === 'claude-sonnet-4-5') {
+          apiResult = result; // Store for cost estimation
+          debugLog(`Received result object from ${currentProvider === 'gemini-flash' ? 'Gemini Flash' : 'Gemini Pro'}:`, result);
+
+        } else if (currentProvider === 'claude-sonnet-4-5') {
           const { default: Anthropic } = await import('@anthropic-ai/sdk');
           const anthropic = new Anthropic({
             apiKey: process.env.REACT_APP_ANTHROPIC_API_KEY,
             dangerouslyAllowBrowser: true
           });
-          
-          // Determine which Claude model to use
-          const claudeModel = currentProvider === 'claude-opus'
-            ? "claude-opus-4-1-20250805"
-            : currentProvider === 'claude-sonnet-4-5'
-            ? "claude-sonnet-4-5"
-            : "claude-sonnet-4-20250514";
-          
-          debugLog(`Making API call to ${currentProvider === 'claude-opus' ? 'Claude Opus 4.1' : currentProvider === 'claude-sonnet-4-5' ? 'Claude Sonnet 4.5' : 'Claude Sonnet 4'}...`);
-          
+
+          debugLog('Making API call to Claude Sonnet 4.5...');
+
           // Prepare message content - include image if available
           const messageContent = [];
-          
+
           if (imageData) {
             debugLog('Adding image to Claude request');
             messageContent.push({
@@ -632,14 +559,14 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
               }
             });
           }
-          
+
           messageContent.push({
             type: "text",
             text: aiPrompt
           });
-          
+
           result = await anthropic.messages.create({
-            model: claudeModel,
+            model: "claude-sonnet-4-5-20241022",
             max_tokens: 8192,
             temperature: 0.7,
             system: "You are an expert WordPress Developer. Generate high-quality, secure WordPress plugins. You respond only with valid JSON objects as specified.",
@@ -650,49 +577,36 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
               }
             ]
           });
-          debugLog(`Received result object from ${currentProvider === 'claude-opus' ? 'Claude Opus' : currentProvider === 'claude-sonnet-4-5' ? 'Claude Sonnet 4.5' : 'Claude Sonnet'}:`, result);
+          apiResult = result; // Store for cost estimation
+          debugLog('Received result object from Claude Sonnet 4.5:', result);
         }
         
-        // Extract text from response based on provider  
+        // Extract text from response based on provider
         let text;
-        if (currentProvider === 'chatgpt') {
-          // ChatGPT response processing
-          if (result.choices && result.choices.length > 0) {
-            text = result.choices[0].message.content;
-            debugLog('ChatGPT text extracted successfully');
-            
-            // Check if response was truncated
-            if (result.choices[0].finish_reason === 'length') {
-              debugLog('⚠️  ChatGPT response was truncated due to max_tokens limit');
-            }
-          } else {
-            throw new Error('EMPTY_RESPONSE_RETRY');
-          }
-          
-          if (!text || text.trim().length === 0) {
-            throw new Error('EMPTY_RESPONSE_RETRY');
-          }
-        } else if (currentProvider === 'claude' || currentProvider === 'claude-opus' || currentProvider === 'claude-sonnet-4-5') {
-          // Claude response processing (all Claude models)
+        if (currentProvider === 'claude-sonnet-4-5') {
+          // Claude response processing
           if (result.content && result.content.length > 0 && result.content[0].text) {
             text = result.content[0].text;
-            debugLog(`${currentProvider === 'claude-opus' ? 'Claude Opus' : currentProvider === 'claude-sonnet-4-5' ? 'Claude Sonnet 4.5' : 'Claude Sonnet'} text extracted successfully`);
-            
+            debugLog('Claude Sonnet 4.5 text extracted successfully');
+
             // Check if response was truncated
             if (result.stop_reason === 'max_tokens') {
-              debugLog(`⚠️  ${currentProvider === 'claude-opus' ? 'Claude Opus' : currentProvider === 'claude-sonnet-4-5' ? 'Claude Sonnet 4.5' : 'Claude Sonnet'} response was truncated due to max_tokens limit`);
+              debugLog('⚠️  Claude Sonnet 4.5 response was truncated due to max_tokens limit');
             }
+
+            // Estimate and log cost
+            estimateCost('claude-sonnet-4-5', result);
           } else {
             throw new Error('EMPTY_RESPONSE_RETRY');
           }
-          
+
           if (!text || text.trim().length === 0) {
             throw new Error('EMPTY_RESPONSE_RETRY');
           }
         } else {
-          // Gemini response processing (simplified for now)
+          // Gemini response processing (gemini-pro or gemini-flash)
           const response = result.response;
-          
+
           // Simple Gemini text extraction
           try {
             text = response.text();
@@ -703,15 +617,18 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
               throw new Error('EMPTY_RESPONSE_RETRY');
             }
           }
-          
+
           if (!text || text.trim().length === 0) {
             throw new Error('EMPTY_RESPONSE_RETRY');
           }
+
+          // Estimate and log cost
+          estimateCost(currentProvider, result);
         }
-        
-        // Common processing for both providers
+
+        // Common processing for all providers
         extensionData = await parseGeminiResponse(text, parentExtension);
-        
+
         // If we get here, the request was successful
         debugLog('Successfully generated extension on attempt ' + attempt);
         break;
@@ -1065,7 +982,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       setIsRevisionModalOpen(false); // Close the revision modal
 
       // Use the token-integrated generation for revisions with custom token cost for Claude Opus
-      const tokenCost = (selectedLLM === 'claude-opus') ? 20 : (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
+      const tokenCost = (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
       const result = await generateWithTokens(
         async () => {
           // Ensure we have the extension files for revision
@@ -1212,7 +1129,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       if (showMyExtensions) setShowMyExtensions(false);
 
       // Use the token-integrated generation with custom token cost for Claude Opus
-      const tokenCost = (selectedLLM === 'claude-opus') ? 20 : (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
+      const tokenCost = (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
       const result = await generateWithTokens(
         async () => {
           const aiResult = await executeAIGeneration(prompt, null, null, uploadedImage, selectedLLM);
@@ -1523,10 +1440,8 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       aria-label="Select AI model"
                     >
                       <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 5</option>
-                      <option value="claude-opus">🧠 Claude Opus 4.1 ⚡ 20</option>
-                      <option value="gemini">🤖 Gemini 2.5 Pro ⚡ 1</option>
-                      <option value="claude">🧠 Claude Sonnet 4 ⚡ 1</option>
-                      <option value="chatgpt">💬 ChatGPT 4o ⚡ 1</option>
+                      <option value="gemini-pro">🤖 Gemini Pro ⚡ 1</option>
+                      <option value="gemini-flash">🤖 Gemini Flash ⚡ 1</option>
                     </select>
                     {/* Mobile emoji overlay */}
                     <div className="sm:hidden absolute inset-0 pointer-events-none flex items-center justify-center text-lg">
@@ -2131,7 +2046,7 @@ function AppContent() {
       setIsRevisionModalOpen(false); // Close the revision modal
 
       // Use the token-integrated generation for revisions with custom token cost for Claude Opus
-      const tokenCost = (selectedLLM === 'claude-opus') ? 20 : (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
+      const tokenCost = (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
       const result = await generateWithTokens(
         async () => {
           // Ensure we have the extension files for revision
