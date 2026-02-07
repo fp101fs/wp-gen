@@ -3,14 +3,14 @@ import { useEffect } from 'react';
 /**
  * Custom hook to dynamically update document title
  * @param {string} title - The title to set for the page
- * @param {boolean} includeSiteName - Whether to include "Kromio" in the title
+ * @param {boolean} includeSiteName - Whether to include "plugin.new" in the title
  */
 export const useDocumentTitle = (title, includeSiteName = true) => {
   useEffect(() => {
     const originalTitle = document.title;
-    
-    const newTitle = includeSiteName && !title.includes('Kromio') 
-      ? `${title} - Kromio` 
+
+    const newTitle = includeSiteName && !title.includes('plugin.new')
+      ? `${title} - plugin.new`
       : title;
     
     document.title = newTitle;

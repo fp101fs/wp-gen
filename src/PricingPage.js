@@ -16,7 +16,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
   const { showUpgradePromptAction } = useTokenContext();
   
   // Set page title
-  useDocumentTitle('Pricing - PlugPress AI Plugin Builder');
+  useDocumentTitle('Pricing - plugin.new');
 
   const handleGetStarted = async (tier, planType) => {
     if (!session) {

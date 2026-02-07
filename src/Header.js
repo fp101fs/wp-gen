@@ -121,17 +121,10 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
         onClick={() => navigate('/')}
         className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
       >
-        <div className="bg-lime-400 p-2 rounded-full">
-          <img
-            src="/plugpress.webp"
-            alt="PlugPress Icon"
-            className="w-5 h-5 sm:w-6 sm:h-6"
-            loading="lazy"
-            width="24"
-            height="24"
-          />
+        <div className="bg-lime-400 w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center">
+          <span className="text-black font-bold text-lg sm:text-xl">p</span>
         </div>
-        <span className="text-xl sm:text-2xl font-bold text-white">plugpress.org</span>
+        <span className="text-xl sm:text-2xl font-bold text-white">plugin.new</span>
       </button>
 
       {/* Desktop Navigation */}

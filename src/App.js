@@ -509,7 +509,7 @@ Respond with ONLY a valid JSON object:
   "slug": "plugin-slug",
   "description": "Brief description",
   "files": {
-    "plugin-slug.php": "<?php\\n/**\\n * Plugin Name: Plugin Name\\n * Description: Brief description\\n * Version: 1.0.0\\n * Author: PlugPress\\n */\\n\\ndefined('ABSPATH') || exit;\\n\\n// Plugin code here",
+    "plugin-slug.php": "<?php\\n/**\\n * Plugin Name: Plugin Name\\n * Description: Brief description\\n * Version: 1.0.0\\n * Author: plugin.new\\n */\\n\\ndefined('ABSPATH') || exit;\\n\\n// Plugin code here",
     "includes/class-main.php": "complete file contents as string"
   },
   "instructions": "Installation: Upload via WordPress Admin (Plugins > Add New > Upload Plugin) or extract to wp-content/plugins/"
@@ -1456,7 +1456,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
             <div className="mb-4">
               <textarea
                 className="w-full h-20 sm:h-24 bg-transparent text-white placeholder-gray-400 focus:outline-none resize-none text-lg sm:text-xl"
-                placeholder={prompt.trim() ? "Ask PlugPress AI to create a WordPress plugin for my.." : (displayText + (isTyping && displayText.length < placeholderExamples[currentPlaceholder].length ? "|" : "")) || "Ask PlugPress AI to create a WordPress plugin for my.."}
+                placeholder={prompt.trim() ? "Ask AI to create a WordPress plugin for my.." : (displayText + (isTyping && displayText.length < placeholderExamples[currentPlaceholder].length ? "|" : "")) || "Ask AI to create a WordPress plugin for my.."}
                 value={prompt}
                 onChange={(e) => {
                   updatePrompt(e.target.value);
