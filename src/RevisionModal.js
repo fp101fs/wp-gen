@@ -11,8 +11,8 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
   const handleSubmit = () => {
     if (!revisionPrompt.trim()) return;
 
-    // Credit costs proportional to API pricing (Flash=1, Pro=15, Claude=50)
-    const requiredTokens = selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
+    // Credit costs proportional to API pricing (Flash=1, Pro=15, Sonnet=50, Opus=240)
+    const requiredTokens = selectedLLM === 'claude-opus' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
     if (!isUnlimited && currentTokens < requiredTokens) {
       showUpgradePromptAction(`Need ${requiredTokens} credit${requiredTokens > 1 ? 's' : ''} to revise extension`);
       return;
@@ -55,6 +55,7 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
               <option value="gemini-flash">🤖 Gemini Flash ⚡ 1</option>
               <option value="gemini-pro">🤖 Gemini Pro ⚡ 15</option>
               <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
+              <option value="claude-opus">🧠 Claude Opus 4.6 ⚡ 240</option>
             </select>
           </div>
         </div>

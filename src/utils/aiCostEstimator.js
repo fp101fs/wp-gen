@@ -5,9 +5,10 @@
 
 // Pricing per 1M tokens (as of Feb 2025)
 const AI_PRICING = {
-  'gemini-pro': { input: 1.25, output: 5.00 },       // Gemini Pro (latest)
-  'gemini-flash': { input: 0.075, output: 0.30 },    // Gemini Flash (latest)
-  'claude-sonnet-4-5': { input: 3.00, output: 15.00 } // Claude Sonnet 4.5
+  'gemini-flash': { input: 0.075, output: 0.30 },     // Gemini Flash
+  'gemini-pro': { input: 1.25, output: 5.00 },        // Gemini Pro
+  'claude-sonnet-4-5': { input: 3.00, output: 15.00 }, // Claude Sonnet 4.5
+  'claude-opus': { input: 15.00, output: 75.00 }      // Claude Opus 4.6
 };
 
 /**
@@ -20,7 +21,7 @@ function extractUsage(provider, response) {
   if (!response) return null;
 
   try {
-    if (provider === 'claude-sonnet-4-5') {
+    if (provider === 'claude-sonnet-4-5' || provider === 'claude-opus') {
       // Anthropic format: response.usage.input_tokens / output_tokens
       if (response.usage) {
         return {
