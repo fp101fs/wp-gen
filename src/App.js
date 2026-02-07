@@ -1443,12 +1443,9 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
         </div> */}
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 px-2 lcp-heading">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 px-2 lcp-heading">
             No Code WordPress Plugin Builder
           </h1>
-          <p className="text-lg sm:text-xl text-gray-300 mb-8 px-2">
-            Turn any idea into a WordPress plugin with AI - no coding required
-          </p>
         </div>
 
         <div className="max-w-4xl mx-auto px-2">
