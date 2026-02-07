@@ -24,7 +24,7 @@ const UpgradePrompt = ({
     hideUpgradePrompt
   } = useTokenContext()
 
-  const [selectedPlan, setSelectedPlan] = useState(USER_TYPES.PRO)
+  const [selectedPlan, setSelectedPlan] = useState(USER_TYPES.FREELANCER)
   const [billingCycle, setBillingCycle] = useState('monthly')
 
   if (!isOpen) return null
@@ -51,9 +51,11 @@ const UpgradePrompt = ({
 
   const getRecommendedPlans = () => {
     if (planName === USER_TYPES.FREE) {
-      return [USER_TYPES.PRO, USER_TYPES.UNLIMITED]
-    } else if (planName === USER_TYPES.PRO) {
-      return [USER_TYPES.UNLIMITED]
+      return [USER_TYPES.FREELANCER, USER_TYPES.AGENCY, USER_TYPES.ENTERPRISE]
+    } else if (planName === USER_TYPES.FREELANCER) {
+      return [USER_TYPES.AGENCY, USER_TYPES.ENTERPRISE]
+    } else if (planName === USER_TYPES.AGENCY) {
+      return [USER_TYPES.ENTERPRISE]
     }
     return []
   }
@@ -78,21 +80,24 @@ const UpgradePrompt = ({
       benefits.push(`${plan.tokens.included} credits/month`)
     }
 
-    // Feature 2: Icon selection
-    if (planType === 'pro' || planType === 'unlimited') {
-      benefits.push('Choose from 1,850+ Lucide icons')
-    } else {
-      benefits.push('8 basic icons')
+    // Feature 2: Unlimited revisions for paid plans
+    if (planType !== USER_TYPES.FREE) {
+      benefits.push('Unlimited revisions')
     }
 
-    // Feature 3: Upload any icon (Max only)
-    if (planType === 'unlimited') {
-      benefits.push('Upload any icon')
+    // Feature 3: Priority support (Agency+)
+    if (planType === USER_TYPES.AGENCY || planType === USER_TYPES.ENTERPRISE) {
+      benefits.push('Priority support')
     }
 
-    // Feature 4: Change author metadata (Max only)
-    if (planType === 'unlimited') {
-      benefits.push('Change author metadata')
+    // Feature 4: Team collaboration (Agency+)
+    if (planType === USER_TYPES.AGENCY || planType === USER_TYPES.ENTERPRISE) {
+      benefits.push('Team collaboration')
+    }
+
+    // Feature 5: API access (Enterprise only)
+    if (planType === USER_TYPES.ENTERPRISE) {
+      benefits.push('API access')
     }
 
     return benefits
@@ -244,7 +249,7 @@ const UpgradePrompt = ({
 
         {/* Plans */}
         <div className="p-6">
-          <div className={`grid gap-6 ${recommendedPlans.length === 1 ? 'grid-cols-1 justify-items-center' : 'grid-cols-1 md:grid-cols-2'}`}>
+          <div className={`grid gap-6 ${recommendedPlans.length === 1 ? 'grid-cols-1 justify-items-center' : recommendedPlans.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
             {recommendedPlans.map((planType) => {
               const plan = allPlans[planType]
               const benefits = getBenefits(planType)
@@ -329,14 +334,14 @@ const UpgradePrompt = ({
                     onClick={() => handleUpgrade(planType)}
                     className={`w-full py-3 px-4 rounded-lg font-semibold transition-all transform hover:scale-105 flex items-center justify-center space-x-2 ${
                       selectedPlan === planType
-                        ? planType === USER_TYPES.PRO 
+                        ? planType === USER_TYPES.FREELANCER
                           ? 'bg-gradient-to-r from-green-600 to-purple-600 hover:from-green-700 hover:to-purple-700 text-white shadow-lg'
                           : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg'
                         : 'bg-gray-700 hover:bg-gray-600 text-white'
                     }`}
                   >
                     <span>
-                      {planType === USER_TYPES.PRO ? 'Get Started' : 'Go Max Now'}
+                      {planType === USER_TYPES.FREELANCER ? 'Get Started' : `Go ${allPlans[planType].displayName}`}
                     </span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
