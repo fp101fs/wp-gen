@@ -61,11 +61,12 @@ const getModelEmoji = (modelId) => {
 };
 
 // Helper function to get credit cost for AI models
+// Costs are proportional to API pricing (Gemini Flash = 1 credit baseline)
 const getModelCreditCost = (modelId) => {
   const modelCosts = {
-    'claude-sonnet-4-5': 5,
-    'gemini-pro': 1,
-    'gemini-flash': 1
+    'claude-sonnet-4-5': 50,  // ~48x Flash pricing
+    'gemini-pro': 15,         // ~17x Flash pricing
+    'gemini-flash': 1         // baseline
   };
   return modelCosts[modelId] || 1;
 };
@@ -512,7 +513,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
           const { GoogleGenerativeAI } = await import('@google/generative-ai');
           const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
           // Use -latest aliases to auto-route to newest versions
-          const modelName = currentProvider === 'gemini-flash' ? 'gemini-flash-latest' : 'gemini-pro-latest';
+          const modelName = currentProvider === 'gemini-flash' ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview';
           const model = genAI.getGenerativeModel({ model: modelName });
 
           debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini Flash' : 'Gemini Pro'}...`);
@@ -775,7 +776,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [userExtensions, setUserExtensions] = useState([]);
   const [loadingMessage, setLoadingMessage] = useState('Activating AI...');
   const [messageIndex, setMessageIndex] = useState(0);
-  const [selectedLLM, setSelectedLLM] = useState('claude-sonnet-4-5');
+  const [selectedLLM, setSelectedLLM] = useState('gemini-flash');
   
   // Token context integration
   const { generateWithTokens, isGenerating, isLoading, currentTokens, isUnlimited, showUpgradePromptAction, planName } = useTokenContext();
@@ -982,7 +983,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       setIsRevisionModalOpen(false); // Close the revision modal
 
       // Use the token-integrated generation for revisions with custom token cost for Claude Opus
-      const tokenCost = (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
+      const tokenCost = selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
           // Ensure we have the extension files for revision
@@ -1129,7 +1130,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       if (showMyExtensions) setShowMyExtensions(false);
 
       // Use the token-integrated generation with custom token cost for Claude Opus
-      const tokenCost = (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
+      const tokenCost = selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
           const aiResult = await executeAIGeneration(prompt, null, null, uploadedImage, selectedLLM);
@@ -1439,9 +1440,9 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       disabled={isGenerating}
                       aria-label="Select AI model"
                     >
-                      <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 5</option>
-                      <option value="gemini-pro">🤖 Gemini Pro ⚡ 1</option>
                       <option value="gemini-flash">🤖 Gemini Flash ⚡ 1</option>
+                      <option value="gemini-pro">🤖 Gemini Pro ⚡ 15</option>
+                      <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
                     </select>
                     {/* Mobile emoji overlay */}
                     <div className="sm:hidden absolute inset-0 pointer-events-none flex items-center justify-center text-lg">
@@ -2046,7 +2047,7 @@ function AppContent() {
       setIsRevisionModalOpen(false); // Close the revision modal
 
       // Use the token-integrated generation for revisions with custom token cost for Claude Opus
-      const tokenCost = (selectedLLM === 'claude-sonnet-4-5') ? 5 : 1;
+      const tokenCost = selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
           // Ensure we have the extension files for revision
