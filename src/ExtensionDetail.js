@@ -576,7 +576,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => navigate('/gallery')}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="bg-lime-400 hover:bg-lime-500 text-black font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 Browse Gallery
               </button>
@@ -597,12 +597,12 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
 
   if (error || !extension) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="text-white text-xl mb-4">{error || 'Extension not found'}</div>
           <button
             onClick={handleBack}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
+            className="bg-lime-400 hover:bg-lime-500 text-black px-4 py-2 rounded-lg"
           >
             Go to Gallery
           </button>
@@ -632,7 +632,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => navigate('/gallery')}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="bg-lime-400 hover:bg-lime-500 text-black font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 Browse Gallery
               </button>
@@ -868,7 +868,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
                   />
                   <button 
                     onClick={() => session ? onRevise(extension) : onShowLoginModal()} 
-                    className="flex-1 px-4 py-4 sm:py-3 bg-purple-600 rounded-lg text-white font-semibold hover:bg-purple-700 flex items-center justify-center space-x-2 transition-colors text-base sm:text-sm"
+                    className="flex-1 px-4 py-4 sm:py-3 bg-lime-400 rounded-lg text-black font-semibold hover:bg-lime-500 flex items-center justify-center space-x-2 transition-colors text-base sm:text-sm"
                   >
                     <GitBranch className="w-5 h-5" />
                     <span>Revise</span>
@@ -936,7 +936,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
                 </button>
                 <button
                   onClick={() => session ? setShowFeedbackModal(true) : onShowLoginModal()}
-                  className="flex-1 px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-purple-400 font-medium flex items-center justify-center space-x-2 transition-colors text-sm"
+                  className="flex-1 px-4 py-3 bg-lime-500/20 hover:bg-lime-500/30 border border-lime-500/30 rounded-lg text-lime-400 font-medium flex items-center justify-center space-x-2 transition-colors text-sm"
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span>Send Feedback</span>
@@ -1012,11 +1012,11 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
                       <div className="text-center mb-3">
                         <p className="text-white text-lg font-semibold mb-2">Revision Prompt</p>
                       </div>
-                      <p className="text-gray-300 whitespace-pre-line bg-gray-900/50 rounded-lg p-4 border-l-4 border-purple-500 text-base leading-relaxed">{extension.revision_prompt}</p>
+                      <p className="text-gray-300 whitespace-pre-line bg-gray-900/50 rounded-lg p-4 border-l-4 border-lime-400 text-base leading-relaxed">{extension.revision_prompt}</p>
                       <div className="text-center mt-4">
                         <button 
                           onClick={handleCopyRevisionPrompt} 
-                          className="w-full sm:w-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2 text-base mx-auto"
+                          className="w-full sm:w-auto px-6 py-3 bg-lime-400 hover:bg-lime-500 text-black font-medium rounded-lg transition-colors flex items-center justify-center space-x-2 text-base mx-auto"
                         >
                           <Clipboard className="w-5 h-5" />
                           <span>Copy Revision Prompt</span>

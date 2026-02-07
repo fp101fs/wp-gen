@@ -4726,7 +4726,7 @@ const LearnPage = ({ onShowLoginModal }) => {
 
     return (
       <div>
-        <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-lime-400 to-white bg-clip-text text-transparent">
           🎯 Help Topics
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -4760,7 +4760,7 @@ const LearnPage = ({ onShowLoginModal }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+    <div className="min-h-screen bg-black text-white">
         <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-4 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
             <div className="absolute -bottom-8 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
@@ -4770,11 +4770,11 @@ const LearnPage = ({ onShowLoginModal }) => {
         <div className="relative z-10 container mx-auto px-4 py-8">
             <Header onShowLoginModal={onShowLoginModal} />
             <div className="text-center mb-16">
-                <h1 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                <h1 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-lime-400 to-white bg-clip-text text-transparent">
                     Help Center
                 </h1>
                 <div className="mt-6">
-                    <input type="text" className="w-1/2 mx-auto bg-white/10 backdrop-blur-lg border border-white/20 rounded-full py-3 px-6 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Search Help..." />
+                    <input type="text" className="w-1/2 mx-auto bg-white/10 backdrop-blur-lg border border-white/20 rounded-full py-3 px-6 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-400" placeholder="Search Help..." />
                 </div>
             </div>
 

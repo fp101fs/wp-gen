@@ -531,7 +531,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
         onShowLoginModal={onShowLoginModal}
       />
       <div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-8 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent px-2 pb-2 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-8 bg-gradient-to-r from-lime-400 to-white bg-clip-text text-transparent px-2 pb-2 text-center">
             Extension Gallery
           </h1>
           <p className="text-xl text-gray-300 text-center max-w-2xl mx-auto mb-6">
@@ -539,7 +539,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
           </p>
 
         {/* Filter Controls */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-xl mb-8">
+        <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shadow-xl mb-8">
           {sessionLoading ? (
             <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
               {/* Loading placeholders for filter controls */}
@@ -571,7 +571,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                     }}
                     className={`flex-1 lg:flex-initial px-2 lg:px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       viewMode === 'my'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-lime-400 text-black'
                         : 'text-gray-300 hover:text-white'
                     }`}
                   >
@@ -584,7 +584,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                     }}
                     className={`flex-1 lg:flex-initial px-2 lg:px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       viewMode === 'all'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-lime-400 text-black'
                         : 'text-gray-300 hover:text-white'
                     }`}
                   >
@@ -640,7 +640,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                       setSearchQuery(value);
                       saveState({ searchQuery: value });
                     }}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -661,7 +661,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                         }
                         setShowSortDropdown(!showSortDropdown);
                       }}
-                      className="flex items-center space-x-2 px-2 lg:px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors w-full lg:w-auto"
+                      className="flex items-center space-x-2 px-2 lg:px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-lime-400 transition-colors w-full lg:w-auto"
                     >
                       <ArrowUpDown className="w-4 h-4" />
                       <span className="text-sm flex-1 lg:flex-initial text-left lg:text-center">
@@ -703,7 +703,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
               {!session && (viewMode === 'my' || favoriteFilter === 'favorites') && (
                 <button
                   onClick={onShowLoginModal}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  className="bg-lime-400 hover:bg-lime-500 text-black px-6 py-3 rounded-lg font-semibold transition-colors"
                 >
                   {viewMode === 'my' ? 'Log In to View Your Extensions' : 'Log In to View Your Favorites'}
                 </button>
@@ -716,7 +716,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                 <a
                   key={extension.id}
                   href={`/extension/${extension.id}`}
-                  className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl hover:shadow-2xl hover:bg-white/15 transition-all duration-300 block no-underline text-inherit"
+                  className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 shadow-xl hover:shadow-2xl hover:bg-white/10 transition-all duration-300 block no-underline text-inherit"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start space-x-3 flex-1 mr-2 min-w-0">
@@ -803,14 +803,14 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                           e.stopPropagation();
                           session ? onRevise(extension) : onShowLoginModal();
                         }}
-                        className="flex items-center justify-center space-x-1 bg-purple-600 hover:bg-purple-700 text-white px-2 py-2 rounded-lg transition-colors text-sm font-medium flex-1"
+                        className="flex items-center justify-center space-x-1 bg-lime-400 hover:bg-lime-500 text-black px-2 py-2 rounded-lg transition-colors text-sm font-medium flex-1"
                       >
                         <GitBranch className="w-4 h-4" />
                         <span>Revise</span>
                       </button>
                       <a
                         href={`/extension/${extension.id}`}
-                        className="flex items-center justify-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded-lg transition-colors text-sm font-medium flex-1 no-underline"
+                        className="flex items-center justify-center space-x-1 bg-lime-400 hover:bg-lime-500 text-black px-2 py-2 rounded-lg transition-colors text-sm font-medium flex-1 no-underline"
                       >
                         <Eye className="w-4 h-4" />
                         <span>View</span>
@@ -836,7 +836,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                 <button
                   onClick={loadMoreExtensions}
                   disabled={loadingMore}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  className="bg-lime-400 hover:bg-lime-500 disabled:bg-lime-300 text-black px-6 py-3 rounded-lg font-semibold transition-colors"
                 >
                   {loadingMore ? 'Loading...' : 'Load More Extensions'}
                 </button>
@@ -874,7 +874,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
           onClick={() => setPreviewExtension(null)}
         >
           <div 
-            className="bg-gray-800 rounded-lg shadow-2xl w-full max-w-6xl relative h-[90vh] sm:max-h-[90vh] flex flex-col"
+            className="bg-neutral-900 rounded-lg shadow-2xl w-full max-w-6xl relative h-[90vh] sm:max-h-[90vh] flex flex-col border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-700 flex-shrink-0">
@@ -904,7 +904,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
       {showSortDropdown && createPortal(
         <div 
           data-sort-dropdown
-          className="fixed w-56 bg-gray-800 border border-gray-600 rounded-lg shadow-2xl"
+          className="fixed w-56 bg-neutral-900 border border-white/10 rounded-lg shadow-2xl"
           style={{ 
             top: dropdownPosition.top + 'px',
             right: dropdownPosition.right + 'px',
@@ -920,7 +920,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                 setShowSortDropdown(false);
               }}
               className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                sortBy === option.value ? 'bg-purple-600 text-white' : 'text-gray-300'
+                sortBy === option.value ? 'bg-lime-400 text-black' : 'text-gray-300'
               }`}
             >
               {option.label}

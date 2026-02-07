@@ -491,7 +491,7 @@ function AccountPage({ onShowLoginModal }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-black">
         <Header onShowLoginModal={onShowLoginModal} />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[60vh]">
@@ -503,10 +503,10 @@ function AccountPage({ onShowLoginModal }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-black">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-4 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-lime-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
         <div className="absolute -bottom-8 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
         <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '4s'}}></div>
       </div>
@@ -591,7 +591,7 @@ function AccountPage({ onShowLoginModal }) {
                   )}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 bg-lime-400 rounded-full flex items-center justify-center">
                         <Crown className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -614,7 +614,7 @@ function AccountPage({ onShowLoginModal }) {
                       {planName !== 'unlimited' && !userSubscription?.cancel_at_period_end && (
                         <button
                           onClick={() => showUpgradePromptAction('Upgrade from account page')}
-                          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                          className="bg-lime-400 hover:bg-lime-500 text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
                         >
                           {planName === 'free' ? 'Upgrade to Pro' : 'Go Max'}
                         </button>
@@ -711,7 +711,7 @@ function AccountPage({ onShowLoginModal }) {
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-3">
                         <div 
-                          className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-300" 
+                          className="bg-lime-400 h-3 rounded-full transition-all duration-300" 
                           style={{ width: `${Math.min(getUsagePercentage(), 100)}%` }}
                         ></div>
                       </div>
@@ -808,9 +808,9 @@ function AccountPage({ onShowLoginModal }) {
                     </button>
                     <button
                       onClick={() => setShowFeedbackModal(true)}
-                      className="w-full flex items-center space-x-3 p-3 bg-purple-500/10 rounded-lg hover:bg-purple-500/20 transition-colors border border-purple-500/20"
+                      className="w-full flex items-center space-x-3 p-3 bg-lime-500/10 rounded-lg hover:bg-lime-500/20 transition-colors border border-lime-500/20"
                     >
-                      <MessageSquare className="w-5 h-5 text-purple-400" />
+                      <MessageSquare className="w-5 h-5 text-lime-400" />
                       <span className="text-white">Send Feedback</span>
                     </button>
                   </div>
@@ -818,7 +818,7 @@ function AccountPage({ onShowLoginModal }) {
 
                 {/* Plan Comparison */}
                 {planName !== 'unlimited' && (
-                  <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/20">
+                  <div className="bg-gradient-to-r from-lime-500/10 to-neutral-500/10 backdrop-blur-lg rounded-2xl p-6 border border-lime-500/20">
                     <h3 className="text-white font-semibold mb-4">Upgrade Benefits</h3>
                     <div className="space-y-2 text-sm">
                       {planName === 'free' && (
@@ -856,7 +856,7 @@ function AccountPage({ onShowLoginModal }) {
                     </div>
                     <button
                       onClick={() => showUpgradePromptAction('Upgrade from benefits card')}
-                      className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all duration-300"
+                      className="w-full mt-4 bg-lime-400 hover:bg-lime-500 text-black py-2 rounded-lg font-semibold transition-all duration-300"
                     >
                       Upgrade Now
                     </button>
@@ -965,7 +965,7 @@ function AccountPage({ onShowLoginModal }) {
                     <h3 className="text-white font-semibold mb-4">Usage Progress</h3>
                     <div className="w-full bg-gray-700 rounded-full h-4 mb-4">
                       <div 
-                        className="bg-gradient-to-r from-purple-500 to-blue-500 h-4 rounded-full transition-all duration-300" 
+                        className="bg-lime-400 h-4 rounded-full transition-all duration-300" 
                         style={{ width: `${Math.min(getUsagePercentage(), 100)}%` }}
                       ></div>
                     </div>
@@ -987,7 +987,7 @@ function AccountPage({ onShowLoginModal }) {
                   <h2 className="text-2xl font-bold text-white">Your Messages</h2>
                   <button
                     onClick={loadUserMessages}
-                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-lime-400 text-black rounded-lg hover:bg-lime-500 font-semibold transition-colors"
                   >
                     <RefreshCw className="w-4 h-4" />
                     <span>Refresh</span>
@@ -1014,7 +1014,7 @@ function AccountPage({ onShowLoginModal }) {
                       </button>
                       <button
                         onClick={() => setShowFeedbackModal(true)}
-                        className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
+                        className="px-6 py-3 bg-lime-400 text-black rounded-lg hover:bg-lime-500 font-semibold transition-colors flex items-center space-x-2"
                       >
                         <MessageSquare className="w-5 h-5" />
                         <span>Send Feedback</span>
@@ -1032,7 +1032,7 @@ function AccountPage({ onShowLoginModal }) {
                               <div className={`px-3 py-1 rounded-full text-sm font-medium ${
                                 message.type === 'support' 
                                   ? 'bg-blue-100 text-blue-800' 
-                                  : 'bg-purple-100 text-purple-800'
+                                  : 'bg-lime-100 text-lime-800'
                               }`}>
                                 {message.type === 'support' ? 'Support Request' : 'Feedback'}
                               </div>
@@ -1099,7 +1099,7 @@ function AccountPage({ onShowLoginModal }) {
                     ))}
                     
                     {/* Send New Message */}
-                    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-6">
+                    <div className="bg-gradient-to-r from-lime-500/10 to-neutral-500/10 border border-lime-500/20 rounded-xl p-6">
                       <h3 className="text-white font-semibold mb-4">Need more help?</h3>
                       <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                         <button
@@ -1111,7 +1111,7 @@ function AccountPage({ onShowLoginModal }) {
                         </button>
                         <button
                           onClick={() => setShowFeedbackModal(true)}
-                          className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+                          className="flex-1 px-6 py-3 bg-lime-400 text-black rounded-lg hover:bg-lime-500 font-semibold transition-colors flex items-center justify-center space-x-2"
                         >
                           <MessageSquare className="w-5 h-5" />
                           <span>Send Feedback</span>

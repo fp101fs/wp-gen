@@ -29,7 +29,7 @@ const TokenBalance = ({
         <div className={`bg-white rounded-lg border shadow-sm p-4 ${className}`}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-gradient-to-r from-purple-400 to-blue-400 rounded animate-pulse"></div>
+              <div className="w-4 h-4 bg-gradient-to-r from-lime-400 to-white rounded animate-pulse"></div>
               <h3 className="font-semibold text-gray-800">Token Balance</h3>
             </div>
             <div className="text-xs text-gray-500">Loading...</div>
@@ -39,8 +39,8 @@ const TokenBalance = ({
             <div className="flex items-center justify-center py-8">
               <div className="flex flex-col items-center space-y-3">
                 <div className="relative">
-                  <div className="w-10 h-10 border-4 border-purple-200 rounded-full"></div>
-                  <div className="absolute inset-0 w-10 h-10 border-4 border-purple-600 rounded-full animate-spin border-t-transparent"></div>
+                  <div className="w-10 h-10 border-4 border-lime-200 rounded-full"></div>
+                  <div className="absolute inset-0 w-10 h-10 border-4 border-lime-400 rounded-full animate-spin border-t-transparent"></div>
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-gray-700">Setting up your account</p>
@@ -67,7 +67,7 @@ const TokenBalance = ({
     return (
       <div className={`flex items-center space-x-2 ${className}`}>
         <div className="animate-pulse flex items-center space-x-2">
-          <div className="w-4 h-4 bg-gradient-to-r from-purple-400 to-blue-400 rounded animate-pulse"></div>
+          <div className="w-4 h-4 bg-gradient-to-r from-lime-400 to-white rounded animate-pulse"></div>
           <div className="w-16 h-4 bg-gray-300 rounded"></div>
         </div>
       </div>

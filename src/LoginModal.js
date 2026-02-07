@@ -123,7 +123,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full relative border border-gray-700 shadow-2xl">
+      <div className="bg-neutral-950 rounded-2xl p-8 max-w-md w-full relative border border-white/10 shadow-2xl">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
@@ -191,7 +191,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full bg-neutral-900 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent"
                 placeholder="Enter your full name"
                 disabled={loading}
               />
@@ -207,7 +207,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full bg-neutral-900 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent"
               placeholder="Enter your email"
               disabled={loading}
             />
@@ -223,7 +223,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full bg-neutral-900 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:border-transparent"
               placeholder={isSignUp ? "Create a password (min 6 characters)" : "Enter your password"}
               disabled={loading}
             />
@@ -232,7 +232,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            className="w-full bg-lime-400 hover:bg-lime-500 text-black py-3 px-4 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
           >
             {loading ? (
               <>
@@ -251,7 +251,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
         <div className="mt-6 text-center">
           <button
             onClick={toggleMode}
-            className="text-purple-400 hover:text-purple-300 transition-colors"
+            className="text-lime-400 hover:text-lime-300 transition-colors"
             disabled={loading}
           >
             {isSignUp 
@@ -267,7 +267,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
             href="/learn#terms" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-purple-400 hover:text-purple-300 underline"
+            className="text-lime-400 hover:text-lime-300 underline"
           >
             Terms of Service
           </a>
@@ -276,7 +276,7 @@ function LoginModal({ isOpen, onClose, onAuthSuccess }) {
             href="/learn#privacy" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-purple-400 hover:text-purple-300 underline"
+            className="text-lime-400 hover:text-lime-300 underline"
           >
             Privacy Policy
           </a>

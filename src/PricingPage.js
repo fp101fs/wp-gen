@@ -176,7 +176,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       popular: true,
       description: 'For individual developers and creators',
       buttonText: 'Start Freelancer',
-      buttonStyle: 'bg-gradient-to-r from-green-600 to-purple-600 hover:from-green-700 hover:to-purple-700 text-white',
+      buttonStyle: 'bg-lime-400 hover:bg-lime-500 text-black font-semibold',
       icon: <Zap className="w-6 h-6" />,
       planType: 'freelancer'
     },
@@ -189,7 +189,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       popular: false,
       description: 'For teams and agencies',
       buttonText: 'Start Agency',
-      buttonStyle: 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white',
+      buttonStyle: 'bg-lime-400 hover:bg-lime-500 text-black font-semibold',
       icon: <Crown className="w-6 h-6" />,
       planType: 'agency'
     },
@@ -203,7 +203,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       bestValue: true,
       description: 'For large teams and businesses',
       buttonText: 'Start Enterprise',
-      buttonStyle: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white',
+      buttonStyle: 'bg-lime-400 hover:bg-lime-500 text-black font-semibold',
       icon: <Crown className="w-6 h-6" />,
       planType: 'enterprise'
     }
@@ -218,7 +218,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
 
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent pb-2">
+          <h1 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-lime-400 to-white bg-clip-text text-transparent pb-2">
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
@@ -234,7 +234,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
             <button
               onClick={() => setAnnualBilling(!annualBilling)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                annualBilling ? 'bg-purple-600' : 'bg-gray-600'
+                annualBilling ? 'bg-lime-400' : 'bg-gray-600'
               }`}
             >
               <span
@@ -261,15 +261,15 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
             .map((tier, index) => (
             <div
               key={tier.name}
-              className={`relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border shadow-2xl transition-all duration-300 hover:transform hover:scale-105 ${
-                tier.popular 
-                  ? 'border-purple-400 ring-2 ring-purple-400/50' 
-                  : 'border-white/20'
+              className={`relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border shadow-2xl transition-all duration-300 hover:transform hover:scale-105 ${
+                tier.popular
+                  ? 'border-lime-400 ring-2 ring-lime-400/50'
+                  : 'border-white/10'
               }`}
             >
               {tier.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                  <span className="bg-lime-400 text-black px-6 py-2 rounded-full text-sm font-bold shadow-lg">
                     Most Popular
                   </span>
                 </div>
@@ -370,25 +370,25 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
             Frequently Asked Questions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-3">What counts as a plugin?</h3>
               <p className="text-gray-300 text-sm">
                 Each new plugin generation or major revision counts toward your monthly limit. Minor edits and re-downloads don't count.
               </p>
             </div>
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-3">Can I upgrade or downgrade anytime?</h3>
               <p className="text-gray-300 text-sm">
                 Yes! You can change your plan at any time. Changes take effect immediately with prorated billing.
               </p>
             </div>
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-3">Do unused plugins roll over?</h3>
               <p className="text-gray-300 text-sm">
                 No, your plugin limit resets each billing period. Enterprise plans have unlimited plugins.
               </p>
             </div>
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-3">What's included in annual billing?</h3>
               <p className="text-gray-300 text-sm">
                 Annual billing saves you 2 months (about 17% off). You get the same features, just pay less!
@@ -398,8 +398,8 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 shadow-2xl">
-          <h2 className="text-3xl font-bold text-white mb-4">
+        <div className="text-center bg-white/5 backdrop-blur-lg rounded-2xl p-12 border border-white/10 shadow-2xl">
+          <h2 className="text-4xl font-bold text-white mb-4">
             Ready to Build Amazing Plugins?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -408,7 +408,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
           <button
             onClick={() => handleGetStarted('Free')}
             disabled={loadingPlan === 'Free'}
-            className="bg-white text-black px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-300 transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+            className="bg-lime-400 text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-lime-500 transition-colors duration-300 transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
           >
             {loadingPlan === 'Free' ? (
               <div className="flex items-center justify-center space-x-2">

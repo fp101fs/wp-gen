@@ -121,7 +121,7 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
         onClick={() => navigate('/')}
         className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
       >
-        <div className="bg-gradient-to-r from-purple-400 to-blue-400 p-2 rounded-full">
+        <div className="bg-lime-400 p-2 rounded-full">
           <img
             src="/plugpress.webp"
             alt="PlugPress Icon"
@@ -212,9 +212,9 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
                 className="flex items-center justify-center px-2 py-2 rounded-lg text-white text-sm font-medium transition-colors duration-200 min-w-[60px] md:min-w-[auto] md:px-4 md:space-x-2"
               >
                 <div 
-                  className="w-10 h-10 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                  className="w-10 h-10 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-black font-bold text-lg"
                   style={{
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)'
+                    background: 'linear-gradient(135deg, #AFEE14 0%, #9BD912 100%)'
                   }}
                 >
                   {session.user.email ? session.user.email[0].toUpperCase() : 'U'}
@@ -236,9 +236,9 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
                   )}
                   <div className="flex items-center p-4 border-b border-gray-700">
                     <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg mr-3"
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-black font-bold text-lg mr-3"
                       style={{
-                        background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)'
+                        background: 'linear-gradient(135deg, #AFEE14 0%, #9BD912 100%)'
                       }}
                     >
                       {session.user.email ? session.user.email[0].toUpperCase() : 'U'}
@@ -265,12 +265,12 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
                             {planName === 'free' ? 'Turn Pro' : 'Go Max'}
                           </span>
                         </div>
-                        <button 
+                        <button
                           onClick={() => {
                             setShowAccountPopup(false);
                             showUpgradePromptAction('Upgrade from account menu');
                           }}
-                          className="bg-purple-600 text-white px-4 py-2 rounded-md text-base hover:bg-purple-700"
+                          className="bg-lime-400 text-black px-4 py-2 rounded-md text-base hover:bg-lime-500 font-semibold"
                         >
                           Upgrade
                         </button>

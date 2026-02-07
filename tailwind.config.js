@@ -7,6 +7,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        'lime': {
+          300: '#C4F43E',
+          400: '#AFEE14',
+          500: '#9BD912',
+          600: '#84C20E',
+          700: '#6DAB0A'
+        },
         'purple': {
           500: '#8B5CF6',
           600: '#7C3AED',

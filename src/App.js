@@ -1626,7 +1626,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       setExtensionToRevise(generatedExtension);
                       setIsRevisionModalOpen(true);
                     }}
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors duration-300 flex items-center space-x-2 text-sm sm:text-base"
+                    className="bg-lime-400 hover:bg-lime-500 text-black font-semibold font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors duration-300 flex items-center space-x-2 text-sm sm:text-base"
                   >
                     <GitBranch className="w-4 h-4" />
                     <span className="hidden sm:inline">Revise this Extension</span>
@@ -1675,7 +1675,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       <div className="flex justify-center items-center gap-6 mt-12">
         <button
           onClick={() => setShowTipsModal(true)}
-          className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
+          className="bg-lime-400 hover:bg-lime-500 text-black px-6 py-3 rounded-lg font-bold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
         >
           <HelpCircle className="w-5 h-5" />
           Tips
@@ -1729,7 +1729,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               <p className="text-gray-300 text-sm">Custom admin panels, settings pages, analytics widgets, and site management tools.</p>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-5 border border-purple-300/30">
+            <div className="bg-gradient-to-br from-lime-500/20 to-neutral-500/20 rounded-xl p-5 border border-lime-300/30">
               <h4 className="text-white font-semibold mb-2">Custom Post Types</h4>
               <p className="text-gray-300 text-sm">Portfolio items, testimonials, team members, products, and custom content types.</p>
             </div>
@@ -1747,7 +1747,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
         </section>
 
         {/* Why No-Code Section */}
-        <section className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-2xl p-8 border border-purple-500/30">
+        <section className="bg-gradient-to-r from-lime-900/20 to-neutral-900/30 rounded-2xl p-8 border border-lime-500/30">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-4">Why Choose No-Code WordPress Plugin Development?</h2>
             <p className="text-gray-300 text-lg">Build professional WordPress plugins without learning PHP, WordPress hooks, or complex APIs</p>
@@ -1800,7 +1800,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="bg-purple-500 rounded-full p-2 mt-1">
+                <div className="bg-lime-400 rounded-full p-2 mt-1">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -1887,14 +1887,14 @@ function GenerationLoadingOverlay() {
       <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4 text-center border border-gray-700 shadow-2xl">
         <div className="mb-6">
           <div className="relative w-20 h-20 mx-auto mb-4">
-            <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-purple-600 rounded-full animate-spin border-t-transparent"></div>
+            <div className="absolute inset-0 border-4 border-lime-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-lime-400 rounded-full animate-spin border-t-transparent"></div>
           </div>
           <h3 className="text-xl font-bold text-white mb-2">Generating Extension</h3>
           <p className="text-gray-300 text-sm mb-4">{loadingMessages[messageIndex].text}</p>
           <button
             onClick={loadingMessages[messageIndex].action}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="bg-lime-400 hover:bg-lime-500 text-black font-semibold px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           >
             {loadingMessages[messageIndex].buttonText}
           </button>
@@ -1902,9 +1902,9 @@ function GenerationLoadingOverlay() {
         
         <div className="bg-gray-800 rounded-lg p-4">
           <div className="flex items-center justify-center space-x-2 text-sm text-gray-400">
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-lime-400 rounded-full animate-pulse"></div>
             <span>This may take 30-60 seconds</span>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+            <div className="w-2 h-2 bg-lime-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
           </div>
         </div>
       </div>
@@ -2250,21 +2250,21 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-black">
       {/* Global animated background - persists during navigation */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-4 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute -bottom-8 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '4s'}}></div>
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-lime-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute -bottom-8 -right-4 w-72 h-72 bg-lime-400/10 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-neutral-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '4s'}}></div>
       </div>
 
       {/* Global loading screen until session is confirmed */}
       {sessionLoading ? (
-        <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
           <div className="text-center">
             <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-purple-600 rounded-full animate-spin border-t-transparent"></div>
+              <div className="absolute inset-0 border-4 border-lime-200 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-lime-400 rounded-full animate-spin border-t-transparent"></div>
             </div>
             <p className="text-white text-lg font-medium">Loading...</p>
           </div>
@@ -2272,7 +2272,7 @@ function AppContent() {
       ) : (
         <>
           <Suspense fallback={
-            <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+            <div className="min-h-screen bg-black flex items-center justify-center">
               <div className="text-white text-xl">Loading...</div>
             </div>
           }>

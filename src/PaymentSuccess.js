@@ -52,7 +52,7 @@ function PaymentSuccess({ onShowLoginModal }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
@@ -60,7 +60,7 @@ function PaymentSuccess({ onShowLoginModal }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-black">
         <div className="relative z-10 container mx-auto px-4 py-8">
           <Header onShowLoginModal={onShowLoginModal} />
           <div className="flex items-center justify-center min-h-[60vh]">
@@ -69,7 +69,7 @@ function PaymentSuccess({ onShowLoginModal }) {
               <p className="text-gray-300 mb-6">{error}</p>
               <button
                 onClick={() => navigate('/')}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold"
+                className="bg-lime-400 hover:bg-lime-500 text-black font-semibold px-6 py-3 rounded-lg font-semibold"
               >
                 Go Home
               </button>
@@ -81,12 +81,12 @@ function PaymentSuccess({ onShowLoginModal }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-black">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-4 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute -bottom-8 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '4s'}}></div>
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-lime-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute -bottom-8 -right-4 w-72 h-72 bg-lime-400/10 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-neutral-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{animationDelay: '4s'}}></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8">

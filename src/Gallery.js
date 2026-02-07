@@ -108,7 +108,7 @@ function Gallery({ isOpen, onClose, onSelectExtension }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-lg p-8 max-w-4xl w-full relative border border-gray-700 shadow-xl">
+      <div className="bg-neutral-950 rounded-lg p-8 max-w-4xl w-full relative border border-white/10 shadow-xl">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white"
@@ -142,7 +142,7 @@ function Gallery({ isOpen, onClose, onSelectExtension }) {
                   <button onClick={() => setPreviewExtension(ext)} className="p-2 bg-gray-700 rounded-full text-white hover:bg-gray-600">
                     <Eye className="w-5 h-5" />
                   </button>
-                  <button onClick={() => onSelectExtension(ext)} className="p-2 bg-blue-500 rounded-full text-white hover:bg-blue-600">
+                  <button onClick={() => onSelectExtension(ext)} className="p-2 bg-lime-400 rounded-full text-black hover:bg-lime-500">
                     <p>View</p>
                   </button>
                   <button onClick={() => handleDownload(ext)} className="p-2 bg-green-500 rounded-full text-white hover:bg-green-600">
@@ -159,8 +159,8 @@ function Gallery({ isOpen, onClose, onSelectExtension }) {
 
       {previewExtension && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-60 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg relative">
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <div className="bg-neutral-900 rounded-lg shadow-2xl w-full max-w-lg relative border border-white/10">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
               <h3 className="text-xl font-bold text-white">Preview: {previewExtension.name}</h3>
               <button onClick={() => setPreviewExtension(null)} className="text-gray-400 hover:text-white">
                 <X className="w-6 h-6" />

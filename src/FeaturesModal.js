@@ -6,7 +6,7 @@ function FeaturesModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-2xl p-6 max-w-6xl w-full relative border border-gray-700 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-neutral-950 rounded-2xl p-6 max-w-6xl w-full relative border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white z-10 bg-gray-800 hover:bg-gray-700 rounded-full p-2 transition-colors"
@@ -16,7 +16,7 @@ function FeaturesModal({ isOpen, onClose }) {
         
         {/* Header */}
         <div className="text-center mb-8 pr-12">
-          <h2 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-lime-400 to-white bg-clip-text text-transparent">
             Platform Features
           </h2>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
@@ -28,12 +28,12 @@ function FeaturesModal({ isOpen, onClose }) {
         <div className="mb-10">
           <h3 className="text-2xl font-semibold text-white mb-6 text-center">🚀 Core Capabilities</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur-lg rounded-xl p-6 border border-purple-300/30">
-              <Code className="w-12 h-12 text-purple-400 mb-4 mx-auto" />
+            <div className="bg-gradient-to-br from-lime-500/20 to-neutral-500/20 backdrop-blur-lg rounded-xl p-6 border border-lime-300/30">
+              <Code className="w-12 h-12 text-lime-400 mb-4 mx-auto" />
               <h4 className="text-xl font-semibold text-white mb-3 text-center">AI-Powered Generation</h4>
               <p className="text-gray-300 text-center">Advanced AI creates complete, functional WordPress plugins from natural language descriptions in seconds</p>
               <div className="mt-4 text-center">
-                <span className="inline-block bg-purple-500/30 text-purple-300 px-3 py-1 rounded-full text-sm font-medium">
+                <span className="inline-block bg-lime-500/30 text-lime-300 px-3 py-1 rounded-full text-sm font-medium">
                   ✨ GPT-4o & Claude Sonnet
                 </span>
               </div>
@@ -109,7 +109,7 @@ function FeaturesModal({ isOpen, onClose }) {
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 backdrop-blur-lg rounded-xl p-6 border border-indigo-300/30">
+            <div className="bg-gradient-to-r from-lime-500/20 to-neutral-500/20 backdrop-blur-lg rounded-xl p-6 border border-lime-300/30">
               <div className="flex items-center mb-4">
                 <Users className="w-8 h-8 text-indigo-400 mr-3" />
                 <h4 className="text-xl font-semibold text-white">Extension Sharing</h4>
@@ -159,7 +159,7 @@ function FeaturesModal({ isOpen, onClose }) {
         </div>
 
         {/* Stats Footer */}
-        <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl p-6 border border-purple-300/20">
+        <div className="bg-gradient-to-r from-lime-500/10 to-neutral-500/10 rounded-xl p-6 border border-lime-300/20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-white">1000+</div>

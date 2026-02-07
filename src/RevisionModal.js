@@ -24,7 +24,7 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-lg p-8 max-w-2xl w-full relative border border-gray-700 shadow-xl">
+      <div className="bg-neutral-950 rounded-lg p-8 max-w-2xl w-full relative border border-white/10 shadow-xl">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white"
@@ -35,7 +35,7 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
         <p className="text-center text-gray-400 mb-8">Revising: <strong>{extension.name} (v{extension.version})</strong></p>
         
         <textarea
-          className="w-full h-32 bg-gray-800 text-white placeholder-gray-400 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-lg"
+          className="w-full h-32 bg-neutral-900 text-white placeholder-gray-400 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-lime-400 resize-none text-lg border border-white/10"
           placeholder="e.g., Add a button to change the background color to blue..."
           value={revisionPrompt}
           onChange={(e) => setRevisionPrompt(e.target.value)}
@@ -94,7 +94,7 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
             className={`px-6 py-3 rounded-lg font-semibold transition-colors duration-300 ${
               !revisionPrompt.trim()
                 ? 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-50'
-                : 'bg-purple-600 text-white hover:bg-purple-700'
+                : 'bg-lime-400 text-black hover:bg-lime-500 font-bold'
             }`}
           >
             Generate Revision

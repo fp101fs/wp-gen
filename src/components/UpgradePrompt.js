@@ -174,12 +174,12 @@ const UpgradePrompt = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900/95 backdrop-blur-lg rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/20 shadow-2xl">
+      <div className="bg-neutral-950/95 backdrop-blur-lg rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/20">
+        <div className="flex items-center justify-between p-6 border-b border-white/10">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              <Crown className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-lime-400 rounded-full flex items-center justify-center">
+              <Crown className="w-5 h-5 text-black" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Upgrade Your Plan</h2>
@@ -195,7 +195,7 @@ const UpgradePrompt = ({
         </div>
 
         {/* Message */}
-        <div className="p-6 bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-b border-white/20">
+        <div className="p-6 bg-gradient-to-r from-lime-900/20 to-neutral-900/30 border-b border-white/10">
           <p className="text-white text-center font-medium mb-3">
             {getUpgradeMessage()}
           </p>
@@ -217,14 +217,14 @@ const UpgradePrompt = ({
 
 
         {/* Billing Cycle Toggle */}
-        <div className="p-6 border-b border-white/20">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-center">
-            <div className="bg-gray-800 rounded-lg p-1 flex">
+            <div className="bg-neutral-900 rounded-lg p-1 flex">
               <button
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   billingCycle === 'monthly'
-                    ? 'bg-purple-600 text-white shadow-sm'
+                    ? 'bg-lime-400 text-black shadow-sm'
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
@@ -234,7 +234,7 @@ const UpgradePrompt = ({
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors relative ${
                   billingCycle === 'yearly'
-                    ? 'bg-purple-600 text-white shadow-sm'
+                    ? 'bg-lime-400 text-black shadow-sm'
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
@@ -260,18 +260,18 @@ const UpgradePrompt = ({
               return (
                 <div
                   key={planType}
-                  className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all bg-white/10 backdrop-blur-lg ${
+                  className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all bg-white/5 backdrop-blur-lg ${
                     recommendedPlans.length === 1 ? 'max-w-md w-full' : ''
                   } ${
                     selectedPlan === planType
-                      ? 'border-purple-400 bg-purple-900/30'
-                      : 'border-white/30 hover:border-white/50'
-                  } ${isPopular ? 'ring-2 ring-purple-400/50' : ''}`}
+                      ? 'border-lime-400 bg-lime-900/20'
+                      : 'border-white/20 hover:border-white/40'
+                  } ${isPopular ? 'ring-2 ring-lime-400/50' : ''}`}
                   onClick={() => setSelectedPlan(planType)}
                 >
                   {isPopular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                      <span className="bg-lime-400 text-black px-3 py-1 rounded-full text-xs font-medium">
                         Most Popular
                       </span>
                     </div>
@@ -334,10 +334,8 @@ const UpgradePrompt = ({
                     onClick={() => handleUpgrade(planType)}
                     className={`w-full py-3 px-4 rounded-lg font-semibold transition-all transform hover:scale-105 flex items-center justify-center space-x-2 ${
                       selectedPlan === planType
-                        ? planType === USER_TYPES.FREELANCER
-                          ? 'bg-gradient-to-r from-green-600 to-purple-600 hover:from-green-700 hover:to-purple-700 text-white shadow-lg'
-                          : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg'
-                        : 'bg-gray-700 hover:bg-gray-600 text-white'
+                        ? 'bg-lime-400 hover:bg-lime-500 text-black shadow-lg'
+                        : 'bg-neutral-800 hover:bg-neutral-700 text-white'
                     }`}
                   >
                     <span>
@@ -352,7 +350,7 @@ const UpgradePrompt = ({
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-gradient-to-r from-green-900/30 to-blue-900/30 border-t border-white/20 rounded-b-2xl">
+        <div className="p-6 bg-gradient-to-r from-lime-900/20 to-neutral-900/30 border-t border-white/10 rounded-b-2xl">
           <div className="text-center mb-4">
             <p className="text-sm text-white font-medium mb-2">
               🚀 Join 10,000+ developers already creating with Kromio AI
