@@ -520,7 +520,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
           const { GoogleGenerativeAI } = await import('@google/generative-ai');
           const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
           // Use -latest aliases to auto-route to newest versions
-          const modelName = currentProvider === 'gemini-flash' ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview';
+          const modelName = currentProvider === 'gemini-flash' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
           const model = genAI.getGenerativeModel({ model: modelName });
 
           debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini Flash' : 'Gemini Pro'}...`);
