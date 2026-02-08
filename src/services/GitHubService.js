@@ -149,9 +149,10 @@ class GitHubService {
    * @param {string} repoFullName - Full repository name (owner/repo)
    * @param {string} commitMessage - Commit message
    * @param {string} branch - Branch to push to (defaults to main)
+   * @param {Object|null} releaseOptions - Optional release options { version, name }
    * @returns {Promise<Object>}
    */
-  async pushFiles(files, repoFullName, commitMessage, branch = 'main') {
+  async pushFiles(files, repoFullName, commitMessage, branch = 'main', releaseOptions = null) {
     try {
       const token = await this.getGitHubToken()
       if (!token) {
@@ -214,7 +215,7 @@ class GitHubService {
       }
 
       if (useContentsApiFallback) {
-        return this.pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers)
+        return this.pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers, releaseOptions)
       }
 
       // 3. Create blobs for all files (in parallel)
@@ -292,11 +293,21 @@ class GitHubService {
         throw new Error(`Failed to ${action} branch ref: HTTP ${updateRefResponse.status}`)
       }
 
+      // Create release if requested
+      let releaseUrl = null
+      if (releaseOptions) {
+        const tagName = `v${releaseOptions.version}`
+        const releaseName = `${releaseOptions.name} v${releaseOptions.version}`
+        const release = await this.createRelease(repoFullName, tagName, newCommit.sha, releaseName, commitMessage, headers)
+        releaseUrl = release.html_url
+      }
+
       return {
         success: true,
         commitSha: newCommit.sha,
         filesCreated: treeItems.map(t => t.path),
-        repoUrl: `https://github.com/${repoFullName}`
+        repoUrl: `https://github.com/${repoFullName}`,
+        releaseUrl
       }
     } catch (error) {
       debugError('GitHubService.pushFiles error:', error)
@@ -321,9 +332,10 @@ class GitHubService {
    * @param {string} commitMessage - Commit message
    * @param {string} branch - Branch to push to
    * @param {Object} headers - Request headers with auth token
+   * @param {Object|null} releaseOptions - Optional release options { version, name }
    * @returns {Promise<Object>}
    */
-  async pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers) {
+  async pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers, releaseOptions = null) {
     const filesToPush = Object.entries(files).filter(([name]) => name !== 'instructions')
     const results = []
 
@@ -347,12 +359,59 @@ class GitHubService {
       results.push(await response.json())
     }
 
+    const commitSha = results[results.length - 1]?.commit?.sha
+
+    // Create release if requested
+    let releaseUrl = null
+    if (releaseOptions && commitSha) {
+      const tagName = `v${releaseOptions.version}`
+      const releaseName = `${releaseOptions.name} v${releaseOptions.version}`
+      const release = await this.createRelease(repoFullName, tagName, commitSha, releaseName, commitMessage, headers)
+      releaseUrl = release.html_url
+    }
+
     return {
       success: true,
-      commitSha: results[results.length - 1]?.commit?.sha,
+      commitSha,
       filesCreated: filesToPush.map(([path]) => path),
-      repoUrl: `https://github.com/${repoFullName}`
+      repoUrl: `https://github.com/${repoFullName}`,
+      releaseUrl
     }
+  }
+
+  /**
+   * Create a GitHub Release
+   * @param {string} repoFullName - Full repository name (owner/repo)
+   * @param {string} tagName - Tag name for the release (e.g., "v1.0.0")
+   * @param {string} targetCommitSha - SHA of the commit to tag
+   * @param {string} name - Release name
+   * @param {string} body - Release description
+   * @param {Object} headers - Request headers with auth token
+   * @returns {Promise<Object>}
+   */
+  async createRelease(repoFullName, tagName, targetCommitSha, name, body, headers) {
+    const response = await fetch(
+      `${this.baseUrl}/repos/${repoFullName}/releases`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          tag_name: tagName,
+          target_commitish: targetCommitSha,
+          name: name,
+          body: body,
+          draft: false,
+          prerelease: false
+        })
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `Failed to create release: HTTP ${response.status}`)
+    }
+
+    return response.json()
   }
 }
 

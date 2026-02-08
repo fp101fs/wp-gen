@@ -14,6 +14,8 @@ const GitHubPushModal = ({
   const [repositories, setRepositories] = useState([]);
   const [selectedRepo, setSelectedRepo] = useState('');
   const [commitMessage, setCommitMessage] = useState('');
+  const [createRelease, setCreateRelease] = useState(false);
+  const [releaseVersion, setReleaseVersion] = useState('1.0.0');
   const [isPushing, setIsPushing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(null);
@@ -92,7 +94,9 @@ const GitHubPushModal = ({
       const result = await gitHubService.pushFiles(
         extensionFiles,
         selectedRepo,
-        commitMessage.trim()
+        commitMessage.trim(),
+        'main',
+        createRelease ? { version: releaseVersion, name: extension?.name || 'Extension' } : null
       );
 
       setSuccess(result);
@@ -156,23 +160,46 @@ const GitHubPushModal = ({
                 <Check className="w-8 h-8 text-green-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Successfully Pushed!</h3>
-              <p className="text-gray-400 mb-6">
+              <p className="text-gray-400 mb-4">
                 {success.filesCreated?.length || 0} file(s) pushed to your repository
+                {success.releaseUrl && ' and release created'}
               </p>
               {success.filesFailed?.length > 0 && (
                 <p className="text-yellow-400 text-sm mb-4">
                   {success.filesFailed.length} file(s) failed to push
                 </p>
               )}
-              <a
-                href={success.repoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-lime-400 hover:bg-lime-500 text-black font-semibold px-6 py-3 rounded-lg transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Open Repository
-              </a>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
+                <a
+                  href={success.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-lime-400 hover:bg-lime-500 text-black font-semibold px-6 py-3 rounded-lg transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open Repository
+                </a>
+                <a
+                  href={`${success.repoUrl}/commits/main/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Commits
+                </a>
+                {success.releaseUrl && (
+                  <a
+                    href={success.releaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Release
+                  </a>
+                )}
+              </div>
             </div>
           )}
 
@@ -264,6 +291,36 @@ const GitHubPushModal = ({
                   disabled={isPushing}
                   maxLength={100}
                 />
+              </div>
+
+              {/* Release Options */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={createRelease}
+                    onChange={(e) => setCreateRelease(e.target.checked)}
+                    disabled={isPushing}
+                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-lime-400 focus:ring-lime-400 focus:ring-offset-0"
+                  />
+                  <span className="text-gray-300">Create a Release</span>
+                </label>
+
+                {createRelease && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Version
+                    </label>
+                    <input
+                      type="text"
+                      value={releaseVersion}
+                      onChange={(e) => setReleaseVersion(e.target.value)}
+                      placeholder="1.0.0"
+                      className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-lime-400 focus:border-transparent"
+                      disabled={isPushing}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Error Message */}
