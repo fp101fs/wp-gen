@@ -164,28 +164,36 @@ class GitHubService {
         'Content-Type': 'application/json'
       }
 
-      // 1. Get current branch ref
+      // 1. Try to get current branch ref (may not exist for empty repos)
+      let currentCommitSha = null
+      let baseTreeSha = null
+
       const refResponse = await fetch(
         `${this.baseUrl}/repos/${repoFullName}/git/ref/heads/${branch}`,
         { headers }
       )
-      if (!refResponse.ok) {
+
+      if (refResponse.ok) {
+        // Existing repo with commits
+        const refData = await refResponse.json()
+        currentCommitSha = refData.object.sha
+
+        // 2. Get base tree from current commit
+        const commitResponse = await fetch(
+          `${this.baseUrl}/repos/${repoFullName}/git/commits/${currentCommitSha}`,
+          { headers }
+        )
+        if (!commitResponse.ok) {
+          throw new Error(`Failed to get commit: HTTP ${commitResponse.status}`)
+        }
+        const commitData = await commitResponse.json()
+        baseTreeSha = commitData.tree.sha
+      } else if (refResponse.status !== 404) {
+        // Unexpected error (not just empty repo)
         const errorData = await refResponse.json().catch(() => ({}))
         throw new Error(errorData.message || `Failed to get branch ref: HTTP ${refResponse.status}`)
       }
-      const refData = await refResponse.json()
-      const currentCommitSha = refData.object.sha
-
-      // 2. Get base tree from current commit
-      const commitResponse = await fetch(
-        `${this.baseUrl}/repos/${repoFullName}/git/commits/${currentCommitSha}`,
-        { headers }
-      )
-      if (!commitResponse.ok) {
-        throw new Error(`Failed to get commit: HTTP ${commitResponse.status}`)
-      }
-      const commitData = await commitResponse.json()
-      const baseTreeSha = commitData.tree.sha
+      // If 404, currentCommitSha and baseTreeSha remain null (empty repo)
 
       // 3. Create blobs for all files (in parallel)
       const filesToPush = Object.entries(files).filter(([name]) => name !== 'instructions')
@@ -208,12 +216,16 @@ class GitHubService {
       )
 
       // 4. Create new tree with all files
+      const treeBody = { tree: treeItems }
+      if (baseTreeSha) {
+        treeBody.base_tree = baseTreeSha
+      }
       const treeResponse = await fetch(
         `${this.baseUrl}/repos/${repoFullName}/git/trees`,
         {
           method: 'POST',
           headers,
-          body: JSON.stringify({ base_tree: baseTreeSha, tree: treeItems })
+          body: JSON.stringify(treeBody)
         }
       )
       if (!treeResponse.ok) {
@@ -230,7 +242,7 @@ class GitHubService {
           body: JSON.stringify({
             message: commitMessage,
             tree: newTree.sha,
-            parents: [currentCommitSha]
+            parents: currentCommitSha ? [currentCommitSha] : []
           })
         }
       )
@@ -239,17 +251,23 @@ class GitHubService {
       }
       const newCommit = await newCommitResponse.json()
 
-      // 6. Update branch ref to point to new commit
-      const updateRefResponse = await fetch(
-        `${this.baseUrl}/repos/${repoFullName}/git/refs/heads/${branch}`,
-        {
-          method: 'PATCH',
-          headers,
-          body: JSON.stringify({ sha: newCommit.sha })
-        }
-      )
+      // 6. Create or update branch ref
+      const refMethod = currentCommitSha ? 'PATCH' : 'POST'
+      const refUrl = currentCommitSha
+        ? `${this.baseUrl}/repos/${repoFullName}/git/refs/heads/${branch}`
+        : `${this.baseUrl}/repos/${repoFullName}/git/refs`
+      const refBody = currentCommitSha
+        ? { sha: newCommit.sha }
+        : { ref: `refs/heads/${branch}`, sha: newCommit.sha }
+
+      const updateRefResponse = await fetch(refUrl, {
+        method: refMethod,
+        headers,
+        body: JSON.stringify(refBody)
+      })
       if (!updateRefResponse.ok) {
-        throw new Error(`Failed to update branch ref: HTTP ${updateRefResponse.status}`)
+        const action = currentCommitSha ? 'update' : 'create'
+        throw new Error(`Failed to ${action} branch ref: HTTP ${updateRefResponse.status}`)
       }
 
       return {
