@@ -793,16 +793,14 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
 
   // Animated placeholder examples
   const placeholderExamples = [
-    "Make an extension that displays a dashboard which looks exactly like the attached image",
-    "Add dark mode CSS to any site with one click",
-    "Display a random motivational quote on each new tab",
-    "Show how long you've spent on the current tab.",
-    "Make a Focus Mode extension to block distracting sites (like Reddit, YouTube) temporarily",
-    "Create a password generator that creates secure passwords",
-    "Build a quick note-taking popup that saves to local storage",
-    "Make a website screenshot tool that captures full pages",
-    "Create a text-to-speech reader for any webpage",
-    "Build a currency converter that shows real-time exchange rates"
+    "Create a plugin that adds a custom dashboard widget showing site stats",
+    "Build a contact form plugin with email notifications",
+    "Make a plugin that adds social sharing buttons to posts",
+    "Create a custom post type for testimonials with star ratings",
+    "Build a plugin that optimizes images on upload",
+    "Make a shortcode that displays a pricing table",
+    "Create a plugin that adds a maintenance mode page",
+    "Build a widget that shows recent posts with thumbnails"
   ];
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
@@ -1371,7 +1369,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
         </div> */}
         
         <div className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 px-2 lcp-heading">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 px-2 lcp-heading">
             No Code WordPress Plugin Builder
           </h1>
         </div>
@@ -1381,7 +1379,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
             <div className="mb-4">
               <textarea
                 className="w-full h-20 sm:h-24 bg-transparent text-white placeholder-gray-400 focus:outline-none resize-none text-lg sm:text-xl"
-                placeholder={prompt.trim() ? "Ask AI to create a WordPress plugin for my.." : (displayText + (isTyping && displayText.length < placeholderExamples[currentPlaceholder].length ? "|" : "")) || "Ask AI to create a WordPress plugin for my.."}
+                placeholder={prompt.trim() ? "Ask AI to create a WordPress plugin that..." : (displayText + (isTyping && displayText.length < placeholderExamples[currentPlaceholder].length ? "|" : "")) || "Ask AI to create a WordPress plugin that..."}
                 value={prompt}
                 onChange={(e) => {
                   updatePrompt(e.target.value);
@@ -1777,17 +1775,17 @@ function GenerationLoadingOverlay() {
     {
       text: '🚀 Try it out - Install your extension in Chrome',
       buttonText: 'Learn How',
-      action: () => window.open('https://www.kromio.ai/learn#install-chrome-extension', '_blank')
+      action: () => window.open('https://plugin.new/learn#install-chrome-extension', '_blank')
     },
     {
       text: '💰 Monetize your extension and earn income',
       buttonText: 'Learn More',
-      action: () => window.open('https://www.kromio.ai/learn#monetize-chrome-extension', '_blank')
+      action: () => window.open('https://plugin.new/learn#monetize-chrome-extension', '_blank')
     },
     {
       text: '🏪 Submit to Chrome Web Store for over 3 billion users',
       buttonText: 'Learn More',
-      action: () => window.open('https://www.kromio.ai/learn#submission-guide', '_blank')
+      action: () => window.open('https://plugin.new/learn#submission-guide', '_blank')
     }
   ];
 
@@ -1811,8 +1809,8 @@ function GenerationLoadingOverlay() {
       <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4 text-center border border-gray-700 shadow-2xl">
         <div className="mb-6">
           <div className="relative w-20 h-20 mx-auto mb-4">
-            <div className="absolute inset-0 border-4 border-lime-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-lime-400 rounded-full animate-spin border-t-transparent"></div>
+            <div className="absolute inset-0 border-4 border-gray-700 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent rounded-full animate-spin border-t-lime-400"></div>
           </div>
           <h3 className="text-xl font-bold text-white mb-2">Generating Extension</h3>
           <p className="text-gray-300 text-sm mb-4">{loadingMessages[messageIndex].text}</p>
