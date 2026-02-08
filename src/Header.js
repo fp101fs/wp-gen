@@ -119,9 +119,9 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
     <nav className="relative z-10 flex items-center justify-between py-4 px-4 sm:px-6 mb-8 sm:mb-12">
       <button 
         onClick={() => navigate('/')}
-        className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        <img src="/icons/plugindotnew-icon-64.png" alt="plugin.new" className="block w-8 h-8 sm:w-9 sm:h-9" />
+        <img src="/icons/plugindotnew-logo-dark-lime-177x177.webp" alt="plugin.new" className="block w-8 h-8 sm:w-9 sm:h-9" />
         <span className="text-xl sm:text-2xl font-bold text-white leading-none">plugin.new</span>
       </button>
 
