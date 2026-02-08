@@ -119,10 +119,10 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
     <nav className="relative z-10 flex items-center justify-between py-4 px-4 sm:px-6 mb-8 sm:mb-12">
       <button 
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        className="flex items-center gap-3 hover:opacity-80 transition-opacity"
       >
         <img src="/icons/plugindotnew-logo-dark-lime-177x177.webp" alt="plugin.new" className="block w-8 h-8 sm:w-9 sm:h-9" />
-        <span className="text-xl sm:text-2xl font-bold text-white leading-none">plugin.new</span>
+        <span className="text-xl sm:text-2xl font-light text-white leading-none -mt-0.5">plugin.new</span>
       </button>
 
       {/* Desktop Navigation */}
@@ -134,10 +134,10 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
         }} className="text-gray-300 hover:text-white transition-colors duration-200">Gallery</button>
 {session && (
           <button onClick={() => {
-            navigate('/my-extensions'); 
+            navigate('/my-extensions');
             // Force a re-render by adding timestamp
             window.dispatchEvent(new CustomEvent('forceGalleryRefresh', { detail: { viewMode: 'my' } }));
-          }} className="text-gray-300 hover:text-white transition-colors duration-200">My Extensions</button>
+          }} className="text-gray-300 hover:text-white transition-colors duration-200">My Plugins</button>
         )}
         <button onClick={() => navigate('/learn')} className="text-gray-300 hover:text-white transition-colors duration-200">Learn</button>
         <button onClick={() => navigate('/pricing')} className="text-gray-300 hover:text-white transition-colors duration-200">Pricing</button>
@@ -362,15 +362,15 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
                 Gallery
               </button>
 {session && (
-                <button 
+                <button
                   onClick={() => {
                     navigate('/my-extensions');
                     window.dispatchEvent(new CustomEvent('forceGalleryRefresh', { detail: { viewMode: 'my' } }));
                     setShowMobileMenu(false);
-                  }} 
+                  }}
                   className="w-full text-left px-6 py-3 text-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                 >
-                  My Extensions
+                  My Plugins
                 </button>
               )}
               <button 

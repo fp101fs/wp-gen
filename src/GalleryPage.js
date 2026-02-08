@@ -70,7 +70,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
   const [userExtensions, setUserExtensions] = useState([]);
   
   // Set page title based on view mode
-  useDocumentTitle(defaultViewMode === 'my' ? 'My Extensions' : 'Extension Gallery');
+  useDocumentTitle(defaultViewMode === 'my' ? 'My Plugins' : 'Extension Gallery');
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
@@ -575,7 +575,7 @@ function GalleryPage({ session, sessionLoading, defaultViewMode = 'all', onShowL
                         : 'text-gray-300 hover:text-white'
                     }`}
                   >
-                    My Extensions
+                    My Plugins
                   </button>
                   <button
                     onClick={() => {

@@ -42,7 +42,7 @@ function MyExtensions({ isOpen, onClose, onSelectExtension }) {
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
           <X className="w-6 h-6" />
         </button>
-        <h2 className="text-3xl font-bold text-white mb-8 text-center">My Extensions</h2>
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">My Plugins</h2>
         <div className="max-h-[70vh] overflow-y-auto">
           {loading ? (
             <p className="text-center text-gray-400">Loading...</p>

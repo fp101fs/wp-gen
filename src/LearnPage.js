@@ -867,7 +867,7 @@ const TroubleshootingArticle = () => (
             <div className="flex items-start">
               <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-1">1</span>
               <div>
-                <p>Go back to Kromio and find your extension in "My Extensions"</p>
+                <p>Go back to plugin.new and find your extension in "My Plugins"</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -1810,7 +1810,7 @@ const SubmissionWalkthroughArticle = () => (
         <p>✅ You have your extension ZIP file downloaded from Kromio AI</p>
         <p>✅ You have a Google account (same one you use for Gmail/YouTube)</p>
         <p>✅ You've read our <a href="/submit-guide" className="text-blue-600 underline hover:text-blue-800">Submit Guide</a> to prepare your information</p>
-        <p>✅ You have a privacy policy URL ready (you can use: <code className="bg-blue-100 px-2 py-1 rounded">https://kromio.ai/learn#privacy</code>)</p>
+        <p>✅ You have a privacy policy URL ready (you can use: <code className="bg-blue-100 px-2 py-1 rounded">https://plugin.new/learn#privacy</code>)</p>
       </div>
     </div>
 
@@ -2021,7 +2021,7 @@ const SubmissionWalkthroughArticle = () => (
           <div className="bg-white/10 rounded-lg p-4">
             <h3 className="font-semibold text-white mb-2">📄 Privacy Policy (Required)</h3>
             <p className="text-sm">Enter your privacy policy URL. You can use:</p>
-            <code className="block bg-gray-800 p-2 rounded text-green-300 text-sm mt-2">https://kromio.ai/learn#privacy</code>
+            <code className="block bg-gray-800 p-2 rounded text-green-300 text-sm mt-2">https://plugin.new/learn#privacy</code>
           </div>
         </div>
       </div>
