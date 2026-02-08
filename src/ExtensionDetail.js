@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Clipboard, GitBranch, Share2, Star, Check, Sparkles, HelpCircle, MessageSquare, DollarSign, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Clipboard, GitBranch, Share2, Star, Check, Sparkles, HelpCircle, MessageSquare, DollarSign, Eye, EyeOff, Github } from 'lucide-react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import Header from './Header';
@@ -15,6 +15,7 @@ import InstallationInstructions from './InstallationInstructions';
 import PageContainer from './components/PageContainer';
 import ExtensionDetailSkeleton from './components/ExtensionDetailSkeleton';
 import WhatsNextModal from './components/WhatsNextModal';
+import GitHubPushModal from './components/GitHubPushModal';
 import CustomizeExtensionSection from './components/CustomizeExtensionSection';
 import useDocumentTitle from './hooks/useDocumentTitle';
 import { debugLog, debugError } from './utils/debugUtils';
@@ -95,6 +96,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
   const [showWhatsNextModal, setShowWhatsNextModal] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showGitHubModal, setShowGitHubModal] = useState(false);
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -908,6 +910,13 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
             {!sessionLoading && (
               <div className="flex flex-row gap-3 mb-6">
                 <button
+                  onClick={() => session ? setShowGitHubModal(true) : onShowLoginModal()}
+                  className="flex-1 px-4 py-3 bg-gray-700/50 hover:bg-gray-700/70 border border-gray-600/50 rounded-lg text-white font-medium flex items-center justify-center space-x-2 transition-colors text-sm"
+                >
+                  <Github className="w-4 h-4" />
+                  <span>Push to GitHub</span>
+                </button>
+                <button
                   onClick={() => window.open('https://www.kromio.ai/learn#monetize-chrome-extension', '_blank')}
                   className="flex-1 px-4 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-lg text-emerald-400 font-medium flex items-center justify-center space-x-2 transition-colors text-sm"
                 >
@@ -1070,6 +1079,14 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
         onClose={() => setShowWhatsNextModal(false)}
         extensionName={extension?.name}
         extension={extension}
+      />
+
+      {/* GitHub Push Modal */}
+      <GitHubPushModal
+        isOpen={showGitHubModal}
+        onClose={() => setShowGitHubModal(false)}
+        extension={extension}
+        files={extensionFiles}
       />
     </PageContainer>
   );
