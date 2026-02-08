@@ -408,6 +408,25 @@ class GitHubService {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
+
+      // Check for specific validation errors
+      if (response.status === 422 && errorData.errors?.length > 0) {
+        const error = errorData.errors[0]
+
+        if (error.code === 'already_exists' && error.field === 'tag_name') {
+          throw new Error(`Release tag "${tagName}" already exists. Please use a different version number.`)
+        }
+
+        if (error.code === 'invalid' && error.field === 'tag_name') {
+          throw new Error(`Invalid tag name "${tagName}". Tag names must be valid git references.`)
+        }
+
+        // Use custom message if provided
+        if (error.message) {
+          throw new Error(error.message)
+        }
+      }
+
       throw new Error(errorData.message || `Failed to create release: HTTP ${response.status}`)
     }
 
