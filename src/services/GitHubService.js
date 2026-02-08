@@ -280,7 +280,7 @@ class GitHubService {
         ? `${this.baseUrl}/repos/${repoFullName}/git/refs/heads/${branch}`
         : `${this.baseUrl}/repos/${repoFullName}/git/refs`
       const refBody = currentCommitSha
-        ? { sha: newCommit.sha }
+        ? { sha: newCommit.sha, force: true }
         : { ref: `refs/heads/${branch}`, sha: newCommit.sha }
 
       const updateRefResponse = await fetch(refUrl, {
