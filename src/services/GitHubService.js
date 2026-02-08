@@ -188,12 +188,12 @@ class GitHubService {
         }
         const commitData = await commitResponse.json()
         baseTreeSha = commitData.tree.sha
-      } else if (refResponse.status !== 404) {
+      } else if (refResponse.status !== 404 && refResponse.status !== 409) {
         // Unexpected error (not just empty repo)
         const errorData = await refResponse.json().catch(() => ({}))
         throw new Error(errorData.message || `Failed to get branch ref: HTTP ${refResponse.status}`)
       }
-      // If 404, currentCommitSha and baseTreeSha remain null (empty repo)
+      // If 404 or 409, currentCommitSha and baseTreeSha remain null (empty repo)
 
       // 3. Create blobs for all files (in parallel)
       const filesToPush = Object.entries(files).filter(([name]) => name !== 'instructions')
