@@ -195,6 +195,28 @@ class GitHubService {
       }
       // If 404 or 409, currentCommitSha and baseTreeSha remain null (empty repo)
 
+      // For 409, verify if Git Data API works by testing blob creation
+      let useContentsApiFallback = false
+      if (refResponse.status === 409) {
+        // Test if Git Data API works on this repo
+        const testBlobResponse = await fetch(
+          `${this.baseUrl}/repos/${repoFullName}/git/blobs`,
+          {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ content: 'test', encoding: 'utf-8' })
+          }
+        )
+        if (testBlobResponse.status === 409) {
+          // Git Data API doesn't work - use Contents API fallback
+          useContentsApiFallback = true
+        }
+      }
+
+      if (useContentsApiFallback) {
+        return this.pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers)
+      }
+
       // 3. Create blobs for all files (in parallel)
       const filesToPush = Object.entries(files).filter(([name]) => name !== 'instructions')
       const treeItems = await Promise.all(
@@ -288,6 +310,48 @@ class GitHubService {
       }
 
       throw error
+    }
+  }
+
+  /**
+   * Push files using Contents API (for empty repositories where Git Data API fails)
+   * Note: Creates one commit per file, so use only when Git Data API is unavailable
+   * @param {Object} files - Object with filename as key, content as value
+   * @param {string} repoFullName - Full repository name (owner/repo)
+   * @param {string} commitMessage - Commit message
+   * @param {string} branch - Branch to push to
+   * @param {Object} headers - Request headers with auth token
+   * @returns {Promise<Object>}
+   */
+  async pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers) {
+    const filesToPush = Object.entries(files).filter(([name]) => name !== 'instructions')
+    const results = []
+
+    for (const [path, content] of filesToPush) {
+      const response = await fetch(
+        `${this.baseUrl}/repos/${repoFullName}/contents/${path}`,
+        {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            message: commitMessage,
+            content: btoa(unescape(encodeURIComponent(content))),
+            branch
+          })
+        }
+      )
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `Failed to create ${path}: HTTP ${response.status}`)
+      }
+      results.push(await response.json())
+    }
+
+    return {
+      success: true,
+      commitSha: results[results.length - 1]?.commit?.sha,
+      filesCreated: filesToPush.map(([path]) => path),
+      repoUrl: `https://github.com/${repoFullName}`
     }
   }
 }
