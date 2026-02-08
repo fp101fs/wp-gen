@@ -144,7 +144,7 @@ class GitHubService {
   }
 
   /**
-   * Push files to a GitHub repository
+   * Push files to a GitHub repository using Git Data API (single atomic commit)
    * @param {Object} files - Object with filename as key, content as value
    * @param {string} repoFullName - Full repository name (owner/repo)
    * @param {string} commitMessage - Commit message
@@ -158,81 +158,104 @@ class GitHubService {
         throw new Error('Not connected to GitHub')
       }
 
-      const results = {
-        success: [],
-        failed: []
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
       }
 
-      // Push each file using the Contents API
-      for (const [filename, content] of Object.entries(files)) {
-        try {
-          // Skip instructions file
-          if (filename === 'instructions') continue
+      // 1. Get current branch ref
+      const refResponse = await fetch(
+        `${this.baseUrl}/repos/${repoFullName}/git/ref/heads/${branch}`,
+        { headers }
+      )
+      if (!refResponse.ok) {
+        const errorData = await refResponse.json().catch(() => ({}))
+        throw new Error(errorData.message || `Failed to get branch ref: HTTP ${refResponse.status}`)
+      }
+      const refData = await refResponse.json()
+      const currentCommitSha = refData.object.sha
 
-          // First, try to get the file to check if it exists (for updating)
-          let sha = null
-          try {
-            const getResponse = await fetch(
-              `${this.baseUrl}/repos/${repoFullName}/contents/${filename}?ref=${branch}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  Accept: 'application/vnd.github.v3+json'
-                }
-              }
-            )
-            if (getResponse.ok) {
-              const existingFile = await getResponse.json()
-              sha = existingFile.sha
-            }
-          } catch (e) {
-            // File doesn't exist, that's fine
-          }
+      // 2. Get base tree from current commit
+      const commitResponse = await fetch(
+        `${this.baseUrl}/repos/${repoFullName}/git/commits/${currentCommitSha}`,
+        { headers }
+      )
+      if (!commitResponse.ok) {
+        throw new Error(`Failed to get commit: HTTP ${commitResponse.status}`)
+      }
+      const commitData = await commitResponse.json()
+      const baseTreeSha = commitData.tree.sha
 
-          // Create or update the file
-          const body = {
-            message: commitMessage,
-            content: btoa(unescape(encodeURIComponent(content))),
-            branch
-          }
-
-          if (sha) {
-            body.sha = sha
-          }
-
-          const response = await fetch(
-            `${this.baseUrl}/repos/${repoFullName}/contents/${filename}`,
+      // 3. Create blobs for all files (in parallel)
+      const filesToPush = Object.entries(files).filter(([name]) => name !== 'instructions')
+      const treeItems = await Promise.all(
+        filesToPush.map(async ([path, content]) => {
+          const blobResponse = await fetch(
+            `${this.baseUrl}/repos/${repoFullName}/git/blobs`,
             {
-              method: 'PUT',
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(body)
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ content, encoding: 'utf-8' })
             }
           )
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            throw new Error(errorData.message || `HTTP ${response.status}`)
+          if (!blobResponse.ok) {
+            throw new Error(`Failed to create blob for ${path}: HTTP ${blobResponse.status}`)
           }
+          const blob = await blobResponse.json()
+          return { path, mode: '100644', type: 'blob', sha: blob.sha }
+        })
+      )
 
-          results.success.push(filename)
-        } catch (fileError) {
-          debugError(`Failed to push ${filename}:`, fileError)
-          results.failed.push({ filename, error: fileError.message })
+      // 4. Create new tree with all files
+      const treeResponse = await fetch(
+        `${this.baseUrl}/repos/${repoFullName}/git/trees`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ base_tree: baseTreeSha, tree: treeItems })
         }
+      )
+      if (!treeResponse.ok) {
+        throw new Error(`Failed to create tree: HTTP ${treeResponse.status}`)
       }
+      const newTree = await treeResponse.json()
 
-      if (results.failed.length > 0 && results.success.length === 0) {
-        throw new Error(`Failed to push files: ${results.failed.map(f => f.error).join(', ')}`)
+      // 5. Create single commit with all files
+      const newCommitResponse = await fetch(
+        `${this.baseUrl}/repos/${repoFullName}/git/commits`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            message: commitMessage,
+            tree: newTree.sha,
+            parents: [currentCommitSha]
+          })
+        }
+      )
+      if (!newCommitResponse.ok) {
+        throw new Error(`Failed to create commit: HTTP ${newCommitResponse.status}`)
+      }
+      const newCommit = await newCommitResponse.json()
+
+      // 6. Update branch ref to point to new commit
+      const updateRefResponse = await fetch(
+        `${this.baseUrl}/repos/${repoFullName}/git/refs/heads/${branch}`,
+        {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({ sha: newCommit.sha })
+        }
+      )
+      if (!updateRefResponse.ok) {
+        throw new Error(`Failed to update branch ref: HTTP ${updateRefResponse.status}`)
       }
 
       return {
         success: true,
-        filesCreated: results.success,
-        filesFailed: results.failed,
+        commitSha: newCommit.sha,
+        filesCreated: treeItems.map(t => t.path),
         repoUrl: `https://github.com/${repoFullName}`
       }
     } catch (error) {
