@@ -121,9 +121,7 @@ function Header({ onShowFeaturesModal, onShowLoginModal }) {
         onClick={() => navigate('/')}
         className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
       >
-        <div className="bg-lime-400 w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center">
-          <span className="text-black font-bold text-lg sm:text-xl">p</span>
-        </div>
+        <img src="/icons/plugindotnew-icon-64.png" alt="plugin.new" className="w-8 h-8 sm:w-9 sm:h-9" />
         <span className="text-xl sm:text-2xl font-bold text-white">plugin.new</span>
       </button>
 
