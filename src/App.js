@@ -23,6 +23,7 @@ import PageContainer from './components/PageContainer';
 import { supabase } from './supabaseClient';
 import { debugLog, debugError, debugWarn } from './utils/debugUtils';
 import { estimateCost } from './utils/aiCostEstimator';
+import { getPlatform, DEFAULT_PLATFORM } from './config/platforms';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -348,7 +349,7 @@ const parseGeminiResponse = (text, parentExtension = null) => {
 };
 
 // Helper function to execute AI generation - extracted from HomePage
-const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtension, uploadedImage, selectedProvider = 'claude-sonnet-4-5') => {
+const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtension, uploadedImage, selectedProvider = 'claude-sonnet-4-5', platform = 'wordpress') => {
   // Determine primary provider and available providers
   const primaryProvider = selectedProvider;
 
@@ -461,17 +462,58 @@ Respond with ONLY a valid JSON object containing the FULL, updated code for all 
   "instructions": "... updated instructions if necessary ..."
 }`;
         } else {
-            // This is a new plugin
-            let basePrompt = `Create a WordPress plugin: "${currentPrompt.replace(/"/g, '"')}"`;
-            if (imageData) {
-              basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the plugin:
+            // This is a new plugin/add-on
+            if (platform === 'google-sheets') {
+              // Google Sheets Apps Script add-on
+              let basePrompt = `Create a Google Sheets Apps Script add-on: "${currentPrompt.replace(/"/g, '"')}"`;
+              if (imageData) {
+                basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the add-on sidebar/dialog if applicable.`;
+              }
+              aiPrompt = `You are an expert Google Apps Script developer. Generate high-quality Google Sheets add-ons.
+
+REQUIREMENTS:
+- Use SpreadsheetApp for all sheet operations
+- Include onOpen() trigger for custom menu
+- Include appsscript.json manifest file
+- Use modern JavaScript (V8 runtime)
+- Follow Google Apps Script best practices
+- Use HtmlService for any UI elements
+
+${basePrompt}
+
+Respond with ONLY a valid JSON object:
+
+{
+  "name": "Add-on Name",
+  "slug": "add-on-slug",
+  "description": "Brief description",
+  "files": {
+    "Code.gs": "// Main Apps Script code\\nfunction onOpen() {\\n  SpreadsheetApp.getUi()\\n    .createMenu('Add-on Name')\\n    .addItem('Run', 'runMain')\\n    .addToUi();\\n}\\n\\nfunction runMain() {\\n  // Main functionality here\\n}",
+    "appsscript.json": "{\\n  \\"timeZone\\": \\"America/New_York\\",\\n  \\"dependencies\\": {},\\n  \\"exceptionLogging\\": \\"STACKDRIVER\\",\\n  \\"runtimeVersion\\": \\"V8\\"\\n}"
+  },
+  "instructions": "Installation: Open Google Sheets > Extensions > Apps Script > Paste code files > Save > Refresh sheet"
+}
+
+Requirements:
+- Include appsscript.json manifest with V8 runtime
+- Use onOpen() to create custom menu
+- Keep code concise but functional
+- Use SpreadsheetApp API appropriately
+${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design' : ''}
+
+IMPORTANT: Response must be valid JSON only. The "files" object should contain all necessary .gs and .json files. Keep file contents concise to avoid truncation.`;
+            } else {
+              // WordPress plugin (default)
+              let basePrompt = `Create a WordPress plugin: "${currentPrompt.replace(/"/g, '"')}"`;
+              if (imageData) {
+                basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the plugin:
 - Extract and use the exact colors, fonts, and styling from the image
 - Replicate the layout, spacing, and visual hierarchy shown
 - Match the overall aesthetic and design patterns
 - If it's a dashboard/interface, recreate the same components and structure
 - Use CSS that closely matches the visual style you see`;
-            }
-            aiPrompt = `You are an expert WordPress Developer. Generate high-quality, secure WordPress plugins.
+              }
+              aiPrompt = `You are an expert WordPress Developer. Generate high-quality, secure WordPress plugins.
 
 SECURITY RULES (MUST FOLLOW):
 - Start every PHP file with: <?php defined('ABSPATH') || exit;
@@ -511,6 +553,7 @@ Requirements:
 ${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design as closely as possible' : ''}
 
 IMPORTANT: Response must be valid JSON only. The "files" object should contain all necessary files to make the plugin work. Keep file contents concise to avoid truncation.`;
+            }
         }
 
         debugLog('Prompt length:', aiPrompt.length, 'characters');
@@ -787,25 +830,25 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [loadingMessage, setLoadingMessage] = useState('Activating AI...');
   const [messageIndex, setMessageIndex] = useState(0);
   const [selectedLLM, setSelectedLLM] = useState('gemini-flash');
-  
+  const [selectedPlatform, setSelectedPlatform] = useState(DEFAULT_PLATFORM);
+
   // Token context integration
   const { generateWithTokens, isGenerating, isLoading, currentTokens, isUnlimited, showUpgradePromptAction, planName } = useTokenContext();
 
-  // Animated placeholder examples
-  const placeholderExamples = [
-    "Create a plugin that adds a custom dashboard widget showing site stats",
-    "Build a contact form plugin with email notifications",
-    "Make a plugin that adds social sharing buttons to posts",
-    "Create a custom post type for testimonials with star ratings",
-    "Build a plugin that optimizes images on upload",
-    "Make a shortcode that displays a pricing table",
-    "Create a plugin that adds a maintenance mode page",
-    "Build a widget that shows recent posts with thumbnails"
-  ];
+  // Get platform-specific placeholder examples
+  const currentPlatformConfig = getPlatform(selectedPlatform);
+  const placeholderExamples = currentPlatformConfig.placeholders;
 
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
+
+  // Reset placeholder animation when platform changes
+  useEffect(() => {
+    setCurrentPlaceholder(0);
+    setDisplayText('');
+    setIsTyping(true);
+  }, [selectedPlatform]);
 
   const loadingMessages = [
     'Generating your extension...'
@@ -1017,7 +1060,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
             debugLog('✅ Extension files loaded for revision');
           }
           
-          const aiResult = await executeAIGeneration(revisionPrompt, revisionPrompt, extensionWithFiles, null, selectedLLM);
+          const aiResult = await executeAIGeneration(revisionPrompt, revisionPrompt, extensionWithFiles, null, selectedLLM, parentExtension.platform || 'wordpress');
           if (!aiResult.success) {
             throw new Error(aiResult.error);
           }
@@ -1036,6 +1079,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               revision_prompt: revisionPrompt, // Store the revision request
               has_uploaded_image: parentExtension.has_uploaded_image || false,
               ai_model: aiResult.actualProvider || selectedLLM,
+              platform: parentExtension.platform || 'wordpress', // Inherit platform
             };
 
             const { data, error: insertError } = await supabase
@@ -1141,7 +1185,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       const tokenCost = selectedLLM === 'claude-opus' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
-          const aiResult = await executeAIGeneration(prompt, null, null, uploadedImage, selectedLLM);
+          const aiResult = await executeAIGeneration(prompt, null, null, uploadedImage, selectedLLM, selectedPlatform);
           if (!aiResult.success) {
             throw new Error(aiResult.error);
           }
@@ -1160,6 +1204,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               revision_prompt: null,
               has_uploaded_image: !!uploadedImage,
               ai_model: aiResult.actualProvider || selectedLLM,
+              platform: selectedPlatform,
             };
 
             const { data, error: insertError } = await supabase
@@ -1263,15 +1308,16 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
         debugLog('✅ Extension files loaded for legacy revision');
       }
       
-      const result = await executeAIGeneration(currentPrompt, revisionPrompt, extensionWithFiles, null, 'gemini');
-      
+      const platformToUse = parentExtension?.platform || selectedPlatform;
+      const result = await executeAIGeneration(currentPrompt, revisionPrompt, extensionWithFiles, null, 'gemini', platformToUse);
+
       if (!result.success) {
         setError(result.error);
         return;
       }
 
       const extensionData = result.extensionData;
-      
+
       if (session && result.needsSaving) {
         // User is logged in, save to database and navigate to detail page
         const newExtension = {
@@ -1286,6 +1332,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
           revision_prompt: revisionPrompt || null,
           has_uploaded_image: (!parentExtension && !!uploadedImage) || (parentExtension?.has_uploaded_image || false),
           ai_model: result.actualProvider || selectedLLM,
+          platform: platformToUse,
         };
 
         const { data, error: insertError } = await supabase
@@ -1370,16 +1417,45 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
         
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 px-2 lcp-heading">
-            No Code WordPress Plugin Builder
+            {currentPlatformConfig.heading}
           </h1>
         </div>
 
         <div className="max-w-4xl mx-auto px-2">
           <div className="bg-gray-800 rounded-2xl sm:rounded-[28px] p-4 sm:p-6 shadow-2xl mb-8">
+            {/* Platform Selector */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-gray-400 text-sm">Build for:</span>
+              <div className="flex bg-gray-700 rounded-full p-1">
+                <button
+                  onClick={() => setSelectedPlatform('wordpress')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'wordpress'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  WordPress
+                </button>
+                <button
+                  onClick={() => setSelectedPlatform('google-sheets')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'google-sheets'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  Google Sheets
+                </button>
+              </div>
+            </div>
+
             <div className="mb-4">
               <textarea
                 className="w-full h-20 sm:h-24 bg-transparent text-white placeholder-gray-400 focus:outline-none resize-none text-lg sm:text-xl"
-                placeholder={prompt.trim() ? "Ask AI to create a WordPress plugin that..." : (displayText + (isTyping && displayText.length < placeholderExamples[currentPlaceholder].length ? "|" : "")) || "Ask AI to create a WordPress plugin that..."}
+                placeholder={prompt.trim() ? currentPlatformConfig.inputPlaceholder : (displayText + (isTyping && displayText.length < placeholderExamples[currentPlaceholder].length ? "|" : "")) || currentPlatformConfig.inputPlaceholder}
                 value={prompt}
                 onChange={(e) => {
                   updatePrompt(e.target.value);
@@ -2082,14 +2158,14 @@ function AppContent() {
             debugLog('✅ Extension files loaded for revision');
           }
           
-          const aiResult = await executeAIGeneration(revisionPrompt, revisionPrompt, extensionWithFiles, null, selectedLLM);
+          const aiResult = await executeAIGeneration(revisionPrompt, revisionPrompt, extensionWithFiles, null, selectedLLM, parentExtension.platform || 'wordpress');
           if (!aiResult.success) {
             throw new Error(aiResult.error);
           }
 
           // Save revision to database
           if (session && aiResult.needsSaving) {
-            
+
             // Find next available version number
             let nextVersion = '1.1';
             if (parentExtension && parentExtension.version) {
@@ -2097,22 +2173,22 @@ function AppContent() {
               const versionParts = parentVersion.split('.').map(Number);
               let major = versionParts[0] || 1;
               let minor = (versionParts[1] || 0) + 1;
-              
+
               // Query existing versions for this parent to find next available
               const { data: existingVersions } = await supabase
                 .from('extensions')
                 .select('version')
                 .eq('parent_id', parentExtension.id);
-              
+
               const existingVersionSet = new Set((existingVersions || []).map(v => v.version));
-              
+
               // Find next available version
               while (existingVersionSet.has(`${major}.${minor}`)) {
                 minor++;
               }
               nextVersion = `${major}.${minor}`;
             }
-            
+
             const newRevision = {
               user_id: session.user.id,
               name: aiResult.extensionData.name,
@@ -2125,6 +2201,7 @@ function AppContent() {
               revision_prompt: revisionPrompt,
               has_uploaded_image: parentExtension.has_uploaded_image || false,
               ai_model: aiResult.actualProvider || selectedLLM,
+              platform: parentExtension.platform || 'wordpress', // Inherit platform
             };
 
             const { data, error: insertError } = await supabase

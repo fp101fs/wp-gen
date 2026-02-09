@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { X, Download, FolderOpen, Settings, Upload, CheckCircle, ArrowRight } from 'lucide-react';
+import { X, Download, FolderOpen, Settings, Upload, CheckCircle, ArrowRight, Code, FileText } from 'lucide-react';
 
-const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin" }) => {
+const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", platform = "wordpress" }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
   if (!isOpen) return null;
 
-  const steps = [
+  // WordPress installation steps
+  const wordpressSteps = [
     {
       id: 1,
       title: "Download the Plugin ZIP",
@@ -52,6 +53,56 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin" }) =
     }
   ];
 
+  // Google Sheets installation steps
+  const googleSheetsSteps = [
+    {
+      id: 1,
+      title: "Open Apps Script Editor",
+      icon: <Code className="w-8 h-8" />,
+      color: "from-green-500 to-teal-500",
+      description: "Access the Apps Script editor from Google Sheets",
+      details: [
+        "Open your Google Sheets document",
+        "Click 'Extensions' in the menu bar",
+        "Select 'Apps Script' from the dropdown",
+        "A new tab will open with the Apps Script editor"
+      ],
+      tip: "The Apps Script editor is where you'll paste your add-on code"
+    },
+    {
+      id: 2,
+      title: "Copy the Code Files",
+      icon: <FileText className="w-8 h-8" />,
+      color: "from-blue-500 to-indigo-500",
+      description: "Add your downloaded code to the Apps Script project",
+      details: [
+        "Extract the downloaded ZIP file",
+        "In the Apps Script editor, delete any existing code in Code.gs",
+        "Copy the contents of Code.gs from your download and paste it",
+        "Click the '+' next to Files to add any additional .gs files",
+        "Create appsscript.json by clicking Project Settings (gear icon) and enabling 'Show appsscript.json'"
+      ],
+      tip: "Make sure to copy the appsscript.json manifest for proper configuration"
+    },
+    {
+      id: 3,
+      title: "Save and Refresh",
+      icon: <Settings className="w-8 h-8" />,
+      color: "from-purple-500 to-pink-500",
+      description: "Save your project and reload the spreadsheet",
+      details: [
+        "Click the Save icon (or Ctrl/Cmd + S) to save the project",
+        "Give your project a name when prompted",
+        "Close the Apps Script tab",
+        "Refresh your Google Sheets page",
+        "Your add-on menu will appear in the menu bar!"
+      ],
+      tip: "Look for your custom menu in the Google Sheets menu bar after refreshing"
+    }
+  ];
+
+  const steps = platform === 'google-sheets' ? googleSheetsSteps : wordpressSteps;
+
   const currentStepData = steps[currentStep];
 
   const nextStep = () => {
@@ -88,7 +139,7 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin" }) =
             </div>
             <div>
               <h2 className="text-2xl font-bold">How to Install {extensionName}</h2>
-              <p className="text-white/90">Follow these simple steps to get your plugin working</p>
+              <p className="text-white/90">Follow these simple steps to get your {platform === 'google-sheets' ? 'add-on' : 'plugin'} working</p>
             </div>
           </div>
 
@@ -142,7 +193,7 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin" }) =
           </div>
 
           {/* Special content for step 2 */}
-          {currentStep === 1 && (
+          {currentStep === 1 && platform !== 'google-sheets' && (
             <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 mb-6">
               <h4 className="font-semibold text-blue-300 mb-2">Quick WordPress Admin Link:</h4>
               <div className="bg-blue-900/50 p-3 rounded font-mono text-blue-200 text-center">
@@ -153,6 +204,14 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin" }) =
               </p>
             </div>
           )}
+          {currentStep === 1 && platform === 'google-sheets' && (
+            <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-green-300 mb-2">Apps Script Editor Tip:</h4>
+              <p className="text-green-200/70 text-sm">
+                Each .gs file should be created as a separate script file. Click the "+" button next to "Files" in the left sidebar to add new script files.
+              </p>
+            </div>
+          )}
 
           {/* Success message for final step */}
           {isLastStep && (
@@ -160,7 +219,9 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin" }) =
               <div className="text-4xl mb-3">🎉</div>
               <h4 className="text-xl font-bold text-green-300 mb-2">Congratulations!</h4>
               <p className="text-green-200/70">
-                Your plugin is now installed and active. Check your WordPress admin for any new menu items or settings pages added by the plugin.
+                {platform === 'google-sheets'
+                  ? 'Your add-on is now installed! Look for your custom menu in the Google Sheets menu bar to start using it.'
+                  : 'Your plugin is now installed and active. Check your WordPress admin for any new menu items or settings pages added by the plugin.'}
               </p>
             </div>
           )}

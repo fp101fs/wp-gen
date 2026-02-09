@@ -196,7 +196,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
       // Build query based on authentication status
       let query = supabase
         .from('extensions')
-        .select('id, name, description, version, created_at, user_id, parent_id, favorite_count, ai_model, is_public, prompt, revision_prompt, has_uploaded_image')
+        .select('id, name, description, version, created_at, user_id, parent_id, favorite_count, ai_model, is_public, prompt, revision_prompt, has_uploaded_image, platform')
         .eq('id', id);
 
       // For unauthenticated users, only fetch public extensions
@@ -287,7 +287,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
     // Get all extensions from the extension owner in one query
     const { data: allUserExtensions, error: allError } = await supabase
       .from('extensions')
-      .select('id, name, description, version, created_at, parent_id, user_id, ai_model, prompt, revision_prompt')
+      .select('id, name, description, version, created_at, parent_id, user_id, ai_model, prompt, revision_prompt, platform')
       .eq('user_id', extensionOwnerId)
       .order('created_at', { ascending: true });
 
@@ -658,7 +658,7 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
   const seoDescription = extension ? 
     `${extension.description} Download this Chrome extension created with Kromio AI.` :
     'Chrome extension details and download';
-  const extensionUrl = `https://kromio.ai/extension/${id}`;
+  const extensionUrl = `https://plugin.new/extension/${id}`;
 
   const structuredData = extension ? {
     "@context": "https://schema.org",
@@ -692,11 +692,11 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
           <meta property="og:description" content={seoDescription} />
           <meta property="og:type" content="website" />
           <meta property="og:url" content={extensionUrl} />
-          <meta property="og:image" content="https://kromio.ai/kromio.webp" />
+          <meta property="og:image" content="https://plugin.new/kromio.webp" />
           <meta property="twitter:card" content="summary" />
           <meta property="twitter:title" content={seoTitle} />
           <meta property="twitter:description" content={seoDescription} />
-          <meta property="twitter:image" content="https://kromio.ai/kromio.webp" />
+          <meta property="twitter:image" content="https://plugin.new/kromio.webp" />
           <link rel="canonical" href={extensionUrl} />
           
           {/* Structured Data */}
@@ -755,6 +755,16 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center">
                   {extension.name}
                 </h1>
+                {/* Platform Badge */}
+                <div className="flex justify-center mt-2">
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    extension.platform === 'google-sheets'
+                      ? 'bg-green-600/20 text-green-400'
+                      : 'bg-blue-600/20 text-blue-400'
+                  }`}>
+                    {extension.platform === 'google-sheets' ? 'Google Sheets' : 'WordPress'}
+                  </span>
+                </div>
               </div>
               <div className="w-1/5 flex flex-col items-center md:w-auto">
                 {extension.version && (
@@ -917,14 +927,14 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
                   <span>Push to GitHub</span>
                 </button>
                 <button
-                  onClick={() => window.open('https://www.kromio.ai/learn#monetize-chrome-extension', '_blank')}
+                  onClick={() => window.open('https://www.plugin.new/learn#monetize-chrome-extension', '_blank')}
                   className="flex-1 px-4 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-lg text-emerald-400 font-medium flex items-center justify-center space-x-2 transition-colors text-sm"
                 >
                   <DollarSign className="w-4 h-4" />
                   <span>Monetize</span>
                 </button>
                 <button
-                  onClick={() => window.open('https://www.kromio.ai/learn#submission-guide', '_blank')}
+                  onClick={() => window.open('https://www.plugin.new/learn#submission-guide', '_blank')}
                   className="flex-1 px-4 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/30 rounded-lg text-blue-300 font-medium flex items-center justify-center space-x-2 transition-colors text-sm"
                 >
                   <ChromeIcon className="w-4 h-4" />

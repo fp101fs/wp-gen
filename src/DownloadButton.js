@@ -116,6 +116,7 @@ function DownloadButton({ extension, files, className, size = "default", onShowL
         isOpen={showInstallModal}
         onClose={() => setShowInstallModal(false)}
         extensionName={extension?.name || 'Your Extension'}
+        platform={extension?.platform || 'wordpress'}
       />
     </>
   );
