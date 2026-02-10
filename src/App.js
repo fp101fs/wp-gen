@@ -1756,68 +1756,74 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               <div className="flex bg-gray-700 rounded-full p-1">
                 <button
                   onClick={() => setSelectedPlatform('wordpress')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
                     selectedPlatform === 'wordpress'
                       ? 'bg-white text-gray-900'
                       : 'text-gray-300 hover:text-white'
                   }`}
                   disabled={isGenerating}
                 >
+                  <img src="/icons/platforms/wordpress.svg" alt="" className="w-4 h-4 mr-1.5" />
                   WordPress
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('shopify')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
                     selectedPlatform === 'shopify'
                       ? 'bg-white text-gray-900'
                       : 'text-gray-300 hover:text-white'
                   }`}
                   disabled={isGenerating}
                 >
+                  <img src="/icons/platforms/shopify.svg" alt="" className="w-4 h-4 mr-1.5" />
                   Shopify
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('figma')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
                     selectedPlatform === 'figma'
                       ? 'bg-white text-gray-900'
                       : 'text-gray-300 hover:text-white'
                   }`}
                   disabled={isGenerating}
                 >
+                  <img src="/icons/platforms/figma.svg" alt="" className="w-4 h-4 mr-1.5" />
                   Figma
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('google-sheets')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
                     selectedPlatform === 'google-sheets'
                       ? 'bg-white text-gray-900'
                       : 'text-gray-300 hover:text-white'
                   }`}
                   disabled={isGenerating}
                 >
+                  <img src="/icons/platforms/google-sheets.svg" alt="" className="w-4 h-4 mr-1.5" />
                   Google Sheets
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('google-sheets-addon')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
                     selectedPlatform === 'google-sheets-addon'
                       ? 'bg-white text-gray-900'
                       : 'text-gray-300 hover:text-white'
                   }`}
                   disabled={isGenerating}
                 >
+                  <img src="/icons/platforms/google-sheets.svg" alt="" className="w-4 h-4 mr-1.5" />
                   Sheets Add-on
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('blender')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
                     selectedPlatform === 'blender'
                       ? 'bg-white text-gray-900'
                       : 'text-gray-300 hover:text-white'
                   }`}
                   disabled={isGenerating}
                 >
+                  <img src="/icons/platforms/blender.svg" alt="" className="w-4 h-4 mr-1.5" />
                   Blender
                 </button>
               </div>
