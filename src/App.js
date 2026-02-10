@@ -1528,6 +1528,17 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                 >
                   Google Sheets
                 </button>
+                <button
+                  onClick={() => setSelectedPlatform('google-sheets-addon')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'google-sheets-addon'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  Sheets Add-on
+                </button>
               </div>
             </div>
 
