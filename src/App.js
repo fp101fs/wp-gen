@@ -1791,18 +1791,6 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   Figma
                 </button>
                 <button
-                  onClick={() => setSelectedPlatform('google-sheets')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
-                    selectedPlatform === 'google-sheets'
-                      ? 'bg-white text-gray-900'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                  disabled={isGenerating}
-                >
-                  <img src="/icons/platforms/google-sheets.svg" alt="" className="w-4 h-4 mr-1.5" />
-                  Google Sheets
-                </button>
-                <button
                   onClick={() => setSelectedPlatform('google-sheets-addon')}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center ${
                     selectedPlatform === 'google-sheets-addon'
