@@ -1766,6 +1766,28 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   WordPress
                 </button>
                 <button
+                  onClick={() => setSelectedPlatform('shopify')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'shopify'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  Shopify
+                </button>
+                <button
+                  onClick={() => setSelectedPlatform('figma')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'figma'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  Figma
+                </button>
+                <button
                   onClick={() => setSelectedPlatform('google-sheets')}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     selectedPlatform === 'google-sheets'
@@ -1797,28 +1819,6 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   disabled={isGenerating}
                 >
                   Blender
-                </button>
-                <button
-                  onClick={() => setSelectedPlatform('figma')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    selectedPlatform === 'figma'
-                      ? 'bg-white text-gray-900'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                  disabled={isGenerating}
-                >
-                  Figma
-                </button>
-                <button
-                  onClick={() => setSelectedPlatform('shopify')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    selectedPlatform === 'shopify'
-                      ? 'bg-white text-gray-900'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                  disabled={isGenerating}
-                >
-                  Shopify
                 </button>
               </div>
             </div>
