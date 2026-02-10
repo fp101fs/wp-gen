@@ -244,7 +244,54 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
     }
   ];
 
+  // Shopify Theme App Extension installation steps
+  const shopifySteps = [
+    {
+      id: 1,
+      title: "Download and Extract ZIP",
+      icon: <Download className="w-8 h-8" />,
+      color: "from-green-500 to-emerald-500",
+      description: "Your theme extension has been downloaded as a ZIP file",
+      details: [
+        "Locate the downloaded ZIP file (usually in your Downloads folder)",
+        "Extract the ZIP file to a folder on your computer",
+        "You'll see blocks/, assets/, and possibly locales/ folders"
+      ],
+      tip: "Theme App Extensions are part of a Shopify app - you'll need an existing app to add them to!"
+    },
+    {
+      id: 2,
+      title: "Copy to Your Shopify App",
+      icon: <FolderOpen className="w-8 h-8" />,
+      color: "from-emerald-500 to-teal-500",
+      description: "Add the extension files to your Shopify app project",
+      details: [
+        "Navigate to your Shopify app's project folder",
+        "Copy the extracted files to the extensions/ directory",
+        "If no extensions/ folder exists, create one at the project root",
+        "Your structure should be: extensions/your-block-name/blocks/, assets/, etc."
+      ],
+      tip: "Each theme extension should be in its own folder within extensions/"
+    },
+    {
+      id: 3,
+      title: "Deploy and Add to Theme",
+      icon: <Settings className="w-8 h-8" />,
+      color: "from-teal-500 to-cyan-500",
+      description: "Deploy your app and add blocks in the Theme Editor",
+      details: [
+        "Run 'shopify app deploy' from your app's root directory",
+        "Install or update your app on your development store",
+        "Open the Theme Editor in your Shopify admin",
+        "Click 'Add section' or 'Add block' where supported",
+        "Find your block under the 'Apps' section"
+      ],
+      tip: "Your blocks appear under 'Apps' in the Theme Editor after deployment"
+    }
+  ];
+
   const getSteps = () => {
+    if (platform === 'shopify') return shopifySteps;
     if (platform === 'figma') return figmaSteps;
     if (platform === 'blender') return blenderSteps;
     if (platform === 'google-sheets-addon') return googleSheetsAddonSteps;
@@ -290,7 +337,7 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
             </div>
             <div>
               <h2 className="text-2xl font-bold">How to Install {extensionName}</h2>
-              <p className="text-white/90">Follow these simple steps to get your {platform === 'google-sheets' || platform === 'google-sheets-addon' || platform === 'blender' ? 'add-on' : 'plugin'} working</p>
+              <p className="text-white/90">Follow these simple steps to get your {platform === 'shopify' ? 'extension' : platform === 'google-sheets' || platform === 'google-sheets-addon' || platform === 'blender' ? 'add-on' : 'plugin'} working</p>
             </div>
           </div>
 
@@ -378,7 +425,9 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
               <div className="text-4xl mb-3">🎉</div>
               <h4 className="text-xl font-bold text-green-300 mb-2">Congratulations!</h4>
               <p className="text-green-200/70">
-                {platform === 'figma'
+                {platform === 'shopify'
+                  ? 'Your Theme App Extension is deployed! Open the Theme Editor in your Shopify admin and look for your block under the "Apps" section when adding blocks or sections.'
+                  : platform === 'figma'
                   ? 'Your Figma plugin is now imported! Find it under Plugins > Development in Figma. Right-click on the canvas for quick access. To publish, go to Plugins > Manage plugins in the Figma Desktop App.'
                   : platform === 'blender'
                   ? 'Your Blender add-on is now installed and enabled! Find your add-on\'s panel in the 3D Viewport sidebar (press N to toggle). Remember to save your preferences to keep it enabled.'

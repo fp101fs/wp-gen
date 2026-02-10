@@ -529,6 +529,37 @@ Respond with ONLY a valid JSON object containing the FULL, updated code for all 
   },
   "instructions": "... updated instructions if necessary ..."
 }`;
+          } else if (platform === 'shopify') {
+            // Shopify Theme App Extension revision
+            aiPrompt = `You are an expert Shopify Theme App Extension developer. Your task is to revise an existing theme block based on a user's request.
+
+IMPORTANT: You must modify the existing code to incorporate the user's changes. Do NOT generate a new block from scratch. Return the COMPLETE, modified code for all files, not just the changed parts.
+
+REQUIREMENTS:
+- Use {{ block.shopify_attributes }} on the root element
+- Define settings in the {% schema %} block
+- Access settings via {{ block.settings.setting_id }}
+- Reference assets via {{ 'filename.css' | asset_url }}
+- Follow Shopify Theme App Extension best practices
+
+User Request: "${revisionPrompt.replace(/"/g, '"')}"
+
+Existing Block Files:
+\`\`\`json
+${JSON.stringify(parentExtension.files, null, 2)}
+\`\`\`
+
+Respond with ONLY a valid JSON object containing the FULL, updated code for all files. The JSON structure should be:
+
+{
+  "name": "${parentExtension.name}",
+  "description": "${parentExtension.description}",
+  "files": {
+    "blocks/block-name.liquid": "... complete updated block file with schema ...",
+    "assets/block-name.css": "... complete updated CSS if applicable ..."
+  },
+  "instructions": "... updated instructions if necessary ..."
+}`;
           } else {
             // WordPress plugin revision
             aiPrompt = `You are an expert WordPress Developer. Your task is to revise an existing plugin based on a user's request.
@@ -742,6 +773,62 @@ Requirements:
 ${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design in the UI' : ''}
 
 IMPORTANT: Response must be valid JSON only. The "files" object should contain manifest.json, code.js, and optionally ui.html.`;
+            } else if (platform === 'shopify') {
+              // Shopify Theme App Extension
+              let basePrompt = `Create a Shopify Theme App Extension block: "${currentPrompt.replace(/"/g, '"')}"`;
+              if (imageData) {
+                basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the block styling.`;
+              }
+              aiPrompt = `You are an expert Shopify Theme App Extension developer. Generate high-quality theme blocks using Liquid templating.
+
+REQUIREMENTS:
+- Create blocks/*.liquid file with the main block template and {% schema %} JSON block
+- Use {{ block.shopify_attributes }} on the root element for Shopify editor integration
+- Define settings in the schema (text, image_picker, color, range, select, richtext, url, etc.)
+- Access settings via {{ block.settings.setting_id }}
+- Reference assets via {{ 'filename.css' | asset_url }} or {{ 'filename.js' | asset_url }}
+- Use Shopify Liquid objects: product, collection, cart, customer, shop, etc.
+- Follow Shopify Theme App Extension best practices
+- Target should be "section" for section blocks
+
+SCHEMA STRUCTURE:
+{
+  "name": "Block Name",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Default" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "color", "id": "bg_color", "label": "Background Color", "default": "#ffffff" },
+    { "type": "range", "id": "padding", "label": "Padding", "min": 0, "max": 100, "step": 5, "default": 20 },
+    { "type": "select", "id": "alignment", "label": "Alignment", "options": [{"value": "left", "label": "Left"}, {"value": "center", "label": "Center"}], "default": "center" }
+  ]
+}
+
+${basePrompt}
+
+Respond with ONLY a valid JSON object:
+
+{
+  "name": "Block Name",
+  "slug": "block-name",
+  "description": "Brief description",
+  "files": {
+    "blocks/block-name.liquid": "<div class=\\"block-name\\" {{ block.shopify_attributes }}>\\n  <h2>{{ block.settings.heading }}</h2>\\n  <!-- Block content -->\\n</div>\\n\\n{% schema %}\\n{\\n  \\"name\\": \\"Block Name\\",\\n  \\"target\\": \\"section\\",\\n  \\"settings\\": [\\n    {\\n      \\"type\\": \\"text\\",\\n      \\"id\\": \\"heading\\",\\n      \\"label\\": \\"Heading\\",\\n      \\"default\\": \\"Default Text\\"\\n    }\\n  ]\\n}\\n{% endschema %}",
+    "assets/block-name.css": "/* Block styles */\\n.block-name {\\n  padding: 20px;\\n}"
+  },
+  "instructions": "Installation: Copy files to your Shopify app's extensions/ directory, deploy with shopify app deploy"
+}
+
+Requirements:
+- Main block file in blocks/ folder with .liquid extension
+- Include {% schema %} with name, target, and settings array
+- Use {{ block.shopify_attributes }} on root element
+- CSS in assets/ folder if needed
+- JavaScript in assets/ folder if needed (optional)
+- Keep code clean and well-organized
+${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design in the block styling' : ''}
+
+IMPORTANT: Response must be valid JSON only. The "files" object should contain the block .liquid file and optionally CSS/JS assets.`;
             } else {
               // WordPress plugin (default)
               let basePrompt = `Create a WordPress plugin: "${currentPrompt.replace(/"/g, '"')}"`;
@@ -1721,6 +1808,17 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   disabled={isGenerating}
                 >
                   Figma
+                </button>
+                <button
+                  onClick={() => setSelectedPlatform('shopify')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'shopify'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  Shopify
                 </button>
               </div>
             </div>

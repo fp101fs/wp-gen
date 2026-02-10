@@ -85,6 +85,23 @@ export const PLATFORMS = {
     ],
     heading: 'No Code Figma Plugin Builder',
     inputPlaceholder: 'Ask AI to create a Figma plugin that...',
+  },
+  'shopify': {
+    id: 'shopify',
+    name: 'Shopify',
+    description: 'Theme App Extension',
+    placeholders: [
+      "Create a product reviews block with star ratings",
+      "Build a custom announcement bar with countdown timer",
+      "Make a featured collection carousel block",
+      "Create a FAQ accordion section",
+      "Build a size chart popup for product pages",
+      "Make a related products recommendation block",
+      "Create a newsletter signup form with popup",
+      "Build a trust badges and payment icons block"
+    ],
+    heading: 'No Code Shopify Theme Extension Builder',
+    inputPlaceholder: 'Ask AI to create a Shopify theme block that...',
   }
 };
 

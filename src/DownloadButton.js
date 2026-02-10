@@ -55,7 +55,9 @@ function DownloadButton({ extension, files, className, size = "default", onShowL
         }
       });
       
-      const defaultInstructions = extension?.platform === 'figma'
+      const defaultInstructions = extension?.platform === 'shopify'
+        ? 'Installation Instructions (Shopify Theme App Extension):\n1. Extract this ZIP file to a folder\n2. Copy the contents to your Shopify app\'s extensions/ directory\n3. Run "shopify app deploy" from your app\'s root directory\n4. Install/update your app on your development store\n5. Open Theme Editor and find your block under "Apps" section'
+        : extension?.platform === 'figma'
         ? 'Installation Instructions (Figma Plugin):\n1. Extract this ZIP file to a folder\n2. Open Figma Desktop App\n3. Go to Plugins > Development > Import plugin from manifest\n4. Select the manifest.json file from the extracted folder\n5. Run via Plugins > Development > Your Plugin Name'
         : extension?.platform === 'blender'
         ? 'Installation Instructions (Blender Add-on):\n1. Open Blender > Edit > Preferences > Add-ons\n2. Click "Install..." button\n3. Select this ZIP file\n4. Enable the add-on checkbox\n5. Find panel in 3D Viewport sidebar (press N)\n6. Save Preferences'
