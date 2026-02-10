@@ -758,11 +758,15 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
                 {/* Platform Badge */}
                 <div className="flex justify-center mt-2">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    extension.platform === 'google-sheets'
+                    extension.platform === 'google-sheets' || extension.platform === 'google-sheets-addon'
                       ? 'bg-green-600/20 text-green-400'
                       : 'bg-blue-600/20 text-blue-400'
                   }`}>
-                    {extension.platform === 'google-sheets' ? 'Google Sheets' : 'WordPress'}
+                    {extension.platform === 'google-sheets-addon'
+                      ? 'Sheets Add-on'
+                      : extension.platform === 'google-sheets'
+                      ? 'Google Sheets'
+                      : 'WordPress'}
                   </span>
                 </div>
               </div>

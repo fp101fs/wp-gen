@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useSearchParams } from 'react-router-dom';
-import { Download, Zap, Code, Globe, Shield, Sparkles, Upload, X, Gift, User, Settings, Crown, HelpCircle, Moon, LogOut, GitBranch } from 'lucide-react';
+import { Download, Zap, Code, Globe, Shield, Sparkles, Upload, X, Gift, User, Settings, Crown, HelpCircle, Moon, LogOut, GitBranch, Image, Eye, EyeOff } from 'lucide-react';
 // JSZip will be loaded dynamically when needed
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import FeaturesModal from './FeaturesModal';
@@ -431,8 +431,44 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
         // Build AI prompt (shared between providers)
         let aiPrompt;
         if (parentExtension) {
-          // This is a revision
-          aiPrompt = `You are an expert WordPress Developer. Your task is to revise an existing plugin based on a user's request.
+          // This is a revision - handle based on platform
+          if (platform === 'google-sheets' || platform === 'google-sheets-addon') {
+            // Google Sheets / Workspace Add-on revision
+            const isWorkspaceAddon = platform === 'google-sheets-addon';
+            aiPrompt = `You are an expert Google Apps Script developer. Your task is to revise an existing ${isWorkspaceAddon ? 'Workspace Add-on' : 'Apps Script add-on'} based on a user's request.
+
+IMPORTANT: You must modify the existing code to incorporate the user's changes. Do NOT generate a new add-on from scratch. Return the COMPLETE, modified code for all files, not just the changed parts.
+
+REQUIREMENTS:
+- Use SpreadsheetApp for all sheet operations
+- Use modern JavaScript (V8 runtime)
+- Follow Google Apps Script best practices
+${isWorkspaceAddon ? `- Use CardService for sidebar UI (Cards, Sections, Widgets)
+- Include BOTH onHomepage() for sidebar AND onOpen() for custom menu
+- Maintain the addOns configuration in appsscript.json` : `- Include onOpen() trigger for custom menu
+- Use HtmlService for any UI elements`}
+
+User Request: "${revisionPrompt.replace(/"/g, '"')}"
+
+Existing Add-on Files:
+\`\`\`json
+${JSON.stringify(parentExtension.files, null, 2)}
+\`\`\`
+
+Respond with ONLY a valid JSON object containing the FULL, updated code for all files. The JSON structure should be:
+
+{
+  "name": "${parentExtension.name}",
+  "description": "${parentExtension.description}",
+  "files": {
+    "Code.gs": "... complete updated main script file ...",
+    "appsscript.json": "... complete updated manifest ..."
+  },
+  "instructions": "... updated instructions if necessary ..."
+}`;
+          } else {
+            // WordPress plugin revision
+            aiPrompt = `You are an expert WordPress Developer. Your task is to revise an existing plugin based on a user's request.
 
 IMPORTANT: You must modify the existing code to incorporate the user's changes. Do NOT generate a new plugin from scratch. Return the COMPLETE, modified code for all files, not just the changed parts.
 
@@ -461,10 +497,11 @@ Respond with ONLY a valid JSON object containing the FULL, updated code for all 
   },
   "instructions": "... updated instructions if necessary ..."
 }`;
+          }
         } else {
             // This is a new plugin/add-on
             if (platform === 'google-sheets') {
-              // Google Sheets Apps Script add-on
+              // Google Sheets Apps Script add-on (basic)
               let basePrompt = `Create a Google Sheets Apps Script add-on: "${currentPrompt.replace(/"/g, '"')}"`;
               if (imageData) {
                 basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the add-on sidebar/dialog if applicable.`;
@@ -502,6 +539,48 @@ Requirements:
 ${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design' : ''}
 
 IMPORTANT: Response must be valid JSON only. The "files" object should contain all necessary .gs and .json files. Keep file contents concise to avoid truncation.`;
+            } else if (platform === 'google-sheets-addon') {
+              // Google Workspace Add-on (Marketplace-ready with CardService)
+              let basePrompt = `Create a Google Workspace Add-on for Sheets: "${currentPrompt.replace(/"/g, '"')}"`;
+              if (imageData) {
+                basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the Card-based UI.`;
+              }
+              aiPrompt = `You are an expert Google Workspace Add-on developer. Generate Marketplace-ready add-ons using CardService.
+
+REQUIREMENTS:
+- Use CardService for sidebar UI (Cards, Sections, Widgets, TextInputs, Buttons)
+- Include BOTH onHomepage() for sidebar AND onOpen() for custom menu
+- Include proper appsscript.json with full addOns configuration
+- Define explicit oauthScopes in manifest
+- Use modern JavaScript (V8 runtime)
+- Follow Google Workspace Add-on best practices
+- Structure code for add-on patterns (Cards, Actions, Callbacks)
+
+${basePrompt}
+
+Respond with ONLY a valid JSON object:
+
+{
+  "name": "Add-on Name",
+  "slug": "add-on-slug",
+  "description": "Brief description",
+  "files": {
+    "Code.gs": "// Sidebar entry point for Workspace Add-on\\nfunction onHomepage(e) {\\n  return createMainCard();\\n}\\n\\nfunction createMainCard() {\\n  return CardService.newCardBuilder()\\n    .setHeader(CardService.newCardHeader().setTitle('Add-on Name'))\\n    .addSection(CardService.newCardSection()\\n      .addWidget(CardService.newTextParagraph().setText('Welcome to the add-on!')))\\n    .build();\\n}\\n\\n// Custom menu for quick access\\nfunction onOpen() {\\n  SpreadsheetApp.getUi()\\n    .createMenu('Add-on Name')\\n    .addItem('Open Sidebar', 'showSidebar')\\n    .addItem('Run Action', 'runAction')\\n    .addToUi();\\n}\\n\\nfunction showSidebar() {\\n  var card = createMainCard();\\n  SpreadsheetApp.getUi().showSidebar(card);\\n}\\n\\nfunction runAction() {\\n  // Main functionality here\\n}",
+    "appsscript.json": "{\\n  \\"timeZone\\": \\"America/New_York\\",\\n  \\"dependencies\\": {},\\n  \\"exceptionLogging\\": \\"STACKDRIVER\\",\\n  \\"runtimeVersion\\": \\"V8\\",\\n  \\"oauthScopes\\": [\\n    \\"https://www.googleapis.com/auth/spreadsheets.currentonly\\",\\n    \\"https://www.googleapis.com/auth/script.container.ui\\"\\n  ],\\n  \\"addOns\\": {\\n    \\"common\\": {\\n      \\"name\\": \\"Add-on Name\\",\\n      \\"logoUrl\\": \\"https://www.gstatic.com/images/branding/product/1x/apps_script_48dp.png\\",\\n      \\"homepageTrigger\\": {\\n        \\"runFunction\\": \\"onHomepage\\"\\n      }\\n    },\\n    \\"sheets\\": {\\n      \\"homepageTrigger\\": {\\n        \\"runFunction\\": \\"onHomepage\\"\\n      }\\n    }\\n  }\\n}"
+  },
+  "instructions": "Installation: Open Google Sheets > Extensions > Apps Script > Paste code files > Enable appsscript.json in Project Settings > Deploy > Test deployments"
+}
+
+Requirements:
+- Include appsscript.json with full addOns block and oauthScopes
+- Use onHomepage() returning a Card for sidebar
+- Include onOpen() for custom menu with sidebar option
+- Use CardService widgets (TextParagraph, TextInput, Button, SelectionInput, etc.)
+- Structure actions with callback functions
+- Keep code organized and well-commented
+${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design using CardService widgets' : ''}
+
+IMPORTANT: Response must be valid JSON only. The "files" object should contain all necessary .gs and .json files. Ensure appsscript.json includes the addOns configuration for Marketplace deployment.`;
             } else {
               // WordPress plugin (default)
               let basePrompt = `Create a WordPress plugin: "${currentPrompt.replace(/"/g, '"')}"`;
@@ -825,7 +904,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const [showMyExtensions, setShowMyExtensions] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
-  const [isPublic, setIsPublic] = useState(true);
+  const [isPublic, setIsPublic] = useState(false);
   const [userExtensions, setUserExtensions] = useState([]);
   const [loadingMessage, setLoadingMessage] = useState('Activating AI...');
   const [messageIndex, setMessageIndex] = useState(0);
@@ -1474,9 +1553,8 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               <div className="flex items-center justify-between mb-3 sm:mb-0">
                 <div className="flex items-center space-x-2 flex-wrap gap-y-2 gap-x-2">
                   {!imagePreview ? (
-                    <label className="cursor-pointer flex items-center space-x-2 px-4 py-2 bg-gray-700 rounded-full text-white text-sm sm:text-base font-medium hover:bg-gray-600 transition-colors">
-                      <span className="text-lg sm:text-xl">+</span>
-                      <span>Image</span>
+                    <label className="cursor-pointer flex items-center justify-center w-10 h-10 bg-gray-700 rounded-full text-white hover:bg-gray-600 transition-colors" title="Attach image">
+                      <Image className="w-5 h-5" />
                       <input
                         type="file"
                         accept="image/jpeg, image/png, image/webp"
@@ -1502,17 +1580,14 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       </div>
                     </div>
                   )}
-                  <div className="relative inline-block text-left">
-                    <select
-                      value={isPublic ? 'public' : 'private'}
-                      onChange={(e) => setIsPublic(e.target.value === 'public')}
-                      className="px-4 py-2 bg-gray-700 rounded-full text-white text-sm sm:text-base font-medium hover:bg-gray-600 transition-colors appearance-none focus:outline-none"
-                      aria-label="Extension visibility"
-                    >
-                      <option value="public">Public</option>
-                      <option value="private">Private</option>
-                    </select>
-                  </div>
+                  <button
+                    onClick={() => setIsPublic(!isPublic)}
+                    className="flex items-center justify-center w-10 h-10 bg-gray-700 rounded-full text-white hover:bg-gray-600 transition-colors"
+                    aria-label={isPublic ? 'Public (click to make private)' : 'Private (click to make public)'}
+                    title={isPublic ? 'Public' : 'Private'}
+                  >
+                    {isPublic ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                  </button>
                   <div className="relative inline-block text-left">
                     <select
                       value={selectedLLM}

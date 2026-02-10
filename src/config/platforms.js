@@ -34,6 +34,23 @@ export const PLATFORMS = {
     ],
     heading: 'No Code Google Sheets Add-on Builder',
     inputPlaceholder: 'Ask AI to create a Google Sheets add-on that...',
+  },
+  'google-sheets-addon': {
+    id: 'google-sheets-addon',
+    name: 'Google Sheets Add-on',
+    description: 'Workspace Marketplace Add-on',
+    placeholders: [
+      "Create a Workspace add-on with a sidebar for data analysis",
+      "Build a Marketplace-ready add-on for project tracking",
+      "Make a card-based add-on for invoice generation",
+      "Create a professional add-on with settings and preferences",
+      "Build a Workspace add-on that syncs data with external APIs",
+      "Make a sidebar add-on for team collaboration features",
+      "Create a CardService-based add-on for expense tracking",
+      "Build a Marketplace add-on with custom card actions"
+    ],
+    heading: 'No Code Google Sheets Add-on Builder',
+    inputPlaceholder: 'Ask AI to create a Google Sheets add-on that...',
   }
 };
 
