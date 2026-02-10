@@ -149,7 +149,56 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
     }
   ];
 
+  // Blender add-on installation steps
+  const blenderSteps = [
+    {
+      id: 1,
+      title: "Download the Add-on ZIP",
+      icon: <Download className="w-8 h-8" />,
+      color: "from-orange-500 to-amber-500",
+      description: "Your add-on has been downloaded as a ZIP file",
+      details: [
+        "Locate the downloaded ZIP file (usually in your Downloads folder)",
+        "Keep the ZIP file intact - do NOT extract it",
+        "Blender will extract it automatically during installation"
+      ],
+      tip: "Blender add-ons are installed directly from ZIP files - don't extract the archive!"
+    },
+    {
+      id: 2,
+      title: "Install in Blender",
+      icon: <Upload className="w-8 h-8" />,
+      color: "from-orange-600 to-red-500",
+      description: "Install the add-on through Blender Preferences",
+      details: [
+        "Open Blender",
+        "Go to Edit > Preferences",
+        "Click on the 'Add-ons' tab in the left sidebar",
+        "Click the 'Install...' button in the top-right",
+        "Navigate to and select your downloaded ZIP file",
+        "Click 'Install Add-on'"
+      ],
+      tip: "You can also drag and drop the ZIP file directly into the Blender window"
+    },
+    {
+      id: 3,
+      title: "Enable and Use",
+      icon: <Settings className="w-8 h-8" />,
+      color: "from-purple-500 to-pink-500",
+      description: "Enable the add-on and find its panel",
+      details: [
+        "After installation, find your add-on in the list",
+        "Check the checkbox next to the add-on name to enable it",
+        "Click the hamburger menu (☰) and select 'Save Preferences' to keep it enabled",
+        "Open the 3D Viewport and press N to show the sidebar",
+        "Find your add-on's tab in the sidebar panel"
+      ],
+      tip: "Press N in the 3D Viewport to toggle the sidebar where most add-on panels appear"
+    }
+  ];
+
   const getSteps = () => {
+    if (platform === 'blender') return blenderSteps;
     if (platform === 'google-sheets-addon') return googleSheetsAddonSteps;
     if (platform === 'google-sheets') return googleSheetsSteps;
     return wordpressSteps;
@@ -193,7 +242,7 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
             </div>
             <div>
               <h2 className="text-2xl font-bold">How to Install {extensionName}</h2>
-              <p className="text-white/90">Follow these simple steps to get your {platform === 'google-sheets' || platform === 'google-sheets-addon' ? 'add-on' : 'plugin'} working</p>
+              <p className="text-white/90">Follow these simple steps to get your {platform === 'google-sheets' || platform === 'google-sheets-addon' || platform === 'blender' ? 'add-on' : 'plugin'} working</p>
             </div>
           </div>
 
@@ -247,7 +296,7 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
           </div>
 
           {/* Special content for step 2 */}
-          {currentStep === 1 && platform !== 'google-sheets' && platform !== 'google-sheets-addon' && (
+          {currentStep === 1 && platform !== 'google-sheets' && platform !== 'google-sheets-addon' && platform !== 'blender' && (
             <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 mb-6">
               <h4 className="font-semibold text-blue-300 mb-2">Quick WordPress Admin Link:</h4>
               <div className="bg-blue-900/50 p-3 rounded font-mono text-blue-200 text-center">
@@ -281,7 +330,9 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
               <div className="text-4xl mb-3">🎉</div>
               <h4 className="text-xl font-bold text-green-300 mb-2">Congratulations!</h4>
               <p className="text-green-200/70">
-                {platform === 'google-sheets-addon'
+                {platform === 'blender'
+                  ? 'Your Blender add-on is now installed and enabled! Find your add-on\'s panel in the 3D Viewport sidebar (press N to toggle). Remember to save your preferences to keep it enabled.'
+                  : platform === 'google-sheets-addon'
                   ? 'Your Workspace Add-on is installed! The sidebar will open automatically, and you\'ll find a custom menu in the menu bar. Use Deploy > Test deployments to share with testers before Marketplace submission.'
                   : platform === 'google-sheets'
                   ? 'Your add-on is now installed! Look for your custom menu in the Google Sheets menu bar to start using it.'

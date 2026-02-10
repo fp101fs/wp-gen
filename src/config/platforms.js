@@ -51,6 +51,23 @@ export const PLATFORMS = {
     ],
     heading: 'No Code Google Sheets Add-on Builder',
     inputPlaceholder: 'Ask AI to create a Google Sheets add-on that...',
+  },
+  'blender': {
+    id: 'blender',
+    name: 'Blender',
+    description: 'Blender Add-on',
+    placeholders: [
+      "Create an add-on that generates random low-poly terrain meshes",
+      "Build a batch exporter that exports selected objects to multiple formats",
+      "Make an add-on that creates a custom procedural texture node setup",
+      "Create a rigging tool that auto-generates IK controls for armatures",
+      "Build an add-on that imports reference images as camera backgrounds",
+      "Make a tool that converts mesh objects to grease pencil strokes",
+      "Create an add-on that randomizes material properties across selected objects",
+      "Build a scene organizer that groups objects by type into collections"
+    ],
+    heading: 'No Code Blender Add-on Builder',
+    inputPlaceholder: 'Ask AI to create a Blender add-on that...',
   }
 };
 

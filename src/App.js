@@ -466,6 +466,37 @@ Respond with ONLY a valid JSON object containing the FULL, updated code for all 
   },
   "instructions": "... updated instructions if necessary ..."
 }`;
+          } else if (platform === 'blender') {
+            // Blender add-on revision
+            aiPrompt = `You are an expert Blender Python add-on developer. Your task is to revise an existing Blender add-on based on a user's request.
+
+IMPORTANT: You must modify the existing code to incorporate the user's changes. Do NOT generate a new add-on from scratch. Return the COMPLETE, modified code for all files, not just the changed parts.
+
+REQUIREMENTS:
+- Use import bpy for Blender Python API
+- Include bl_info dictionary with: name, author, version, blender (min version tuple), description, category, location
+- Use proper class naming: CATEGORY_OT_name for Operators, CATEGORY_PT_name for Panels
+- Include register() and unregister() functions using bpy.utils.register_class()
+- Use bpy.props for properties (IntProperty, FloatProperty, StringProperty, etc.)
+- Follow Blender Python API best practices
+
+User Request: "${revisionPrompt.replace(/"/g, '"')}"
+
+Existing Add-on Files:
+\`\`\`json
+${JSON.stringify(parentExtension.files, null, 2)}
+\`\`\`
+
+Respond with ONLY a valid JSON object containing the FULL, updated code for all files. The JSON structure should be:
+
+{
+  "name": "${parentExtension.name}",
+  "description": "${parentExtension.description}",
+  "files": {
+    "__init__.py": "... complete updated main add-on file ..."
+  },
+  "instructions": "... updated instructions if necessary ..."
+}`;
           } else {
             // WordPress plugin revision
             aiPrompt = `You are an expert WordPress Developer. Your task is to revise an existing plugin based on a user's request.
@@ -581,6 +612,50 @@ Requirements:
 ${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design using CardService widgets' : ''}
 
 IMPORTANT: Response must be valid JSON only. The "files" object should contain all necessary .gs and .json files. Ensure appsscript.json includes the addOns configuration for Marketplace deployment.`;
+            } else if (platform === 'blender') {
+              // Blender Python add-on
+              let basePrompt = `Create a Blender Python add-on: "${currentPrompt.replace(/"/g, '"')}"`;
+              if (imageData) {
+                basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the add-on panel UI if applicable.`;
+              }
+              aiPrompt = `You are an expert Blender Python add-on developer. Generate high-quality Blender add-ons.
+
+REQUIREMENTS:
+- Use import bpy for Blender Python API
+- Include bl_info dictionary with: name, author, version, blender (min version tuple), description, category, location
+- Use proper class naming conventions:
+  - Operators: CATEGORY_OT_name (e.g., MESH_OT_generate_terrain)
+  - Panels: CATEGORY_PT_name (e.g., VIEW3D_PT_terrain_tools)
+  - Menus: CATEGORY_MT_name
+- Include register() and unregister() functions using bpy.utils.register_class()
+- Use bpy.props for properties (IntProperty, FloatProperty, StringProperty, BoolProperty, EnumProperty)
+- Follow Blender Python API best practices
+- Place panels in 3D Viewport sidebar (View3D > UI region)
+
+${basePrompt}
+
+Respond with ONLY a valid JSON object:
+
+{
+  "name": "Add-on Name",
+  "slug": "addon-slug",
+  "description": "Brief description",
+  "files": {
+    "__init__.py": "bl_info = {\\n    \\"name\\": \\"Add-on Name\\",\\n    \\"author\\": \\"plugin.new\\",\\n    \\"version\\": (1, 0, 0),\\n    \\"blender\\": (3, 0, 0),\\n    \\"location\\": \\"View3D > Sidebar > Add-on Tab\\",\\n    \\"description\\": \\"Brief description\\",\\n    \\"category\\": \\"Object\\"\\n}\\n\\nimport bpy\\n\\n# Add-on code here\\n\\ndef register():\\n    pass\\n\\ndef unregister():\\n    pass\\n\\nif __name__ == \\"__main__\\":\\n    register()"
+  },
+  "instructions": "Installation: Edit > Preferences > Add-ons > Install > Select ZIP > Enable checkbox"
+}
+
+Requirements:
+- Include bl_info dictionary with all required fields
+- Main file must be __init__.py
+- Use proper Blender class naming conventions (CATEGORY_OT/PT/MT_name)
+- Include register() and unregister() functions
+- Use bpy.props for any configurable properties
+- Place UI panels in appropriate location (usually 3D Viewport sidebar)
+${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design in the panel UI' : ''}
+
+IMPORTANT: Response must be valid JSON only. The "files" object should contain all necessary .py files with __init__.py as the main entry point.`;
             } else {
               // WordPress plugin (default)
               let basePrompt = `Create a WordPress plugin: "${currentPrompt.replace(/"/g, '"')}"`;
@@ -1538,6 +1613,17 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   disabled={isGenerating}
                 >
                   Sheets Add-on
+                </button>
+                <button
+                  onClick={() => setSelectedPlatform('blender')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'blender'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  Blender
                 </button>
               </div>
             </div>
