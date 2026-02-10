@@ -497,6 +497,38 @@ Respond with ONLY a valid JSON object containing the FULL, updated code for all 
   },
   "instructions": "... updated instructions if necessary ..."
 }`;
+          } else if (platform === 'figma') {
+            // Figma plugin revision
+            aiPrompt = `You are an expert Figma plugin developer. Your task is to revise an existing Figma plugin based on a user's request.
+
+IMPORTANT: You must modify the existing code to incorporate the user's changes. Do NOT generate a new plugin from scratch. Return the COMPLETE, modified code for all files, not just the changed parts.
+
+REQUIREMENTS:
+- Maintain manifest.json with: name, id, api, main, and optionally ui fields
+- Use the Figma Plugin API (figma.* namespace) for all Figma interactions
+- Use postMessage for communication between UI and plugin code
+- Call figma.closePlugin() when the plugin completes its task
+- Follow Figma Plugin API best practices
+
+User Request: "${revisionPrompt.replace(/"/g, '"')}"
+
+Existing Plugin Files:
+\`\`\`json
+${JSON.stringify(parentExtension.files, null, 2)}
+\`\`\`
+
+Respond with ONLY a valid JSON object containing the FULL, updated code for all files. The JSON structure should be:
+
+{
+  "name": "${parentExtension.name}",
+  "description": "${parentExtension.description}",
+  "files": {
+    "manifest.json": "... complete updated manifest ...",
+    "code.js": "... complete updated main plugin file ...",
+    "ui.html": "... complete updated UI file if applicable ..."
+  },
+  "instructions": "... updated instructions if necessary ..."
+}`;
           } else {
             // WordPress plugin revision
             aiPrompt = `You are an expert WordPress Developer. Your task is to revise an existing plugin based on a user's request.
@@ -656,6 +688,60 @@ Requirements:
 ${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design in the panel UI' : ''}
 
 IMPORTANT: Response must be valid JSON only. The "files" object should contain all necessary .py files with __init__.py as the main entry point.`;
+            } else if (platform === 'figma') {
+              // Figma Plugin
+              let basePrompt = `Create a Figma plugin: "${currentPrompt.replace(/"/g, '"')}"`;
+              if (imageData) {
+                basePrompt += `\n\nIMPORTANT: Analyze the provided image carefully and incorporate its visual design into the plugin UI if applicable.`;
+              }
+              aiPrompt = `You are an expert Figma plugin developer. Generate high-quality Figma plugins using TypeScript/JavaScript.
+
+REQUIREMENTS:
+- Create a manifest.json with: name, id, api, main, and optionally ui fields
+- Use the Figma Plugin API (figma.* namespace) for all Figma interactions
+- Main code file should be code.js or code.ts
+- If UI is needed, create ui.html with HTML/CSS/JS
+- Use postMessage for communication between UI and plugin code
+- Call figma.closePlugin() when the plugin completes its task
+- Follow Figma Plugin API best practices
+
+FIGMA API PATTERNS:
+- Access current page: figma.currentPage
+- Access selection: figma.currentPage.selection
+- Create shapes: figma.createRectangle(), figma.createEllipse(), figma.createFrame()
+- Create text: figma.createText() (must load font first with figma.loadFontAsync)
+- Find nodes: figma.currentPage.findAll(), figma.currentPage.findOne()
+- Show UI: figma.showUI(__html__, { width: 300, height: 200 })
+- UI to plugin: parent.postMessage({ pluginMessage: data }, '*')
+- Plugin to UI: figma.ui.postMessage(data)
+- Listen in plugin: figma.ui.onmessage = (msg) => { }
+
+${basePrompt}
+
+Respond with ONLY a valid JSON object:
+
+{
+  "name": "Plugin Name",
+  "slug": "plugin-name",
+  "description": "Brief description",
+  "files": {
+    "manifest.json": "{\\n  \\"name\\": \\"Plugin Name\\",\\n  \\"id\\": \\"plugin-name-unique-id\\",\\n  \\"api\\": \\"1.0.0\\",\\n  \\"main\\": \\"code.js\\",\\n  \\"ui\\": \\"ui.html\\"\\n}",
+    "code.js": "// Main plugin code\\nfigma.showUI(__html__, { width: 300, height: 200 });\\n\\nfigma.ui.onmessage = (msg) => {\\n  if (msg.type === 'run') {\\n    // Plugin logic here\\n    figma.closePlugin();\\n  }\\n};",
+    "ui.html": "<html>\\n<body>\\n  <button id=\\"run\\">Run</button>\\n  <script>\\n    document.getElementById('run').onclick = () => {\\n      parent.postMessage({ pluginMessage: { type: 'run' } }, '*');\\n    };\\n  </script>\\n</body>\\n</html>"
+  },
+  "instructions": "Installation: Figma > Plugins > Development > Import plugin from manifest"
+}
+
+Requirements:
+- Include manifest.json with required fields (name, id, api, main)
+- Main code file uses figma.* API
+- If plugin needs UI, include ui.html and add "ui" field to manifest
+- Use proper postMessage communication pattern between UI and code
+- Call figma.closePlugin() when done
+- Handle async operations properly (font loading, API calls)
+${imageData ? '- CRITICAL: Carefully study the provided image and recreate its visual design in the UI' : ''}
+
+IMPORTANT: Response must be valid JSON only. The "files" object should contain manifest.json, code.js, and optionally ui.html.`;
             } else {
               // WordPress plugin (default)
               let basePrompt = `Create a WordPress plugin: "${currentPrompt.replace(/"/g, '"')}"`;
@@ -1624,6 +1710,17 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   disabled={isGenerating}
                 >
                   Blender
+                </button>
+                <button
+                  onClick={() => setSelectedPlatform('figma')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedPlatform === 'figma'
+                      ? 'bg-white text-gray-900'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                  disabled={isGenerating}
+                >
+                  Figma
                 </button>
               </div>
             </div>

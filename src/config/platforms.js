@@ -68,6 +68,23 @@ export const PLATFORMS = {
     ],
     heading: 'No Code Blender Add-on Builder',
     inputPlaceholder: 'Ask AI to create a Blender add-on that...',
+  },
+  'figma': {
+    id: 'figma',
+    name: 'Figma',
+    description: 'Figma Plugin',
+    placeholders: [
+      "Create a plugin that generates random color palettes from selection",
+      "Build a plugin that batch renames layers with a prefix/suffix",
+      "Make a plugin that exports selected frames as optimized SVGs",
+      "Create a plugin that aligns and distributes objects evenly",
+      "Build a plugin that generates placeholder text in text layers",
+      "Make a plugin that creates a style guide from selected elements",
+      "Create a plugin that converts frames to auto-layout",
+      "Build a plugin that finds and replaces text across the document"
+    ],
+    heading: 'No Code Figma Plugin Builder',
+    inputPlaceholder: 'Ask AI to create a Figma plugin that...',
   }
 };
 

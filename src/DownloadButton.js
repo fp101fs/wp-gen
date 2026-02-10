@@ -55,7 +55,9 @@ function DownloadButton({ extension, files, className, size = "default", onShowL
         }
       });
       
-      const defaultInstructions = extension?.platform === 'blender'
+      const defaultInstructions = extension?.platform === 'figma'
+        ? 'Installation Instructions (Figma Plugin):\n1. Extract this ZIP file to a folder\n2. Open Figma Desktop App\n3. Go to Plugins > Development > Import plugin from manifest\n4. Select the manifest.json file from the extracted folder\n5. Run via Plugins > Development > Your Plugin Name'
+        : extension?.platform === 'blender'
         ? 'Installation Instructions (Blender Add-on):\n1. Open Blender > Edit > Preferences > Add-ons\n2. Click "Install..." button\n3. Select this ZIP file\n4. Enable the add-on checkbox\n5. Find panel in 3D Viewport sidebar (press N)\n6. Save Preferences'
         : extension?.platform === 'google-sheets-addon'
         ? 'Installation Instructions (Workspace Add-on):\n1. Open Google Sheets > Extensions > Apps Script\n2. Delete default code, paste Code.gs contents\n3. Enable "Show appsscript.json" in Project Settings (gear icon)\n4. Replace appsscript.json content with the provided manifest\n5. Save the project\n6. Go to Deploy > Test deployments > Install\n7. Refresh your spreadsheet - sidebar opens automatically!\n\nMarketplace Submission:\n1. Complete testing with Deploy > Test deployments\n2. Go to Deploy > New deployment > Select type: Add-on\n3. Fill in deployment details and submit for review'

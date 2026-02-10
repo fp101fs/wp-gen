@@ -197,7 +197,55 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
     }
   ];
 
+  // Figma plugin installation steps
+  const figmaSteps = [
+    {
+      id: 1,
+      title: "Download and Extract ZIP",
+      icon: <Download className="w-8 h-8" />,
+      color: "from-purple-500 to-violet-500",
+      description: "Your plugin has been downloaded as a ZIP file",
+      details: [
+        "Locate the downloaded ZIP file (usually in your Downloads folder)",
+        "Extract the ZIP file to a folder on your computer",
+        "Remember where you extracted it - you'll need this location"
+      ],
+      tip: "Unlike other platforms, Figma plugins need to be extracted before importing!"
+    },
+    {
+      id: 2,
+      title: "Import in Figma",
+      icon: <Upload className="w-8 h-8" />,
+      color: "from-violet-500 to-fuchsia-500",
+      description: "Import the plugin through Figma's development menu",
+      details: [
+        "Open Figma Desktop App (required for development plugins)",
+        "Go to Plugins > Development > Import plugin from manifest",
+        "Navigate to the extracted folder",
+        "Select the manifest.json file",
+        "Click 'Open' to import the plugin"
+      ],
+      tip: "You need the Figma Desktop App to run development plugins"
+    },
+    {
+      id: 3,
+      title: "Run Your Plugin",
+      icon: <Settings className="w-8 h-8" />,
+      color: "from-fuchsia-500 to-pink-500",
+      description: "Run the plugin from the Plugins menu",
+      details: [
+        "Open a Figma design file",
+        "Go to Plugins > Development > Your Plugin Name",
+        "Or right-click on the canvas > Plugins > Development > Your Plugin Name",
+        "The plugin will run and show its UI if it has one",
+        "Your plugin is now ready to use!"
+      ],
+      tip: "Development plugins appear under 'Development' until you publish them"
+    }
+  ];
+
   const getSteps = () => {
+    if (platform === 'figma') return figmaSteps;
     if (platform === 'blender') return blenderSteps;
     if (platform === 'google-sheets-addon') return googleSheetsAddonSteps;
     if (platform === 'google-sheets') return googleSheetsSteps;
@@ -330,7 +378,9 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
               <div className="text-4xl mb-3">🎉</div>
               <h4 className="text-xl font-bold text-green-300 mb-2">Congratulations!</h4>
               <p className="text-green-200/70">
-                {platform === 'blender'
+                {platform === 'figma'
+                  ? 'Your Figma plugin is now imported! Find it under Plugins > Development in Figma. Right-click on the canvas for quick access. To publish, go to Plugins > Manage plugins in the Figma Desktop App.'
+                  : platform === 'blender'
                   ? 'Your Blender add-on is now installed and enabled! Find your add-on\'s panel in the 3D Viewport sidebar (press N to toggle). Remember to save your preferences to keep it enabled.'
                   : platform === 'google-sheets-addon'
                   ? 'Your Workspace Add-on is installed! The sidebar will open automatically, and you\'ll find a custom menu in the menu bar. Use Deploy > Test deployments to share with testers before Marketplace submission.'
