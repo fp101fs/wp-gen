@@ -100,7 +100,7 @@ BEGIN
       RAISE LOG 'DEBUG: Making HTTP POST request to welcome email API for user: %', user_email;
       
       SELECT * FROM http_post(
-        'https://kromio.ai/api/send-welcome-email',
+        'https://plugin.new/api/send-welcome-email',
         payload,
         'application/json'
       ) INTO http_response;

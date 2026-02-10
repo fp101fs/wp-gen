@@ -9,7 +9,7 @@ Allow: /learn/*
 Allow: /extension/*
 
 # Sitemap location
-Sitemap: https://kromio.ai/sitemap.xml
+Sitemap: https://plugin.new/sitemap.xml
 
 # Crawl delay (optional)
 Crawl-delay: 1

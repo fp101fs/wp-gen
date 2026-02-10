@@ -75,9 +75,9 @@ BEGIN
     )::TEXT;
 
     -- Make HTTP request to our welcome email API
-    -- Note: Replace 'https://kromio.ai' with your actual domain
+    -- Note: Replace 'https://plugin.new' with your actual domain
     SELECT * FROM http_post(
-      'https://kromio.ai/api/send-welcome-email',
+      'https://plugin.new/api/send-welcome-email',
       payload,
       'application/json'
     ) INTO http_response;

@@ -25,9 +25,15 @@ const GitHubPushModal = ({
   useEffect(() => {
     if (isOpen) {
       checkConnectionAndLoadRepos();
-      // Set default commit message
-      if (extension?.name) {
-        setCommitMessage(`Add ${extension.name} extension`);
+      // Set default commit message from prompt
+      if (extension) {
+        const prompt = extension.revision_prompt || extension.prompt;
+        if (prompt) {
+          // Truncate to fit maxLength (100 chars)
+          setCommitMessage(prompt.length > 100 ? prompt.substring(0, 97) + '...' : prompt);
+        } else if (extension.name) {
+          setCommitMessage(`Add ${extension.name} extension`);
+        }
       }
     }
   }, [isOpen, extension]);

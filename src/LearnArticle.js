@@ -161,12 +161,12 @@ const LearnArticle = ({ onShowLoginModal }) => {
       "name": "Kromio",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://kromio.ai/kromio.webp"
+        "url": "https://plugin.new/kromio.webp"
       }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://kromio.ai/learn/${article}`
+      "@id": `https://plugin.new/learn/${article}`
     }
   };
   
@@ -178,13 +178,13 @@ const LearnArticle = ({ onShowLoginModal }) => {
       <meta property="og:title" content={articleData.title} />
       <meta property="og:description" content={articleData.description} />
       <meta property="og:type" content="article" />
-      <meta property="og:url" content={`https://kromio.ai/learn/${article}`} />
-      <meta property="og:image" content="https://kromio.ai/kromio.webp" />
+      <meta property="og:url" content={`https://plugin.new/learn/${article}`} />
+      <meta property="og:image" content="https://plugin.new/kromio.webp" />
       <meta property="twitter:card" content="summary" />
       <meta property="twitter:title" content={articleData.title} />
       <meta property="twitter:description" content={articleData.description} />
-      <meta property="twitter:image" content="https://kromio.ai/kromio.webp" />
-      <link rel="canonical" href={`https://kromio.ai/learn/${article}`} />
+      <meta property="twitter:image" content="https://plugin.new/kromio.webp" />
+      <link rel="canonical" href={`https://plugin.new/learn/${article}`} />
       
       {/* Structured Data */}
       <script type="application/ld+json">

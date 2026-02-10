@@ -453,7 +453,7 @@ Install Comic Sansify and turn the internet into a more fun place!"
         <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
           <p className="text-sm text-purple-800">
             💡 <strong>Don't have a privacy policy?</strong> You can use your Kromio AI privacy policy page: 
-            <code className="bg-purple-100 px-2 py-1 rounded ml-1">https://kromio.ai/learn#privacy</code>
+            <code className="bg-purple-100 px-2 py-1 rounded ml-1">https://plugin.new/learn#privacy</code>
           </p>
         </div>
         

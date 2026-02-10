@@ -50,13 +50,13 @@ function getWelcomeEmailTemplate(greeting) {
 
           <!-- Quick Action Buttons -->
           <div class="cta-buttons">
-            <a href="https://kromio.ai" class="cta-primary">🚀 Start Building Now</a>
+            <a href="https://plugin.new" class="cta-primary">🚀 Start Building Now</a>
           </div>
           
           <div class="cta-buttons">
-            <a href="https://kromio.ai/learn#faq" class="cta-secondary">❓ FAQ</a>
-            <a href="https://kromio.ai/learn#troubleshooting" class="cta-secondary">🔧 Troubleshooting</a>
-            <a href="https://kromio.ai/learn#quick-start" class="cta-secondary">📚 Quick Start Guide</a>
+            <a href="https://plugin.new/learn#faq" class="cta-secondary">❓ FAQ</a>
+            <a href="https://plugin.new/learn#troubleshooting" class="cta-secondary">🔧 Troubleshooting</a>
+            <a href="https://plugin.new/learn#quick-start" class="cta-secondary">📚 Quick Start Guide</a>
           </div>
 
           <!-- How to Use Section -->
@@ -107,9 +107,9 @@ function getWelcomeEmailTemplate(greeting) {
             <h3 style="color: #92400e; margin-top: 0;">Need Help? We've Got You Covered</h3>
             <p style="margin-bottom: 15px;">Most questions are answered instantly in our help center:</p>
             <div class="support-buttons">
-              <a href="https://kromio.ai/learn#faq" class="cta-secondary" style="background: #92400e;">📋 Common Questions</a>
-              <a href="https://kromio.ai/learn#troubleshooting" class="cta-secondary" style="background: #dc2626;">🔧 Fix Extension Issues</a>
-              <a href="https://kromio.ai/learn#examples" class="cta-secondary" style="background: #059669;">🎯 See Examples</a>
+              <a href="https://plugin.new/learn#faq" class="cta-secondary" style="background: #92400e;">📋 Common Questions</a>
+              <a href="https://plugin.new/learn#troubleshooting" class="cta-secondary" style="background: #dc2626;">🔧 Fix Extension Issues</a>
+              <a href="https://plugin.new/learn#examples" class="cta-secondary" style="background: #059669;">🎯 See Examples</a>
             </div>
           </div>
 
@@ -124,9 +124,9 @@ function getWelcomeEmailTemplate(greeting) {
         <div class="footer">
           <p><strong>Questions?</strong> Simply reply to this email — we read every message and help personally.</p>
           <p style="margin-top: 15px;">
-            <a href="https://kromio.ai">kromio.ai</a> | 
-            <a href="https://kromio.ai/learn">Help Center</a> | 
-            <a href="https://kromio.ai/gallery">Extension Gallery</a>
+            <a href="https://plugin.new">plugin.new</a> | 
+            <a href="https://plugin.new/learn">Help Center</a> | 
+            <a href="https://plugin.new/gallery">Extension Gallery</a>
           </p>
           <p style="margin-top: 20px; color: #94a3b8;">
             <em>Kromio - Making Chrome extension development accessible to everyone</em>
@@ -287,12 +287,12 @@ module.exports = async (req, res) => {
     }
 
     console.log('📤 Attempting to send email with Resend...');
-    console.log('- From: hello@kromio.ai');
+    console.log('- From: hello@plugin.new');
     console.log('- To:', email);
     console.log('- Subject: Welcome to Kromio');
 
     const { data, error } = await resend.emails.send({
-      from: 'hello@kromio.ai',
+      from: 'hello@plugin.new',
       to: [email],
       subject: 'Welcome to Kromio - Start Building Chrome Extensions with AI!',
       html: getWelcomeEmailTemplate(greeting)
