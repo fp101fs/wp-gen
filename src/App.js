@@ -359,7 +359,11 @@ const parseGeminiResponse = (text, parentExtension = null) => {
 };
 
 // Helper function to execute AI generation - extracted from HomePage
-const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtension, uploadedImage, selectedProvider = 'claude-sonnet-4-5', platform = 'wordpress') => {
+const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtension, uploadedImage, selectedProvider = 'claude-sonnet-4-5', platform = 'wordpress', onStatusUpdate = null) => {
+  // Helper to update status if callback provided
+  const updateStatus = (message) => {
+    if (onStatusUpdate) onStatusUpdate(message);
+  };
   // Determine primary provider and available providers
   const primaryProvider = selectedProvider;
 
@@ -418,6 +422,7 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
       try {
         let result;
         debugLog(`🚀 Sending request to ${currentProvider.toUpperCase()}... (attempt ${attempt} of ${MAX_RETRIES})`);
+        updateStatus(`Sending prompt to ${getModelDisplayName(currentProvider)}...`);
 
         // Prepare image data if available
         let imageData = null;
@@ -1019,6 +1024,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
         }
 
         // Common processing for all providers
+        updateStatus('Response received, processing...');
         extensionData = await parseGeminiResponse(text, parentExtension);
 
         // If we get here, the request was successful
@@ -1044,6 +1050,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
 
     // If we successfully got extension data, continue with processing
     if (extensionData) {
+      updateStatus('Validating extension files...');
       // Handle different response structures for revisions vs new extensions
     let processedData;
     if (parentExtension && !extensionData.name && !extensionData.files) {
@@ -1172,7 +1179,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [selectedPlatform, setSelectedPlatform] = useState(DEFAULT_PLATFORM);
 
   // Token context integration
-  const { generateWithTokens, isGenerating, isLoading, currentTokens, isUnlimited, showUpgradePromptAction, planName } = useTokenContext();
+  const { generateWithTokens, isGenerating, isLoading, currentTokens, isUnlimited, showUpgradePromptAction, planName, setGenerationStatus } = useTokenContext();
 
   // Get platform-specific placeholder examples
   const currentPlatformConfig = getPlatform(selectedPlatform);
@@ -1593,6 +1600,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
     try {
       setError('');
       setGeneratedExtension(null);
+      setGenerationStatus('Checking permissions...');
       if (isRevisionModalOpen) setIsRevisionModalOpen(false);
       if (showGallery) setShowGallery(false);
       if (showMyExtensions) setShowMyExtensions(false);
@@ -1601,13 +1609,14 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       const tokenCost = selectedLLM === 'claude-opus' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
-          const aiResult = await executeAIGeneration(prompt, null, null, uploadedImage, selectedLLM, selectedPlatform);
+          const aiResult = await executeAIGeneration(prompt, null, null, uploadedImage, selectedLLM, selectedPlatform, setGenerationStatus);
           if (!aiResult.success) {
             throw new Error(aiResult.error);
           }
 
           // Save to database if user is logged in
           if (session && aiResult.needsSaving) {
+            setGenerationStatus('Saving your extension...');
             const newExtension = {
               user_id: session.user.id,
               name: aiResult.extensionData.name,
@@ -1659,6 +1668,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       // Check if upgrade is required (user has insufficient tokens)
       if (result.requiresUpgrade) {
         // The upgrade modal should already be shown by TokenContext
+        setGenerationStatus(''); // Clear status
         // Don't set error, just return
         return;
       }
@@ -1681,13 +1691,14 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       localStorage.removeItem('cx-gen-pending-generation');
     } catch (error) {
       debugError('Tokenized generation failed:', error);
-      
+      setGenerationStatus(''); // Clear status on error
+
       // Check if this is an upgrade-required case (shouldn't happen with new logic, but safety check)
       if (error.message?.includes('Insufficient tokens')) {
         // The upgrade modal should have already been shown by the TokenContext
         return;
       }
-      
+
       setError(`Failed to generate extension: ${error.message}`);
     }
   };
@@ -2318,7 +2329,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
 
 // Loading overlay component for generation progress
 function GenerationLoadingOverlay() {
-  const { isGenerating } = useTokenContext();
+  const { isGenerating, generationStatus } = useTokenContext();
   const [messageIndex, setMessageIndex] = useState(0);
   
   const loadingMessages = [
@@ -2363,6 +2374,9 @@ function GenerationLoadingOverlay() {
             <div className="absolute inset-0 border-4 border-transparent rounded-full animate-spin border-t-lime-400"></div>
           </div>
           <h3 className="text-xl font-bold text-white mb-2">Generating Extension</h3>
+          {generationStatus && (
+            <p className="text-lime-400 text-sm mb-2">{generationStatus}</p>
+          )}
           <p className="text-gray-300 text-sm mb-4">{loadingMessages[messageIndex].text}</p>
           <button
             onClick={loadingMessages[messageIndex].action}

@@ -17,6 +17,7 @@ const TOKEN_ACTIONS = {
   SET_ERROR: 'SET_ERROR',
   UPDATE_TOKENS: 'UPDATE_TOKENS',
   SET_GENERATION_STATE: 'SET_GENERATION_STATE',
+  SET_GENERATION_STATUS: 'SET_GENERATION_STATUS',
   SHOW_UPGRADE_PROMPT: 'SHOW_UPGRADE_PROMPT',
   HIDE_UPGRADE_PROMPT: 'HIDE_UPGRADE_PROMPT',
   SET_SYNC_STATE: 'SET_SYNC_STATE'
@@ -51,6 +52,7 @@ const initialState = {
   showUpgradePrompt: false, // Start with false to prevent initial flash
   upgradeReason: '',
   generationState: 'idle', // 'idle', 'checking', 'generating', 'success', 'error'
+  generationStatus: '', // User-friendly status message during generation
   isSyncing: false, // Global sync state
   
   // Real-time updates
@@ -121,7 +123,15 @@ const tokenReducer = (state, action) => {
     case TOKEN_ACTIONS.SET_GENERATION_STATE:
       return {
         ...state,
-        generationState: action.payload
+        generationState: action.payload,
+        // Clear status when returning to idle
+        generationStatus: action.payload === 'idle' ? '' : state.generationStatus
+      }
+
+    case TOKEN_ACTIONS.SET_GENERATION_STATUS:
+      return {
+        ...state,
+        generationStatus: action.payload
       }
     
     case TOKEN_ACTIONS.SHOW_UPGRADE_PROMPT:
@@ -433,11 +443,16 @@ export const TokenProvider = ({ children }) => {
     dispatch({ type: TOKEN_ACTIONS.SET_SYNC_STATE, payload: syncing })
   }, [])
 
+  // Generation status management (user-friendly status messages)
+  const setGenerationStatus = useCallback((status) => {
+    dispatch({ type: TOKEN_ACTIONS.SET_GENERATION_STATUS, payload: status })
+  }, [])
+
   // Context value
   const contextValue = {
     // State
     ...state,
-    
+
     // Actions
     canGenerateExtension,
     generateWithTokens,
@@ -445,6 +460,7 @@ export const TokenProvider = ({ children }) => {
     showUpgradePromptAction: showUpgradePrompt, // Rename the function to avoid collision
     hideUpgradePrompt,
     setSyncState,
+    setGenerationStatus,
     
     // Computed values
     hasTokens: state.isUnlimited || state.currentTokens > 0,
