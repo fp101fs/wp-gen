@@ -1310,8 +1310,10 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       } else {
         // Finished deleting
         if (isDemoMode) {
-          // In demo mode: trigger platform switch
-          triggerPlatformSwitch();
+          // In demo mode: trigger platform switch (only if not already transitioning)
+          if (headingTransition === 'visible') {
+            triggerPlatformSwitch();
+          }
         } else {
           // Normal mode: move to next example
           setCurrentPlaceholder((prev) => (prev + 1) % placeholderExamples.length);
@@ -1321,7 +1323,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
     }
 
     return () => clearTimeout(timeoutId);
-  }, [displayText, isTyping, currentPlaceholder, placeholderExamples, prompt, isDemoMode, triggerPlatformSwitch]);
+  }, [displayText, isTyping, currentPlaceholder, placeholderExamples, prompt, isDemoMode, headingTransition, triggerPlatformSwitch]);
 
   // Restore form data from localStorage after auth (only on homepage)
   useEffect(() => {
@@ -1845,6 +1847,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   ? 'opacity-100 translate-y-0 animate-heading-fade-in'
                   : 'opacity-100 translate-y-0'
               }`}
+              style={{ WebkitTextFillColor: 'inherit' }}
               onTransitionEnd={handleHeadingTransitionEnd}
             >
               {PLATFORM_MIDDLE_TEXT[selectedPlatform] || 'WordPress Plugin'}
