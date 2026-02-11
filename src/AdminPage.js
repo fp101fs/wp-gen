@@ -34,6 +34,8 @@ function AdminPage({ onShowLoginModal }) {
   const [tokenModal, setTokenModal] = useState({ isOpen: false, user: null });
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [newTokenCount, setNewTokenCount] = useState('');
+  const [isUpdatingTokens, setIsUpdatingTokens] = useState(false);
 
   // Messages state
   const [messages, setMessages] = useState([]);
@@ -388,6 +390,7 @@ function AdminPage({ onShowLoginModal }) {
 
   const openTokenModal = (user) => {
     setTokenModal({ isOpen: true, user });
+    setNewTokenCount(user.current_tokens?.toString() || '0');
   };
 
   const closeTokenModal = () => {
@@ -415,11 +418,33 @@ function AdminPage({ onShowLoginModal }) {
 
   const handleTokenUpdate = (updatedUser) => {
     // Update the user in the list
-    setUsers(users.map(user => 
+    setUsers(users.map(user =>
       user.id === updatedUser.id ? { ...user, ...updatedUser } : user
     ));
     showToast('Tokens updated successfully', 'success');
     closeTokenModal();
+  };
+
+  const handleSaveTokens = async () => {
+    if (!tokenModal.user) return;
+
+    setIsUpdatingTokens(true);
+    try {
+      const result = await adminService.updateUserTokens(
+        tokenModal.user.id,
+        parseInt(newTokenCount, 10),
+        'Admin adjustment'
+      );
+
+      if (result.success) {
+        handleTokenUpdate({ ...tokenModal.user, current_tokens: result.newTokenCount });
+      } else {
+        showToast(result.error || 'Failed to update tokens', 'error');
+      }
+    } catch (error) {
+      showToast('Failed to update tokens', 'error');
+    }
+    setIsUpdatingTokens(false);
   };
 
   const showToast = (message, type = 'success') => {
@@ -1430,15 +1455,36 @@ function AdminPage({ onShowLoginModal }) {
             <p className="text-gray-300 mb-4">
               User: <strong>{tokenModal.user?.email}</strong>
             </p>
-            <p className="text-gray-300 mb-6">
-              Current tokens: <strong>{tokenModal.user?.current_tokens}</strong>
-            </p>
+            <div className="mb-6">
+              <label htmlFor="tokenCount" className="block text-sm font-medium text-gray-300 mb-2">
+                Token Count
+              </label>
+              <input
+                id="tokenCount"
+                type="number"
+                value={newTokenCount}
+                onChange={(e) => setNewTokenCount(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                min="0"
+              />
+              <p className="text-gray-400 text-sm mt-2">
+                Current: {tokenModal.user?.current_tokens} tokens
+              </p>
+            </div>
             <div className="flex space-x-4">
               <button
-                onClick={closeTokenModal}
-                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                onClick={handleSaveTokens}
+                disabled={isUpdatingTokens}
+                className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
               >
-                Close
+                {isUpdatingTokens ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                onClick={closeTokenModal}
+                disabled={isUpdatingTokens}
+                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </div>
