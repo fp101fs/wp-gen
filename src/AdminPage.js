@@ -525,8 +525,8 @@ function AdminPage({ onShowLoginModal }) {
   const loadCostsData = async () => {
     setCostsLoading(true);
     try {
-      // Query extensions with cost data, joining with user_profiles for user info
-      const { data, error } = await supabase
+      // Query extensions with cost data (no join - FK relationship doesn't exist)
+      const { data: extensionsData, error: extensionsError } = await supabase
         .from('extensions')
         .select(`
           id,
@@ -537,17 +537,43 @@ function AdminPage({ onShowLoginModal }) {
           output_tokens,
           cost_usd,
           created_at,
-          user_id,
-          user_profiles!inner(email, full_name)
+          user_id
         `)
         .order(costsSortBy, { ascending: false });
 
-      if (error) {
-        console.error('Error loading costs data:', error);
+      if (extensionsError) {
+        console.error('Error loading costs data:', extensionsError);
         showToast('Failed to load costs data', 'error');
-      } else {
-        setCostsData(data || []);
+        setCostsLoading(false);
+        return;
       }
+
+      // Get unique user IDs
+      const userIds = [...new Set(extensionsData?.map(e => e.user_id).filter(Boolean))];
+
+      // Fetch user profiles for those IDs
+      let userProfiles = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('user_profiles')
+          .select('id, email, full_name')
+          .in('id', userIds);
+
+        if (profiles) {
+          userProfiles = profiles.reduce((acc, p) => {
+            acc[p.id] = { email: p.email, full_name: p.full_name };
+            return acc;
+          }, {});
+        }
+      }
+
+      // Merge user profiles into extensions data
+      const mergedData = (extensionsData || []).map(ext => ({
+        ...ext,
+        user_profiles: userProfiles[ext.user_id] || null
+      }));
+
+      setCostsData(mergedData);
     } catch (error) {
       console.error('Error loading costs data:', error);
       showToast('Failed to load costs data', 'error');
