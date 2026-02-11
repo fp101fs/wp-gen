@@ -1862,8 +1862,8 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   }`}
                   disabled={isGenerating}
                 >
-                  <img src="/icons/platforms/wordpress.svg" alt="" className="w-4 h-4 mr-1.5" />
-                  WordPress
+                  <img src="/icons/platforms/wordpress.svg" alt="" className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">WordPress</span>
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('shopify')}
@@ -1874,8 +1874,8 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   }`}
                   disabled={isGenerating}
                 >
-                  <img src="/icons/platforms/shopify.svg" alt="" className="w-4 h-4 mr-1.5" />
-                  Shopify
+                  <img src="/icons/platforms/shopify.svg" alt="" className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">Shopify</span>
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('figma')}
@@ -1886,8 +1886,8 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   }`}
                   disabled={isGenerating}
                 >
-                  <img src="/icons/platforms/figma.svg" alt="" className="w-4 h-4 mr-1.5" />
-                  Figma
+                  <img src="/icons/platforms/figma.svg" alt="" className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">Figma</span>
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('google-sheets-addon')}
@@ -1898,8 +1898,8 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   }`}
                   disabled={isGenerating}
                 >
-                  <img src="/icons/platforms/google-sheets.svg" alt="" className="w-4 h-4 mr-1.5" />
-                  Sheets Add-on
+                  <img src="/icons/platforms/google-sheets.svg" alt="" className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">Sheets Add-on</span>
                 </button>
                 <button
                   onClick={() => setSelectedPlatform('blender')}
@@ -1910,8 +1910,8 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                   }`}
                   disabled={isGenerating}
                 >
-                  <img src="/icons/platforms/blender.svg" alt="" className="w-4 h-4 mr-1.5" />
-                  Blender
+                  <img src="/icons/platforms/blender.svg" alt="" className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">Blender</span>
                 </button>
               </div>
             </div>
