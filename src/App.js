@@ -961,7 +961,8 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
             text: aiPrompt
           });
 
-          result = await anthropic.messages.create({
+          // Use streaming mode for high max_tokens (SDK requires it for requests >10min)
+          const stream = anthropic.messages.stream({
             model: claudeModel,
             max_tokens: isOpus ? 128000 : 64000,  // Opus 4.6: 128K, Sonnet 4.5: 64K
             temperature: 0.7,
@@ -973,6 +974,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
               }
             ]
           });
+          result = await stream.finalMessage();
           apiResult = result; // Store for cost estimation
           debugLog(`Received result object from ${isOpus ? 'Claude Opus 4.6' : 'Claude Sonnet 4.5'}:`, result);
         }
