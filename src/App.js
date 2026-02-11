@@ -75,6 +75,16 @@ const getModelCreditCost = (modelId) => {
   return modelCosts[modelId] || 1;
 };
 
+// Demo mode constants
+const DEMO_PLATFORM_ORDER = ['wordpress', 'shopify', 'figma', 'google-sheets-addon', 'blender'];
+const PLATFORM_MIDDLE_TEXT = {
+  'wordpress': 'WordPress Plugin',
+  'shopify': 'Shopify Theme Extension',
+  'figma': 'Figma Plugin',
+  'google-sheets-addon': 'Google Sheets Add-on',
+  'blender': 'Blender Add-on'
+};
+
 // Helper function to get plan-based image upload size limits in bytes
 const getImageUploadSizeLimit = (planName) => {
   const sizeLimits = {
@@ -1172,6 +1182,59 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
 
+  // Demo mode state
+  const [isDemoMode, setIsDemoMode] = useState(true);
+  const [showUseThisButton, setShowUseThisButton] = useState(false);
+  const [headingTransition, setHeadingTransition] = useState('visible'); // 'visible' | 'fading-out' | 'fading-in'
+  const [pendingPlatform, setPendingPlatform] = useState(null);
+
+  // Stop demo mode function
+  const stopDemoMode = useCallback(() => {
+    setIsDemoMode(false);
+    setShowUseThisButton(false);
+    setHeadingTransition('visible');
+    setPendingPlatform(null);
+  }, []);
+
+  // Global click/touch/keydown to dismiss demo mode
+  useEffect(() => {
+    if (!isDemoMode) return;
+
+    const handleInteraction = () => {
+      stopDemoMode();
+    };
+
+    window.addEventListener('click', handleInteraction);
+    window.addEventListener('touchstart', handleInteraction);
+    window.addEventListener('keydown', handleInteraction);
+
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+  }, [isDemoMode, stopDemoMode]);
+
+  // Handle heading transition end
+  const handleHeadingTransitionEnd = useCallback(() => {
+    if (headingTransition === 'fading-out' && pendingPlatform) {
+      setSelectedPlatform(pendingPlatform);
+      setPendingPlatform(null);
+      setHeadingTransition('fading-in');
+    } else if (headingTransition === 'fading-in') {
+      setHeadingTransition('visible');
+    }
+  }, [headingTransition, pendingPlatform]);
+
+  // Trigger platform switch in demo mode
+  const triggerPlatformSwitch = useCallback(() => {
+    if (!isDemoMode) return;
+    const currentIndex = DEMO_PLATFORM_ORDER.indexOf(selectedPlatform);
+    const nextIndex = (currentIndex + 1) % DEMO_PLATFORM_ORDER.length;
+    setPendingPlatform(DEMO_PLATFORM_ORDER[nextIndex]);
+    setHeadingTransition('fading-out');
+  }, [isDemoMode, selectedPlatform]);
+
   // Reset placeholder animation when platform changes
   useEffect(() => {
     setCurrentPlaceholder(0);
@@ -1221,10 +1284,22 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
           setDisplayText(currentText.slice(0, displayText.length + 1));
         }, 50 + Math.random() * 50); // Vary typing speed slightly
       } else {
-        // Finished typing, pause then start deleting
-        timeoutId = setTimeout(() => {
-          setIsTyping(false);
-        }, 2000);
+        // Finished typing
+        if (isDemoMode) {
+          // In demo mode: show "Use This" button for 2s, then start deleting
+          setShowUseThisButton(true);
+          timeoutId = setTimeout(() => {
+            setShowUseThisButton(false);
+            setTimeout(() => {
+              setIsTyping(false);
+            }, 300); // Wait for button fade out
+          }, 2000);
+        } else {
+          // Normal mode: pause then start deleting
+          timeoutId = setTimeout(() => {
+            setIsTyping(false);
+          }, 2000);
+        }
       }
     } else {
       // Deleting effect
@@ -1233,14 +1308,20 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
           setDisplayText(displayText.slice(0, -1));
         }, 30);
       } else {
-        // Finished deleting, move to next example
-        setCurrentPlaceholder((prev) => (prev + 1) % placeholderExamples.length);
-        setIsTyping(true);
+        // Finished deleting
+        if (isDemoMode) {
+          // In demo mode: trigger platform switch
+          triggerPlatformSwitch();
+        } else {
+          // Normal mode: move to next example
+          setCurrentPlaceholder((prev) => (prev + 1) % placeholderExamples.length);
+          setIsTyping(true);
+        }
       }
     }
 
     return () => clearTimeout(timeoutId);
-  }, [displayText, isTyping, currentPlaceholder, placeholderExamples, prompt]);
+  }, [displayText, isTyping, currentPlaceholder, placeholderExamples, prompt, isDemoMode, triggerPlatformSwitch]);
 
   // Restore form data from localStorage after auth (only on homepage)
   useEffect(() => {
@@ -1755,7 +1836,20 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
         
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 px-2 lcp-heading">
-            {currentPlatformConfig.heading}
+            No Code{' '}
+            <span
+              className={`inline-block transition-all duration-300 ${
+                headingTransition === 'fading-out'
+                  ? 'opacity-0 -translate-y-2'
+                  : headingTransition === 'fading-in'
+                  ? 'opacity-100 translate-y-0 animate-heading-fade-in'
+                  : 'opacity-100 translate-y-0'
+              }`}
+              onTransitionEnd={handleHeadingTransitionEnd}
+            >
+              {PLATFORM_MIDDLE_TEXT[selectedPlatform] || 'WordPress Plugin'}
+            </span>
+            {' '}Builder
           </h1>
         </div>
 
@@ -1828,7 +1922,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               </div>
             </div>
 
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <textarea
                 className="w-full h-20 sm:h-24 bg-transparent text-white placeholder-gray-400 focus:outline-none resize-none text-lg sm:text-xl"
                 placeholder={prompt.trim() ? currentPlatformConfig.inputPlaceholder : (displayText + (isTyping && displayText.length < placeholderExamples[currentPlaceholder].length ? "|" : "")) || currentPlatformConfig.inputPlaceholder}
@@ -1838,6 +1932,20 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                 }}
                 disabled={isGenerating}
               />
+              {isDemoMode && (
+                <button
+                  className={`absolute right-2 bottom-2 px-3 py-1.5 text-sm bg-gray-700/50 border border-gray-600/50 rounded-lg text-gray-300 hover:bg-gray-600/50 hover:text-white transition-all duration-300 ${
+                    showUseThisButton ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    stopDemoMode();
+                    updatePrompt(placeholderExamples[currentPlaceholder]);
+                  }}
+                >
+                  Use This
+                </button>
+              )}
             </div>
 
             {error && (
