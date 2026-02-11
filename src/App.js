@@ -1186,14 +1186,12 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [showUseThisButton, setShowUseThisButton] = useState(false);
   const [headingTransition, setHeadingTransition] = useState('visible'); // 'visible' | 'fading-out' | 'fading-in'
-  const [pendingPlatform, setPendingPlatform] = useState(null);
 
   // Stop demo mode function
   const stopDemoMode = useCallback(() => {
     setIsDemoMode(false);
     setShowUseThisButton(false);
     setHeadingTransition('visible');
-    setPendingPlatform(null);
   }, []);
 
   // Global click/touch/keydown to dismiss demo mode
@@ -1215,24 +1213,27 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
     };
   }, [isDemoMode, stopDemoMode]);
 
-  // Handle heading transition end
-  const handleHeadingTransitionEnd = useCallback(() => {
-    if (headingTransition === 'fading-out' && pendingPlatform) {
-      setSelectedPlatform(pendingPlatform);
-      setPendingPlatform(null);
-      setHeadingTransition('fading-in');
-    } else if (headingTransition === 'fading-in') {
-      setHeadingTransition('visible');
-    }
-  }, [headingTransition, pendingPlatform]);
-
-  // Trigger platform switch in demo mode
+  // Trigger platform switch in demo mode with timeout-based transitions
   const triggerPlatformSwitch = useCallback(() => {
     if (!isDemoMode) return;
+
     const currentIndex = DEMO_PLATFORM_ORDER.indexOf(selectedPlatform);
     const nextIndex = (currentIndex + 1) % DEMO_PLATFORM_ORDER.length;
-    setPendingPlatform(DEMO_PLATFORM_ORDER[nextIndex]);
+    const nextPlatform = DEMO_PLATFORM_ORDER[nextIndex];
+
+    // Start fade out
     setHeadingTransition('fading-out');
+
+    // After fade out completes, switch platform and fade in
+    setTimeout(() => {
+      setSelectedPlatform(nextPlatform);
+      setHeadingTransition('fading-in');
+
+      // After fade in completes, reset to visible
+      setTimeout(() => {
+        setHeadingTransition('visible');
+      }, 300);
+    }, 300);
   }, [isDemoMode, selectedPlatform]);
 
   // Reset placeholder animation when platform changes
@@ -1837,22 +1838,12 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
         </div> */}
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 px-2 lcp-heading">
-            No Code{' '}
-            <span
-              className={`inline-block transition-all duration-300 ${
-                headingTransition === 'fading-out'
-                  ? 'opacity-0 -translate-y-2'
-                  : headingTransition === 'fading-in'
-                  ? 'opacity-100 translate-y-0 animate-heading-fade-in'
-                  : 'opacity-100 translate-y-0'
-              }`}
-              style={{ WebkitTextFillColor: 'inherit' }}
-              onTransitionEnd={handleHeadingTransitionEnd}
-            >
-              {PLATFORM_MIDDLE_TEXT[selectedPlatform] || 'WordPress Plugin'}
-            </span>
-            {' '}Builder
+          <h1
+            className={`text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 px-2 lcp-heading transition-opacity duration-300 ${
+              headingTransition === 'fading-out' ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
+            {currentPlatformConfig.heading}
           </h1>
         </div>
 
