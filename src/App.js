@@ -923,8 +923,8 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
           });
 
           const isOpus = currentProvider === 'claude-opus';
-          const claudeModel = isOpus ? 'claude-opus-4-6' : 'claude-sonnet-4-5-20251101';
-          debugLog(`Making API call to ${isOpus ? 'Claude Opus 4.6' : 'Claude Sonnet 4.5'}...`);
+          const claudeModel = isOpus ? 'claude-opus-4-20250514' : 'claude-sonnet-4-5-20251101';
+          debugLog(`Making API call to ${isOpus ? 'Claude Opus 4' : 'Claude Sonnet 4.5'}...`);
 
           // Prepare message content - include image if available
           const messageContent = [];
