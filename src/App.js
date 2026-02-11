@@ -963,7 +963,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
 
           result = await anthropic.messages.create({
             model: claudeModel,
-            max_tokens: 8192,
+            max_tokens: isOpus ? 128000 : 64000,  // Opus 4.6: 128K, Sonnet 4.5: 64K
             temperature: 0.7,
             system: "You are an expert WordPress Developer. Generate high-quality, secure WordPress plugins. You respond only with valid JSON objects as specified.",
             messages: [
