@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Users, Shield, AlertTriangle, CheckCircle, XCircle, Coins, History, MessageSquare, HelpCircle, Send, ExternalLink, Filter, Mail, Chrome, TestTube, BarChart3, Calendar, X } from 'lucide-react';
+import { Trash2, Users, Shield, AlertTriangle, CheckCircle, XCircle, Coins, History, MessageSquare, HelpCircle, Send, ExternalLink, Filter, Mail, Chrome, TestTube, BarChart3, Calendar, X, DollarSign } from 'lucide-react';
 import { adminService } from './services/AdminService';
 import { supabase } from './supabaseClient';
 import Header from './Header';
@@ -55,7 +55,12 @@ function AdminPage({ onShowLoginModal }) {
   const [statsData, setStatsData] = useState([]);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsDateRange, setStatsDateRange] = useState(30); // Last 30 days by default
-  
+
+  // Costs states
+  const [costsData, setCostsData] = useState([]);
+  const [costsLoading, setCostsLoading] = useState(false);
+  const [costsSortBy, setCostsSortBy] = useState('created_at'); // 'created_at' or 'cost_usd'
+
   const navigate = useNavigate();
 
   // Check admin status
@@ -111,6 +116,13 @@ function AdminPage({ onShowLoginModal }) {
       loadStatsData();
     }
   }, [isAdmin, activeTab, statsDateRange]);
+
+  // Load costs data when costs tab is active
+  useEffect(() => {
+    if (isAdmin && activeTab === 'costs') {
+      loadCostsData();
+    }
+  }, [isAdmin, activeTab, costsSortBy]);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -484,6 +496,74 @@ function AdminPage({ onShowLoginModal }) {
     setStatsLoading(false);
   };
 
+  // Load costs data
+  const loadCostsData = async () => {
+    setCostsLoading(true);
+    try {
+      // Query extensions with cost data, joining with user_profiles for user info
+      const { data, error } = await supabase
+        .from('extensions')
+        .select(`
+          id,
+          name,
+          platform,
+          ai_model,
+          input_tokens,
+          output_tokens,
+          cost_usd,
+          created_at,
+          user_id,
+          user_profiles!inner(email, full_name)
+        `)
+        .order(costsSortBy, { ascending: false });
+
+      if (error) {
+        console.error('Error loading costs data:', error);
+        showToast('Failed to load costs data', 'error');
+      } else {
+        setCostsData(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading costs data:', error);
+      showToast('Failed to load costs data', 'error');
+    }
+    setCostsLoading(false);
+  };
+
+  // Calculate totals for costs
+  const calculateCostsTotals = () => {
+    return costsData.reduce((acc, item) => {
+      acc.totalInputTokens += item.input_tokens || 0;
+      acc.totalOutputTokens += item.output_tokens || 0;
+      acc.totalCost += item.cost_usd || 0;
+      acc.count++;
+      return acc;
+    }, { totalInputTokens: 0, totalOutputTokens: 0, totalCost: 0, count: 0 });
+  };
+
+  // Format model name for display
+  const formatModelName = (model) => {
+    switch (model) {
+      case 'claude-opus': return 'Claude Opus 4.1';
+      case 'claude-sonnet-4-5': return 'Claude Sonnet 4.5';
+      case 'gemini-pro': return 'Gemini 2.5 Pro';
+      case 'gemini-flash': return 'Gemini Flash';
+      default: return model || 'Unknown';
+    }
+  };
+
+  // Format platform name for display
+  const formatPlatformName = (platform) => {
+    switch (platform) {
+      case 'wordpress': return 'WordPress';
+      case 'shopify': return 'Shopify';
+      case 'figma': return 'Figma';
+      case 'blender': return 'Blender';
+      case 'sheets-addon': return 'Sheets Add-on';
+      default: return platform || 'Unknown';
+    }
+  };
+
   if (!isAdmin) {
     return null; // Will redirect in useEffect
   }
@@ -548,6 +628,19 @@ function AdminPage({ onShowLoginModal }) {
               <div className="flex items-center space-x-2">
                 <TestTube className="w-4 h-4" />
                 <span>Test Emails</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('costs')}
+              className={`px-3 sm:px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap ${
+                activeTab === 'costs'
+                  ? 'text-purple-400 border-b-2 border-purple-400'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <DollarSign className="w-4 h-4" />
+                <span>Costs</span>
               </div>
             </button>
             <button
@@ -1142,6 +1235,157 @@ function AdminPage({ onShowLoginModal }) {
                 <div className="text-center py-12">
                   <BarChart3 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400">No usage data found for the selected period</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        )}
+
+        {activeTab === 'costs' && (
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+          <div className="p-6 border-b border-white/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <DollarSign className="w-6 h-6 text-purple-400 mr-2" />
+                <h2 className="text-xl font-semibold text-white">Generation Costs ({costsData.length})</h2>
+              </div>
+              <div className="flex items-center space-x-3">
+                <select
+                  value={costsSortBy}
+                  onChange={(e) => setCostsSortBy(e.target.value)}
+                  className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="created_at">Sort by Date</option>
+                  <option value="cost_usd">Sort by Cost</option>
+                </select>
+                <button
+                  onClick={loadCostsData}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            {/* Summary Stats */}
+            {costsData.length > 0 && (() => {
+              const totals = calculateCostsTotals();
+              return (
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <div className="flex flex-wrap items-center gap-4 text-sm">
+                    <span className="text-gray-300 font-medium">Totals:</span>
+                    <span className="text-gray-400">
+                      <span className="text-blue-400 font-medium">Generations:</span> {totals.count}
+                    </span>
+                    <span className="text-gray-400">
+                      <span className="text-cyan-400 font-medium">Input Tokens:</span> {totals.totalInputTokens.toLocaleString()}
+                    </span>
+                    <span className="text-gray-400">
+                      <span className="text-purple-400 font-medium">Output Tokens:</span> {totals.totalOutputTokens.toLocaleString()}
+                    </span>
+                    <span className="text-gray-400">
+                      <span className="text-green-400 font-medium">Total Cost:</span> ${totals.totalCost.toFixed(4)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {costsLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <span className="text-white ml-3">Loading costs data...</span>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5">
+                  <tr className="text-left">
+                    <th className="px-3 py-4 text-gray-300 font-medium">Date/Time</th>
+                    <th className="px-2 py-4 text-gray-300 font-medium">User</th>
+                    <th className="px-2 py-4 text-gray-300 font-medium">Plugin Name</th>
+                    <th className="px-2 py-4 text-gray-300 font-medium text-center">Platform</th>
+                    <th className="px-2 py-4 text-gray-300 font-medium">Model</th>
+                    <th className="px-2 py-4 text-gray-300 font-medium text-right">Input</th>
+                    <th className="px-2 py-4 text-gray-300 font-medium text-right">Output</th>
+                    <th className="px-2 py-4 text-gray-300 font-medium text-right">Cost (USD)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {costsData.map((item) => (
+                    <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-3 py-4">
+                        <div className="text-white text-sm">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </div>
+                        <div className="text-gray-400 text-xs">
+                          {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </td>
+                      <td className="px-2 py-4">
+                        <div className="text-white text-sm truncate max-w-[150px]" title={item.user_profiles?.email}>
+                          {item.user_profiles?.email || 'Unknown'}
+                        </div>
+                        {item.user_profiles?.full_name && (
+                          <div className="text-gray-400 text-xs truncate max-w-[150px]">
+                            {item.user_profiles.full_name}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-2 py-4">
+                        <div className="text-white text-sm truncate max-w-[200px]" title={item.name}>
+                          {item.name}
+                        </div>
+                      </td>
+                      <td className="px-2 py-4 text-center">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          item.platform === 'wordpress' ? 'bg-blue-700 text-blue-300' :
+                          item.platform === 'shopify' ? 'bg-green-700 text-green-300' :
+                          item.platform === 'figma' ? 'bg-purple-700 text-purple-300' :
+                          item.platform === 'blender' ? 'bg-orange-700 text-orange-300' :
+                          'bg-gray-700 text-gray-300'
+                        }`}>
+                          {formatPlatformName(item.platform)}
+                        </span>
+                      </td>
+                      <td className="px-2 py-4">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          item.ai_model === 'claude-opus' ? 'bg-purple-700 text-purple-300' :
+                          item.ai_model === 'claude-sonnet-4-5' ? 'bg-cyan-700 text-cyan-300' :
+                          item.ai_model === 'gemini-pro' ? 'bg-yellow-700 text-yellow-300' :
+                          item.ai_model === 'gemini-flash' ? 'bg-amber-700 text-amber-300' :
+                          'bg-gray-700 text-gray-300'
+                        }`}>
+                          {formatModelName(item.ai_model)}
+                        </span>
+                      </td>
+                      <td className="px-2 py-4 text-right">
+                        <span className="text-cyan-400 text-sm">
+                          {item.input_tokens ? item.input_tokens.toLocaleString() : '-'}
+                        </span>
+                      </td>
+                      <td className="px-2 py-4 text-right">
+                        <span className="text-purple-400 text-sm">
+                          {item.output_tokens ? item.output_tokens.toLocaleString() : '-'}
+                        </span>
+                      </td>
+                      <td className="px-2 py-4 text-right">
+                        <span className={`text-sm font-medium ${item.cost_usd ? 'text-green-400' : 'text-gray-500'}`}>
+                          {item.cost_usd ? `$${item.cost_usd.toFixed(6)}` : '-'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {costsData.length === 0 && (
+                <div className="text-center py-12">
+                  <DollarSign className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400">No cost data found</p>
+                  <p className="text-gray-500 text-sm mt-2">Cost tracking was recently added. New generations will show cost data.</p>
                 </div>
               )}
             </div>

@@ -402,6 +402,7 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
       const RETRY_DELAYS = [1000, 2000, 4000]; // 1s, 2s, 4s
       let extensionData; // Declare outside the loop
       let apiResult; // Store the raw API result for cost estimation
+      let tokenInfo = null; // Store token usage and cost data
 
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
@@ -976,7 +977,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
             }
 
             // Estimate and log cost
-            estimateCost(currentProvider, result);
+            tokenInfo = estimateCost(currentProvider, result);
           } else {
             throw new Error('EMPTY_RESPONSE_RETRY');
           }
@@ -1004,7 +1005,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
           }
 
           // Estimate and log cost
-          estimateCost(currentProvider, result);
+          tokenInfo = estimateCost(currentProvider, result);
         }
 
         // Common processing for all providers
@@ -1088,7 +1089,8 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
         success: true,
         extensionData: processedData,
         needsSaving: true,
-        actualProvider: currentProvider
+        actualProvider: currentProvider,
+        tokenInfo: tokenInfo
       };
     }
 
@@ -1407,6 +1409,9 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               has_uploaded_image: parentExtension.has_uploaded_image || false,
               ai_model: aiResult.actualProvider || selectedLLM,
               platform: parentExtension.platform || 'wordpress', // Inherit platform
+              input_tokens: aiResult.tokenInfo?.inputTokens || null,
+              output_tokens: aiResult.tokenInfo?.outputTokens || null,
+              cost_usd: aiResult.tokenInfo?.cost || null,
             };
 
             const { data, error: insertError } = await supabase
@@ -1532,6 +1537,9 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
               has_uploaded_image: !!uploadedImage,
               ai_model: aiResult.actualProvider || selectedLLM,
               platform: selectedPlatform,
+              input_tokens: aiResult.tokenInfo?.inputTokens || null,
+              output_tokens: aiResult.tokenInfo?.outputTokens || null,
+              cost_usd: aiResult.tokenInfo?.cost || null,
             };
 
             const { data, error: insertError } = await supabase
@@ -1660,6 +1668,9 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
           has_uploaded_image: (!parentExtension && !!uploadedImage) || (parentExtension?.has_uploaded_image || false),
           ai_model: result.actualProvider || selectedLLM,
           platform: platformToUse,
+          input_tokens: result.tokenInfo?.inputTokens || null,
+          output_tokens: result.tokenInfo?.outputTokens || null,
+          cost_usd: result.tokenInfo?.cost || null,
         };
 
         const { data, error: insertError } = await supabase
@@ -2563,6 +2574,9 @@ function AppContent() {
               has_uploaded_image: parentExtension.has_uploaded_image || false,
               ai_model: aiResult.actualProvider || selectedLLM,
               platform: parentExtension.platform || 'wordpress', // Inherit platform
+              input_tokens: aiResult.tokenInfo?.inputTokens || null,
+              output_tokens: aiResult.tokenInfo?.outputTokens || null,
+              cost_usd: aiResult.tokenInfo?.cost || null,
             };
 
             const { data, error: insertError } = await supabase
@@ -2575,7 +2589,7 @@ function AppContent() {
               debugError('Error saving revision:', insertError);
               throw new Error('Failed to save revision to database');
             }
-            
+
             return {
               success: true,
               extensionId: data.id,
