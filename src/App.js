@@ -772,7 +772,7 @@ Respond with ONLY a valid JSON object:
   "slug": "plugin-name",
   "description": "Brief description",
   "files": {
-    "manifest.json": "{\\n  \\"name\\": \\"Plugin Name\\",\\n  \\"id\\": \\"plugin-name-unique-id\\",\\n  \\"api\\": \\"1.0.0\\",\\n  \\"main\\": \\"code.js\\",\\n  \\"ui\\": \\"ui.html\\",\\n  \\"editorType\\": [\\"figma\\"]\\n}",
+    "manifest.json": "{\\n  \\"name\\": \\"Plugin Name\\",\\n  \\"id\\": \\"plugin-name-unique-id\\",\\n  \\"api\\": \\"1.0.0\\",\\n  \\"main\\": \\"code.js\\",\\n  \\"ui\\": \\"ui.html\\",\\n  \\"editorType\\": [\\"figma\\"],\\n  \\"documentAccess\\": \\"dynamic-page\\"\\n}",
     "code.js": "// Main plugin code\\nfigma.showUI(__html__, { width: 300, height: 200 });\\n\\nfigma.ui.onmessage = (msg) => {\\n  if (msg.type === 'run') {\\n    // Plugin logic here\\n    figma.closePlugin();\\n  }\\n};",
     "ui.html": "<html>\\n<body>\\n  <button id=\\"run\\">Run</button>\\n  <script>\\n    document.getElementById('run').onclick = () => {\\n      parent.postMessage({ pluginMessage: { type: 'run' } }, '*');\\n    };\\n  </script>\\n</body>\\n</html>"
   },
@@ -780,7 +780,7 @@ Respond with ONLY a valid JSON object:
 }
 
 Requirements:
-- Include manifest.json with required fields (name, id, api, main, editorType)
+- Include manifest.json with required fields (name, id, api, main, editorType, documentAccess)
 - editorType must be an array like ["figma"] or ["figma", "figjam"]
 - Main code file uses figma.* API
 - If plugin needs UI, include ui.html and add "ui" field to manifest
