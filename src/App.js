@@ -1090,8 +1090,8 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
       }
     }
     
-    // Update manifest.json with correct version
-    if (processedData.files && processedData.files['manifest.json']) {
+    // Update manifest.json with correct version (skip for Figma - it doesn't support version field)
+    if (processedData.files && processedData.files['manifest.json'] && platform !== 'figma') {
       try {
         const manifest = JSON.parse(processedData.files['manifest.json']);
         manifest.version = extensionVersion;

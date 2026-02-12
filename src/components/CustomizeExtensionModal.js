@@ -99,19 +99,23 @@ function CustomizeExtensionModal({
     const manifest = JSON.parse(extensionFiles['manifest.json'] || '{}');
 
     manifest.name = metadata.name;
-    manifest.description = metadata.description;
-    manifest.version = metadata.version;
-    if (metadata.author) {
-      manifest.author = metadata.author;
-    }
 
-    // Add icons section
-    if (iconSet) {
-      manifest.icons = {
-        "16": "icons/icon16.png",
-        "48": "icons/icon48.png",
-        "128": "icons/icon128.png"
-      };
+    // Only add WordPress-specific fields for non-Figma platforms (Figma doesn't support these)
+    if (extension?.platform !== 'figma') {
+      manifest.description = metadata.description;
+      manifest.version = metadata.version;
+      if (metadata.author) {
+        manifest.author = metadata.author;
+      }
+
+      // Add icons section
+      if (iconSet) {
+        manifest.icons = {
+          "16": "icons/icon16.png",
+          "48": "icons/icon48.png",
+          "128": "icons/icon128.png"
+        };
+      }
     }
 
     // Remove default_icon from action if it exists

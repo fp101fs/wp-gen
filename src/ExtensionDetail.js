@@ -760,12 +760,24 @@ function ExtensionDetail({ session, sessionLoading, onRevise, onShowLoginModal }
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                     extension.platform === 'google-sheets' || extension.platform === 'google-sheets-addon'
                       ? 'bg-green-600/20 text-green-400'
+                      : extension.platform === 'figma'
+                      ? 'bg-purple-600/20 text-purple-400'
+                      : extension.platform === 'blender'
+                      ? 'bg-orange-600/20 text-orange-400'
+                      : extension.platform === 'shopify'
+                      ? 'bg-emerald-600/20 text-emerald-400'
                       : 'bg-blue-600/20 text-blue-400'
                   }`}>
                     {extension.platform === 'google-sheets-addon'
                       ? 'Sheets Add-on'
                       : extension.platform === 'google-sheets'
                       ? 'Google Sheets'
+                      : extension.platform === 'figma'
+                      ? 'Figma'
+                      : extension.platform === 'blender'
+                      ? 'Blender'
+                      : extension.platform === 'shopify'
+                      ? 'Shopify'
                       : 'WordPress'}
                   </span>
                 </div>

@@ -27,6 +27,71 @@ const WhatsNextModal = ({ isOpen, onClose, extensionName = "Your Plugin", extens
     }
   ];
 
+  const FigmaInstallContent = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <div className="text-4xl mb-3">🎨</div>
+        <h3 className="text-2xl font-bold text-white mb-2">Ready to Test Your Plugin</h3>
+        <p className="text-gray-400 text-lg">Get your plugin running in Figma Desktop</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 text-center">
+          <FolderOpen className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+          <h4 className="font-semibold text-blue-300 mb-1">1. Extract</h4>
+          <p className="text-blue-200/70 text-sm">Unzip the files</p>
+        </div>
+        <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-4 text-center">
+          <Upload className="w-8 h-8 text-green-400 mx-auto mb-2" />
+          <h4 className="font-semibold text-green-300 mb-1">2. Import</h4>
+          <p className="text-green-200/70 text-sm">Load manifest.json</p>
+        </div>
+        <div className="bg-purple-900/30 border border-purple-700/50 rounded-lg p-4 text-center">
+          <Settings className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+          <h4 className="font-semibold text-purple-300 mb-1">3. Run</h4>
+          <p className="text-purple-200/70 text-sm">Launch the plugin</p>
+        </div>
+      </div>
+
+      <div className="bg-gray-800 rounded-lg p-4">
+        <h4 className="font-semibold text-white mb-2">How to Test Your Plugin:</h4>
+        <ol className="text-gray-300 space-y-2 text-sm">
+          <li className="flex items-start gap-2 flex-wrap">
+            <span className="font-semibold text-purple-400">1.</span>
+            <span><strong>Open a Design File:</strong> Open any file (even a draft) in the Figma Desktop App</span>
+          </li>
+          <li className="flex items-start gap-2 flex-wrap">
+            <span className="font-semibold text-purple-400">2.</span>
+            <span><strong>Import Your Manifest:</strong> Go to Main Menu (Figma icon) → Plugins → Development → Import plugin from manifest...</span>
+          </li>
+          <li className="flex items-start gap-2 flex-wrap">
+            <span className="font-semibold text-purple-400">3.</span>
+            <span>Select the <code className="bg-gray-700 px-1 rounded">manifest.json</code> file in your extracted folder</span>
+          </li>
+          <li className="flex items-start gap-2 flex-wrap">
+            <span className="font-semibold text-purple-400">4.</span>
+            <span><strong>Run the Plugin:</strong> Your plugin will appear under Plugins → Development. Click its name to launch it</span>
+          </li>
+        </ol>
+      </div>
+
+      <div className="bg-purple-900/30 border border-purple-700/50 rounded-lg p-4">
+        <h4 className="font-semibold text-purple-300 mb-2">Hot Reloading Tip:</h4>
+        <p className="text-purple-200/70 text-sm">
+          Re-run your plugin instantly after making code changes using <kbd className="bg-gray-700 px-1.5 py-0.5 rounded text-xs">Cmd + Option + P</kbd> (Mac) or <kbd className="bg-gray-700 px-1.5 py-0.5 rounded text-xs">Ctrl + Alt + P</kbd> (Windows)
+        </p>
+      </div>
+
+      <button
+        onClick={() => window.open('https://www.figma.com/plugin-docs/plugin-quickstart-guide/', '_blank')}
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+      >
+        <ExternalLink className="w-5 h-5" />
+        Figma Plugin Documentation
+      </button>
+    </div>
+  );
+
   const InstallContent = () => (
     <div className="space-y-6">
       <div className="text-center">
@@ -200,13 +265,13 @@ const WhatsNextModal = ({ isOpen, onClose, extensionName = "Your Plugin", extens
   const renderContent = () => {
     switch (activeTab) {
       case 'install':
-        return <InstallContent />;
+        return extension?.platform === 'figma' ? <FigmaInstallContent /> : <InstallContent />;
       case 'monetize':
         return <MonetizeContent />;
       case 'submit':
         return <SubmitContent />;
       default:
-        return <InstallContent />;
+        return extension?.platform === 'figma' ? <FigmaInstallContent /> : <InstallContent />;
     }
   };
 
