@@ -573,6 +573,12 @@ CRITICAL RANGE INPUT RULES:
 - WRONG: min=0, max=100, step=10, default=15 (15 is not a multiple of 10)
 - CORRECT: min=0, max=100, step=10, default=20 (20 is 0 + 10×2)
 
+ADDITIONAL SCHEMA RULES:
+- NEVER use "presets" in the schema - Theme App Extension blocks do not support presets
+- NEVER use the script_tag filter (parser-blocking) - use <script src="{{ 'file.js' | asset_url }}" defer></script> instead
+- For "url" type settings, either omit the default OR use a valid placeholder like "https://example.com"
+- Valid schema keys for blocks: name, target, settings, locales (NO presets, NO templates)
+
 User Request: "${revisionPrompt.replace(/"/g, '"')}"
 
 Existing Block Files:
@@ -825,7 +831,8 @@ REQUIREMENTS:
 - Use {{ block.shopify_attributes }} on the root element for Shopify editor integration
 - Define settings in the schema (text, image_picker, color, range, select, richtext, url, etc.)
 - Access settings via {{ block.settings.setting_id }}
-- Reference assets via {{ 'filename.css' | asset_url }} or {{ 'filename.js' | asset_url }}
+- Reference CSS via {{ 'filename.css' | asset_url | stylesheet_tag }}
+- Reference JS via <script src="{{ 'filename.js' | asset_url }}" defer></script> (NEVER use script_tag filter)
 - Use Shopify Liquid objects: product, collection, cart, customer, shop, etc.
 - Follow Shopify Theme App Extension best practices
 - Target should be "section" for section blocks
@@ -850,6 +857,12 @@ CRITICAL RANGE INPUT RULES:
 - Example: min=10, max=50, step=8 → valid defaults: 10, 18, 26, 34, 42, 50
 - WRONG: min=0, max=100, step=10, default=15 (15 is not a multiple of 10)
 - CORRECT: min=0, max=100, step=10, default=20 (20 is 0 + 10×2)
+
+ADDITIONAL SCHEMA RULES:
+- NEVER use "presets" in the schema - Theme App Extension blocks do not support presets
+- NEVER use the script_tag filter (parser-blocking) - use <script src="{{ 'file.js' | asset_url }}" defer></script> instead
+- For "url" type settings, either omit the default OR use a valid placeholder like "https://example.com"
+- Valid schema keys for blocks: name, target, settings, locales (NO presets, NO templates)
 
 ${basePrompt}
 
