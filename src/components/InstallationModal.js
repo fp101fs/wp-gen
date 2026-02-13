@@ -248,45 +248,45 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
   const shopifySteps = [
     {
       id: 1,
-      title: "Download and Extract ZIP",
-      icon: <Download className="w-8 h-8" />,
+      title: "Set Up a Development Store",
+      icon: <FolderOpen className="w-8 h-8" />,
       color: "from-green-500 to-emerald-500",
-      description: "Your theme extension has been downloaded as a ZIP file",
+      description: "Create a free development store to test your extension",
       details: [
-        "Locate the downloaded ZIP file (usually in your Downloads folder)",
-        "Extract the ZIP file to a folder on your computer",
-        "You'll see blocks/, assets/, and possibly locales/ folders"
+        "Go to the Shopify Partner Dashboard (dev.shopify.com/dashboard)",
+        "Click on 'Stores' (or 'Dev Stores') in the sidebar",
+        "Click 'Add store' > 'Create store for app development'",
+        "Enter a Store Name, choose Shopify plan, click 'Create store'"
       ],
-      tip: "Theme App Extensions are part of a Shopify app - you'll need an existing app to add them to!"
+      tip: "Development stores are free and let you test without affecting real customers"
     },
     {
       id: 2,
-      title: "Copy to Your Shopify App",
-      icon: <FolderOpen className="w-8 h-8" />,
+      title: "Set Up Shopify CLI",
+      icon: <Download className="w-8 h-8" />,
       color: "from-emerald-500 to-teal-500",
-      description: "Add the extension files to your Shopify app project",
+      description: "Install the CLI tools and prepare your extension",
       details: [
-        "Navigate to your Shopify app's project folder",
-        "Copy the extracted files to the extensions/ directory",
-        "If no extensions/ folder exists, create one at the project root",
-        "Your structure should be: extensions/your-block-name/blocks/, assets/, etc."
+        "Extract the downloaded ZIP file and note the folder path",
+        "Open Terminal and install Shopify CLI: npm install -g @shopify/cli @shopify/app",
+        "Navigate to the extracted folder: cd /path/to/your/extracted-folder"
       ],
-      tip: "Each theme extension should be in its own folder within extensions/"
+      tip: "You need Node.js installed. Download from nodejs.org if needed"
     },
     {
       id: 3,
-      title: "Deploy and Add to Theme",
+      title: "Link and Test Your Extension",
       icon: <Settings className="w-8 h-8" />,
       color: "from-teal-500 to-cyan-500",
-      description: "Deploy your app and add blocks in the Theme Editor",
+      description: "Connect to Shopify and preview your extension",
       details: [
-        "Run 'shopify app deploy' from your app's root directory",
-        "Install or update your app on your development store",
-        "Open the Theme Editor in your Shopify admin",
-        "Click 'Add section' or 'Add block' where supported",
-        "Find your block under the 'Apps' section"
+        "Run 'shopify app config link' in your terminal",
+        "When prompted, select 'Yes, create it as a new app'",
+        "Run 'shopify app dev' to start the development server",
+        "Press 'p' to open the preview in your browser",
+        "In Theme Editor: Add Section > Apps tab > Select your extension"
       ],
-      tip: "Your blocks appear under 'Apps' in the Theme Editor after deployment"
+      tip: "If asked for a Store Password, find it in Online Store > Preferences"
     }
   ];
 
@@ -391,7 +391,7 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
           </div>
 
           {/* Special content for step 2 */}
-          {currentStep === 1 && platform !== 'google-sheets' && platform !== 'google-sheets-addon' && platform !== 'blender' && (
+          {currentStep === 1 && platform === 'wordpress' && (
             <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 mb-6">
               <h4 className="font-semibold text-blue-300 mb-2">Quick WordPress Admin Link:</h4>
               <div className="bg-blue-900/50 p-3 rounded font-mono text-blue-200 text-center">
@@ -418,6 +418,30 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
               </p>
             </div>
           )}
+          {currentStep === 1 && platform === 'shopify' && (
+            <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-green-300 mb-2">Install Command:</h4>
+              <div className="bg-green-900/50 p-3 rounded font-mono text-green-200 text-sm">
+                npm install -g @shopify/cli @shopify/app
+              </div>
+            </div>
+          )}
+          {currentStep === 2 && platform === 'shopify' && (
+            <div className="bg-teal-900/30 border border-teal-700/50 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-teal-300 mb-2">Key Terminal Commands:</h4>
+              <div className="space-y-2">
+                <div className="bg-teal-900/50 p-2 rounded font-mono text-teal-200 text-sm">
+                  shopify app config link
+                </div>
+                <div className="bg-teal-900/50 p-2 rounded font-mono text-teal-200 text-sm">
+                  shopify app dev
+                </div>
+              </div>
+              <p className="text-teal-200/70 text-sm mt-2">
+                Press 'p' during dev to open the preview
+              </p>
+            </div>
+          )}
 
           {/* Success message for final step */}
           {isLastStep && (
@@ -426,7 +450,7 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
               <h4 className="text-xl font-bold text-green-300 mb-2">Congratulations!</h4>
               <p className="text-green-200/70">
                 {platform === 'shopify'
-                  ? 'Your Theme App Extension is deployed! Open the Theme Editor in your Shopify admin and look for your block under the "Apps" section when adding blocks or sections.'
+                  ? 'Your extension is linked and running! In the Theme Editor, click "Add Section" and look under the "Apps" tab to add your block. Press Ctrl+C in terminal to stop the dev server when done.'
                   : platform === 'figma'
                   ? 'Your Figma plugin is now imported! Find it under Plugins > Development in Figma. Right-click on the canvas for quick access. To publish, go to Plugins > Manage plugins in the Figma Desktop App.'
                   : platform === 'blender'
