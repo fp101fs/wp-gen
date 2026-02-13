@@ -526,6 +526,13 @@ REQUIREMENTS:
 - Call figma.closePlugin() when the plugin completes its task
 - Follow Figma Plugin API best practices
 
+COMMON MISTAKES TO AVOID:
+- NEVER set read-only properties directly (width, height, x, y on some nodes). Use resize() and x/y setters only on nodes that support them
+- NEVER access .children on a page without first calling await page.loadAsync() or await figma.loadAllPagesAsync()
+- NEVER use browser APIs not available in Figma sandbox: navigator.clipboard, navigator.mediaDevices, camera, microphone, display-capture
+- ALWAYS use figma.loadFontAsync() before setting text content
+- ALWAYS handle errors with try/catch for async operations
+
 User Request: "${revisionPrompt.replace(/"/g, '"')}"
 
 Existing Plugin Files:
@@ -751,6 +758,13 @@ REQUIREMENTS:
 - Use postMessage for communication between UI and plugin code
 - Call figma.closePlugin() when the plugin completes its task
 - Follow Figma Plugin API best practices
+
+COMMON MISTAKES TO AVOID:
+- NEVER set read-only properties directly (width, height, x, y on some nodes). Use resize() and x/y setters only on nodes that support them
+- NEVER access .children on a page without first calling await page.loadAsync() or await figma.loadAllPagesAsync()
+- NEVER use browser APIs not available in Figma sandbox: navigator.clipboard, navigator.mediaDevices, camera, microphone, display-capture
+- ALWAYS use figma.loadFontAsync() before setting text content
+- ALWAYS handle errors with try/catch for async operations
 
 FIGMA API PATTERNS:
 - Access current page: figma.currentPage
