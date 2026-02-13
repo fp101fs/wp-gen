@@ -215,7 +215,7 @@ class GitHubService {
       }
 
       if (useContentsApiFallback) {
-        return this.pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers, releaseOptions)
+        return this.pushFilesViaContentsApi(files, repoFullName, commitMessage, null, headers, releaseOptions)
       }
 
       // 3. Create blobs for all files (in parallel)
@@ -348,7 +348,7 @@ class GitHubService {
           body: JSON.stringify({
             message: commitMessage,
             content: btoa(unescape(encodeURIComponent(content))),
-            branch
+            ...(branch && { branch })
           })
         }
       )
