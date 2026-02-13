@@ -204,7 +204,8 @@ class GitHubService {
       }
       // If 404 or 409, currentCommitSha and baseTreeSha remain null (empty repo)
 
-      // For 409 (empty repo), verify write permissions by testing blob creation
+      // For 409, verify if Git Data API works by testing blob creation
+      let useContentsApiFallback = false
       if (refResponse.status === 409) {
         const testBlobResponse = await fetch(
           `${this.baseUrl}/repos/${repoFullName}/git/blobs`,
@@ -214,13 +215,14 @@ class GitHubService {
             body: JSON.stringify({ content: 'test', encoding: 'utf-8' })
           }
         )
-        if (!testBlobResponse.ok) {
-          // GitHub returns 404 for permission errors (to hide resource existence)
-          // Since GET ref returned 409 (repo exists), 404 on write = no write permission
-          throw new Error(
-            'Your GitHub connection doesn\'t have write access. Please disconnect from GitHub in your account settings and reconnect to grant write permission.'
-          )
+        if (testBlobResponse.status === 409) {
+          // Git Data API doesn't work - use Contents API fallback
+          useContentsApiFallback = true
         }
+      }
+
+      if (useContentsApiFallback) {
+        return this.pushFilesViaContentsApi(files, repoFullName, commitMessage, branch, headers, releaseOptions)
       }
 
       // 3. Create blobs for all files (in parallel)
