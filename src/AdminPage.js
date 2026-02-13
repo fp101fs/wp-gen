@@ -598,7 +598,7 @@ function AdminPage({ onShowLoginModal }) {
       case 'claude-opus': return 'Claude Opus 4.1';
       case 'claude-sonnet-4-5': return 'Claude Sonnet 4.5';
       case 'gemini-pro': return 'Gemini 2.5 Pro';
-      case 'gemini-flash': return 'Gemini Flash';
+      case 'gemini-flash': return 'Gemini 3 Flash';
       default: return model || 'Unknown';
     }
   };

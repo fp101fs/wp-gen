@@ -44,7 +44,7 @@ const StoreSubmissionGuide = lazy(() => import('./StoreSubmissionGuide'));
 // Helper function to get display name for AI models
 const getModelDisplayName = (modelId) => {
   const modelNames = {
-    'gemini-flash': 'Gemini Flash',
+    'gemini-flash': 'Gemini 3 Flash',
     'gemini-pro': 'Gemini Pro',
     'claude-sonnet-4-5': 'Claude Sonnet 4.5',
     'claude-opus': 'Claude Opus 4.6'
@@ -953,7 +953,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
           const modelName = currentProvider === 'gemini-flash' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
           const model = genAI.getGenerativeModel({ model: modelName });
 
-          debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini Flash' : 'Gemini Pro'}...`);
+          debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini Pro'}...`);
 
           // Prepare content array - include image if available
           const contentArray = [];
@@ -972,7 +972,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
 
           result = await model.generateContent(contentArray);
           apiResult = result; // Store for cost estimation
-          debugLog(`Received result object from ${currentProvider === 'gemini-flash' ? 'Gemini Flash' : 'Gemini Pro'}:`, result);
+          debugLog(`Received result object from ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini Pro'}:`, result);
 
         } else if (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus') {
           const { default: Anthropic } = await import('@anthropic-ai/sdk');
@@ -2055,7 +2055,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       disabled={isGenerating}
                       aria-label="Select AI model"
                     >
-                      <option value="gemini-flash">🤖 Gemini Flash ⚡ 1</option>
+                      <option value="gemini-flash">🤖 Gemini 3 Flash ⚡ 1</option>
                       <option value="gemini-pro">🤖 Gemini 2.5 Pro ⚡ 15</option>
                       <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
                       <option value="claude-opus">🧠 Claude Opus 4.6 ⚡ 240</option>

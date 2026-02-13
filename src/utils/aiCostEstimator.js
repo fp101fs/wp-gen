@@ -5,7 +5,7 @@
 
 // Pricing per 1M tokens (as of Feb 2025)
 const AI_PRICING = {
-  'gemini-flash': { input: 0.075, output: 0.30 },     // Gemini Flash
+  'gemini-flash': { input: 0.075, output: 0.30 },     // Gemini 3 Flash
   'gemini-pro': { input: 1.25, output: 5.00 },        // Gemini Pro
   'claude-sonnet-4-5': { input: 3.00, output: 15.00 }, // Claude Sonnet 4.5
   'claude-opus': { input: 15.00, output: 75.00 }      // Claude Opus 4.6
