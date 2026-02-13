@@ -267,9 +267,9 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
       color: "from-emerald-500 to-teal-500",
       description: "Install the CLI tools and prepare your extension",
       details: [
-        "Extract the downloaded ZIP file and note the folder path",
-        "Open Terminal and install Shopify CLI: npm install -g @shopify/cli @shopify/app",
-        "Navigate to the extracted folder: cd /path/to/your/extracted-folder"
+        { text: "Extract the downloaded ZIP file and note the folder path" },
+        { text: "Open Terminal and install Shopify CLI:", code: "npm install -g @shopify/cli @shopify/app" },
+        { text: "Navigate to the extracted folder:", code: "cd /path/to/your/extracted-folder", example: "~/Downloads/Hello_World_v1_0/" }
       ],
       tip: "You need Node.js installed. Download from nodejs.org if needed"
     },
@@ -280,11 +280,12 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
       color: "from-teal-500 to-cyan-500",
       description: "Connect to Shopify and preview your extension",
       details: [
-        "Run 'shopify app config link' in your terminal",
-        "When prompted, select 'Yes, create it as a new app'",
-        "Run 'shopify app dev' to start the development server",
-        "Press 'p' to open the preview in your browser",
-        "In Theme Editor: Add Section > Apps tab > Select your extension"
+        { text: "Run", code: "shopify app config link", suffix: "in your terminal" },
+        { text: "When prompted, select 'Yes, create it as a new app'" },
+        { text: "Enter an App name (e.g., 'My Theme Extension')" },
+        { text: "Run", code: "shopify app dev", suffix: "to start the development server" },
+        { text: "Press 'p' to open the preview in your browser" },
+        { text: "In Theme Editor: Add Section > Apps tab > Select your extension" }
       ],
       tip: "If asked for a Store Password, find it in Online Store > Preferences"
     }
@@ -381,7 +382,16 @@ const InstallationModal = ({ isOpen, onClose, extensionName = "Your Plugin", pla
                 <div className="w-6 h-6 bg-blue-900/50 text-blue-400 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
                   {index + 1}
                 </div>
-                <p className="text-gray-300 leading-relaxed">{detail}</p>
+                <p className="text-gray-300 leading-relaxed">
+                  {typeof detail === 'string' ? detail : (
+                    <>
+                      {detail.text}{' '}
+                      {detail.code && <code className="bg-gray-700 px-2 py-1 rounded text-green-400 font-mono text-sm">{detail.code}</code>}
+                      {detail.suffix && ` ${detail.suffix}`}
+                      {detail.example && <span className="text-gray-500 text-sm block mt-1">(e.g., {detail.example})</span>}
+                    </>
+                  )}
+                </p>
               </div>
             ))}
           </div>

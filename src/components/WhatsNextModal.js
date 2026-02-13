@@ -92,6 +92,62 @@ const WhatsNextModal = ({ isOpen, onClose, extensionName = "Your Plugin", extens
     </div>
   );
 
+  const ShopifyInstallContent = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <div className="text-4xl mb-3">🛒</div>
+        <h3 className="text-2xl font-bold text-white mb-2">Ready to Install Your Extension</h3>
+        <p className="text-gray-400 text-lg">Get your extension running on Shopify</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-4 text-center">
+          <FolderOpen className="w-8 h-8 text-green-400 mx-auto mb-2" />
+          <h4 className="font-semibold text-green-300 mb-1">1. Download</h4>
+          <p className="text-green-200/70 text-sm">Get the ZIP file</p>
+        </div>
+        <div className="bg-teal-900/30 border border-teal-700/50 rounded-lg p-4 text-center">
+          <Settings className="w-8 h-8 text-teal-400 mx-auto mb-2" />
+          <h4 className="font-semibold text-teal-300 mb-1">2. Link</h4>
+          <p className="text-teal-200/70 text-sm">Via Shopify CLI</p>
+        </div>
+        <div className="bg-cyan-900/30 border border-cyan-700/50 rounded-lg p-4 text-center">
+          <CheckCircle className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+          <h4 className="font-semibold text-cyan-300 mb-1">3. Test</h4>
+          <p className="text-cyan-200/70 text-sm">Preview in store</p>
+        </div>
+      </div>
+
+      <div className="bg-gray-800 rounded-lg p-4">
+        <h4 className="font-semibold text-white mb-2">Quick Start:</h4>
+        <ol className="text-gray-300 space-y-2 text-sm">
+          <li className="flex items-start gap-2 flex-wrap">
+            • Download the ZIP file
+            <span className="text-gray-500 text-xs">
+              (close this popup - then click
+              <button className="inline-flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded ml-1 mr-1 font-medium pointer-events-none">
+                <Download className="w-3 h-3" />
+                Download ZIP
+              </button>
+              button)
+            </span>
+          </li>
+          <li>• Extract ZIP and run <code className="bg-gray-700 px-1.5 py-0.5 rounded text-green-400 text-xs">shopify app config link</code></li>
+          <li>• Run <code className="bg-gray-700 px-1.5 py-0.5 rounded text-green-400 text-xs">shopify app dev</code> to start dev server</li>
+          <li>• Open Theme Editor → Add Section → Apps tab</li>
+        </ol>
+      </div>
+
+      <button
+        onClick={() => window.open('https://shopify.dev/docs/apps/build/online-store/theme-app-extensions', '_blank')}
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+      >
+        <ExternalLink className="w-5 h-5" />
+        Shopify Extension Docs
+      </button>
+    </div>
+  );
+
   const InstallContent = () => (
     <div className="space-y-6">
       <div className="text-center">
@@ -263,15 +319,21 @@ const WhatsNextModal = ({ isOpen, onClose, extensionName = "Your Plugin", extens
   );
 
   const renderContent = () => {
+    const getInstallContent = () => {
+      if (extension?.platform === 'figma') return <FigmaInstallContent />;
+      if (extension?.platform === 'shopify') return <ShopifyInstallContent />;
+      return <InstallContent />;
+    };
+
     switch (activeTab) {
       case 'install':
-        return extension?.platform === 'figma' ? <FigmaInstallContent /> : <InstallContent />;
+        return getInstallContent();
       case 'monetize':
         return <MonetizeContent />;
       case 'submit':
         return <SubmitContent />;
       default:
-        return extension?.platform === 'figma' ? <FigmaInstallContent /> : <InstallContent />;
+        return getInstallContent();
     }
   };
 

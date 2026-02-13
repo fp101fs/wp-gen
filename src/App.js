@@ -2056,7 +2056,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       aria-label="Select AI model"
                     >
                       <option value="gemini-flash">🤖 Gemini Flash ⚡ 1</option>
-                      <option value="gemini-pro">🤖 Gemini Pro ⚡ 15</option>
+                      <option value="gemini-pro">🤖 Gemini 2.5 Pro ⚡ 15</option>
                       <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
                       <option value="claude-opus">🧠 Claude Opus 4.6 ⚡ 240</option>
                     </select>
