@@ -565,6 +565,14 @@ REQUIREMENTS:
 - Reference assets via {{ 'filename.css' | asset_url }}
 - Follow Shopify Theme App Extension best practices
 
+CRITICAL RANGE INPUT RULES:
+- For "range" type settings, the default MUST be a valid step in the range
+- Formula: default = min + (step × n), where n is any non-negative integer
+- Example: min=0, max=100, step=5 → valid defaults: 0, 5, 10, 15... 100
+- Example: min=10, max=50, step=8 → valid defaults: 10, 18, 26, 34, 42, 50
+- WRONG: min=0, max=100, step=10, default=15 (15 is not a multiple of 10)
+- CORRECT: min=0, max=100, step=10, default=20 (20 is 0 + 10×2)
+
 User Request: "${revisionPrompt.replace(/"/g, '"')}"
 
 Existing Block Files:
@@ -834,6 +842,14 @@ SCHEMA STRUCTURE:
     { "type": "select", "id": "alignment", "label": "Alignment", "options": [{"value": "left", "label": "Left"}, {"value": "center", "label": "Center"}], "default": "center" }
   ]
 }
+
+CRITICAL RANGE INPUT RULES:
+- For "range" type settings, the default MUST be a valid step in the range
+- Formula: default = min + (step × n), where n is any non-negative integer
+- Example: min=0, max=100, step=5 → valid defaults: 0, 5, 10, 15... 100
+- Example: min=10, max=50, step=8 → valid defaults: 10, 18, 26, 34, 42, 50
+- WRONG: min=0, max=100, step=10, default=15 (15 is not a multiple of 10)
+- CORRECT: min=0, max=100, step=10, default=20 (20 is 0 + 10×2)
 
 ${basePrompt}
 
