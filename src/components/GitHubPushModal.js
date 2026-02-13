@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Github, ExternalLink, AlertCircle, Check, Loader2, RefreshCw } from 'lucide-react';
+import { X, Github, ExternalLink, AlertCircle, Check, Loader2, RefreshCw, Unplug } from 'lucide-react';
 import { gitHubService } from '../services/GitHubService';
 import { debugLog, debugError } from '../utils/debugUtils';
 
@@ -78,6 +78,19 @@ const GitHubPushModal = ({
     } catch (err) {
       debugError('GitHub connect error:', err);
       setError(err.message || 'Failed to connect to GitHub');
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      await gitHubService.disconnectGitHub();
+      setIsConnected(false);
+      setGitHubUser(null);
+      setRepositories([]);
+      setSelectedRepo('');
+    } catch (err) {
+      debugError('GitHub disconnect error:', err);
+      setError(err.message || 'Failed to disconnect from GitHub');
     }
   };
 
@@ -248,13 +261,22 @@ const GitHubPushModal = ({
                       <p className="text-gray-400 text-sm">Connected to GitHub</p>
                     </div>
                   </div>
-                  <button
-                    onClick={checkConnectionAndLoadRepos}
-                    className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700 transition-colors"
-                    title="Refresh repositories"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={checkConnectionAndLoadRepos}
+                      className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700 transition-colors"
+                      title="Refresh repositories"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleDisconnect}
+                      className="p-2 text-gray-400 hover:text-red-400 rounded-lg hover:bg-gray-700 transition-colors"
+                      title="Disconnect GitHub"
+                    >
+                      <Unplug className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
 
