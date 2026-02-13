@@ -4,6 +4,11 @@ import { Download } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import InstallationModal from './components/InstallationModal';
 
+const toKebabCase = (str) => str
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '');
+
 function DownloadButton({ extension, files, className, size = "default", onShowLoginModal }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [session, setSession] = useState(null);
@@ -47,17 +52,87 @@ function DownloadButton({ extension, files, className, size = "default", onShowL
       const safeVersion = extensionVersion.replace(/\./g, '_');
       const folderName = `${extension.name.replace(/[^a-zA-Z0-9]/g, '_')}_v${safeVersion}`;
       
-      Object.entries(extensionFiles).forEach(([filename, content]) => {
-        if (content && typeof content === 'string' && content.trim()) {
-          zip.file(`${folderName}/${filename}`, content);
-        } else {
-          console.warn(`Skipping file ${filename} - invalid content`);
-        }
-      });
+      // Handle Shopify Theme App Extensions with proper folder structure
+      if (extension.platform === 'shopify') {
+        const slug = toKebabCase(extension.name);
+
+        // Remap AI-generated files to proper Shopify CLI structure
+        Object.entries(extensionFiles).forEach(([filename, content]) => {
+          if (content && typeof content === 'string' && content.trim()) {
+            if (filename.startsWith('blocks/')) {
+              // Move blocks to extensions/{slug}/blocks/
+              zip.file(`${folderName}/extensions/${slug}/${filename}`, content);
+            } else if (filename.startsWith('assets/')) {
+              // Move assets to extensions/{slug}/assets/
+              zip.file(`${folderName}/extensions/${slug}/${filename}`, content);
+            } else if (filename.startsWith('locales/')) {
+              // Move locales to extensions/{slug}/locales/
+              zip.file(`${folderName}/extensions/${slug}/${filename}`, content);
+            } else if (filename.startsWith('snippets/')) {
+              // Move snippets to extensions/{slug}/snippets/
+              zip.file(`${folderName}/extensions/${slug}/${filename}`, content);
+            } else {
+              // Other files go to root
+              zip.file(`${folderName}/${filename}`, content);
+            }
+          } else {
+            console.warn(`Skipping file ${filename} - invalid content`);
+          }
+        });
+
+        // Generate shopify.extension.toml
+        const shopifyExtensionToml = `api_version = "2024-01"
+
+[[extensions]]
+type = "theme"
+name = "${extension.name}"
+handle = "${slug}"
+
+[[extensions.blocks]]
+name = "${extension.name}"
+target = "section"
+template = "blocks/${slug}.liquid"
+`;
+        zip.file(`${folderName}/extensions/${slug}/shopify.extension.toml`, shopifyExtensionToml);
+
+        // Generate shopify.app.toml
+        const shopifyAppToml = `# Run: shopify app config link
+# This will connect to your Shopify Partner app
+
+name = "${extension.name}"
+client_id = "YOUR_CLIENT_ID"
+application_url = "https://localhost"
+
+[access_scopes]
+scopes = ""
+
+[auth]
+redirect_urls = ["https://localhost/callback"]
+
+[webhooks]
+api_version = "2024-01"
+`;
+        zip.file(`${folderName}/shopify.app.toml`, shopifyAppToml);
+
+        // Generate package.json
+        const packageJson = JSON.stringify({
+          name: slug,
+          version: "1.0.0"
+        }, null, 2);
+        zip.file(`${folderName}/package.json`, packageJson);
+
+      } else {
+        // Non-Shopify platforms: use existing simple file copying
+        Object.entries(extensionFiles).forEach(([filename, content]) => {
+          if (content && typeof content === 'string' && content.trim()) {
+            zip.file(`${folderName}/${filename}`, content);
+          } else {
+            console.warn(`Skipping file ${filename} - invalid content`);
+          }
+        });
+      }
       
-      const defaultInstructions = extension?.platform === 'shopify'
-        ? 'Installation Instructions (Shopify Theme App Extension):\n1. Extract this ZIP file to a folder\n2. Copy the contents to your Shopify app\'s extensions/ directory\n3. Run "shopify app deploy" from your app\'s root directory\n4. Install/update your app on your development store\n5. Open Theme Editor and find your block under "Apps" section'
-        : extension?.platform === 'figma'
+      const defaultInstructions = extension?.platform === 'figma'
         ? 'Installation Instructions (Figma Plugin):\n1. Extract this ZIP file to a folder\n2. Open Figma Desktop App\n3. Go to Plugins > Development > Import plugin from manifest\n4. Select the manifest.json file from the extracted folder\n5. Run via Plugins > Development > Your Plugin Name'
         : extension?.platform === 'blender'
         ? 'Installation Instructions (Blender Add-on):\n1. Open Blender > Edit > Preferences > Add-ons\n2. Click "Install..." button\n3. Select this ZIP file\n4. Enable the add-on checkbox\n5. Find panel in 3D Viewport sidebar (press N)\n6. Save Preferences'
@@ -67,9 +142,32 @@ function DownloadButton({ extension, files, className, size = "default", onShowL
         ? 'Installation Instructions:\n1. Open Google Sheets > Extensions > Apps Script\n2. Delete default code, paste Code.gs contents\n3. Add other .gs files via File > New > Script\n4. Save, then refresh your spreadsheet\n5. Find your add-on in the custom menu'
         : 'Installation Instructions:\n1. Go to WordPress Admin > Plugins > Add New > Upload Plugin\n2. Choose the ZIP file and click Install Now\n3. Activate the plugin after installation';
 
-      zip.file(`${folderName}/README.txt`,
-        `${extension.name} v${extensionVersion}\n${extension.description}\n\n${extension.instructions || defaultInstructions}\n\nGenerated by plugin.new\n`
-      );
+      // Generate README - markdown for Shopify, text for others
+      if (extension.platform === 'shopify') {
+        const slug = toKebabCase(extension.name);
+        const shopifyReadme = `# ${extension.name}
+
+## Setup
+
+1. \`cd ${folderName}\`
+2. \`shopify app config link\` (connect to your Shopify Partner app)
+3. \`shopify app dev\` (start development server)
+4. Open your dev store's theme customizer
+5. Go to a product page → Add block → Look under "Apps" section
+
+## Files
+
+- \`extensions/${slug}/blocks/\` - Liquid block templates
+- \`extensions/${slug}/assets/\` - CSS and JS files
+
+## Generated by plugin.new
+`;
+        zip.file(`${folderName}/README.md`, shopifyReadme);
+      } else {
+        zip.file(`${folderName}/README.txt`,
+          `${extension.name} v${extensionVersion}\n${extension.description}\n\n${extension.instructions || defaultInstructions}\n\nGenerated by plugin.new\n`
+        );
+      }
       
       const content = await zip.generateAsync({ 
         type: 'blob',
