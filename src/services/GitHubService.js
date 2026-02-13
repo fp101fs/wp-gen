@@ -208,8 +208,8 @@ class GitHubService {
             body: JSON.stringify({ content: 'test', encoding: 'utf-8' })
           }
         )
-        if (testBlobResponse.status === 409) {
-          // Git Data API doesn't work - use Contents API fallback
+        if (!testBlobResponse.ok) {
+          // Git Data API doesn't work (404 or 409) - use Contents API fallback
           useContentsApiFallback = true
         }
       }
