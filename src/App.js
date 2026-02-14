@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 
 import { Routes, Route, useNavigate, useSearchParams } from 'react-router-dom';
 import { Download, Zap, Code, Globe, Shield, Sparkles, Upload, X, Gift, User, Settings, Crown, HelpCircle, Moon, LogOut, GitBranch, Image, Eye, EyeOff } from 'lucide-react';
 // JSZip will be loaded dynamically when needed
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import FeaturesModal from './FeaturesModal';
 import MyExtensions from './MyExtensions';
 import Gallery from './Gallery';
@@ -45,7 +44,7 @@ const StoreSubmissionGuide = lazy(() => import('./StoreSubmissionGuide'));
 const getModelDisplayName = (modelId) => {
   const modelNames = {
     'gemini-flash': 'Gemini 3 Flash',
-    'gemini-pro': 'Gemini Pro',
+    'gemini-pro': 'Gemini 3 Pro',
     'claude-sonnet-4-5': 'Claude Sonnet 4.5',
     'claude-opus': 'Claude Opus 4.6'
   };
@@ -368,12 +367,16 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
   const primaryProvider = selectedProvider;
 
   // Check if we have API keys for providers
-  const hasGeminiKey = !!process.env.REACT_APP_GEMINI_API_KEY;
+  const hasGeminiFlashKey = !!process.env.REACT_APP_OPENROUTER_FLASH_KEY;
+  const hasGeminiProKey = !!process.env.REACT_APP_OPENROUTER_PRO_KEY;
   const hasClaudeKey = !!process.env.REACT_APP_ANTHROPIC_API_KEY;
 
   // Check if primary provider has API key
-  if ((primaryProvider === 'gemini-pro' || primaryProvider === 'gemini-flash') && !hasGeminiKey) {
-    throw new Error('Gemini API key not found. Please add REACT_APP_GEMINI_API_KEY to your .env.local file');
+  if (primaryProvider === 'gemini-flash' && !hasGeminiFlashKey) {
+    throw new Error('OpenRouter Flash API key not found');
+  }
+  if (primaryProvider === 'gemini-pro' && !hasGeminiProKey) {
+    throw new Error('OpenRouter Pro API key not found');
   }
   if ((primaryProvider === 'claude-sonnet-4-5' || primaryProvider === 'claude-opus') && !hasClaudeKey) {
     throw new Error('Claude API key not found. Please add REACT_APP_ANTHROPIC_API_KEY to your .env.local file');
@@ -384,17 +387,17 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
 
   if (primaryProvider === 'claude-opus') {
     if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
-    if (hasGeminiKey) providersToTry.push('gemini-pro');
-    if (hasGeminiKey) providersToTry.push('gemini-flash');
+    if (hasGeminiProKey) providersToTry.push('gemini-pro');
+    if (hasGeminiFlashKey) providersToTry.push('gemini-flash');
   } else if (primaryProvider === 'claude-sonnet-4-5') {
-    if (hasGeminiKey) providersToTry.push('gemini-pro');
-    if (hasGeminiKey) providersToTry.push('gemini-flash');
+    if (hasGeminiProKey) providersToTry.push('gemini-pro');
+    if (hasGeminiFlashKey) providersToTry.push('gemini-flash');
   } else if (primaryProvider === 'gemini-pro') {
     if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
-    if (hasGeminiKey) providersToTry.push('gemini-flash');
+    if (hasGeminiFlashKey) providersToTry.push('gemini-flash');
   } else if (primaryProvider === 'gemini-flash') {
     if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
-    if (hasGeminiKey) providersToTry.push('gemini-pro');
+    if (hasGeminiProKey) providersToTry.push('gemini-pro');
   }
 
   // Remove duplicates (shouldn't happen, but just in case)
@@ -947,32 +950,42 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
         debugLog('Full prompt being sent:', aiPrompt);
 
         if (currentProvider === 'gemini-pro' || currentProvider === 'gemini-flash') {
-          const { GoogleGenerativeAI } = await import('@google/generative-ai');
-          const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
-          // Use -latest aliases to auto-route to newest versions
-          const modelName = currentProvider === 'gemini-flash' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
-          const model = genAI.getGenerativeModel({ model: modelName });
+          const OpenAI = (await import('openai')).default;
 
-          debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini Pro'}...`);
+          const apiKey = currentProvider === 'gemini-flash'
+            ? process.env.REACT_APP_OPENROUTER_FLASH_KEY
+            : process.env.REACT_APP_OPENROUTER_PRO_KEY;
 
-          // Prepare content array - include image if available
-          const contentArray = [];
+          const modelId = currentProvider === 'gemini-flash'
+            ? 'google/gemini-3-flash-preview'
+            : 'google/gemini-3-pro-preview';
 
+          const client = new OpenAI({
+            baseURL: 'https://openrouter.ai/api/v1',
+            apiKey,
+            dangerouslyAllowBrowser: true
+          });
+
+          debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini 3 Pro'} via OpenRouter...`);
+
+          const userContent = [];
           if (imageData) {
-            debugLog('Adding image to Gemini request');
-            contentArray.push({
-              inlineData: {
-                mimeType: imageData.mimeType,
-                data: imageData.base64
-              }
+            userContent.push({
+              type: 'image_url',
+              image_url: { url: `data:${imageData.mimeType};base64,${imageData.base64}` }
             });
           }
+          userContent.push({ type: 'text', text: aiPrompt });
 
-          contentArray.push({ text: aiPrompt });
+          const completion = await client.chat.completions.create({
+            model: modelId,
+            messages: [{ role: 'user', content: userContent }],
+            max_tokens: currentProvider === 'gemini-pro' ? 64000 : 32000
+          });
 
-          result = await model.generateContent(contentArray);
-          apiResult = result; // Store for cost estimation
-          debugLog(`Received result object from ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini Pro'}:`, result);
+          result = completion;
+          apiResult = completion;
+          debugLog(`Received result object from ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini 3 Pro'} via OpenRouter:`, result);
 
         } else if (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus') {
           const { default: Anthropic } = await import('@anthropic-ai/sdk');
@@ -1047,25 +1060,14 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
             throw new Error('EMPTY_RESPONSE_RETRY');
           }
         } else {
-          // Gemini response processing (gemini-pro or gemini-flash)
-          const response = result.response;
-
-          // Simple Gemini text extraction
-          try {
-            text = response.text();
-          } catch (error) {
-            if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
-              text = response.candidates[0].content.parts[0].text;
-            } else {
-              throw new Error('EMPTY_RESPONSE_RETRY');
-            }
-          }
-
+          // Gemini response via OpenRouter (OpenAI format)
+          text = result.choices?.[0]?.message?.content;
           if (!text || text.trim().length === 0) {
             throw new Error('EMPTY_RESPONSE_RETRY');
           }
-
-          // Estimate and log cost
+          if (result.choices?.[0]?.finish_reason === 'length') {
+            debugLog(`⚠️ ${currentProvider} response was truncated`);
+          }
           tokenInfo = estimateCost(currentProvider, result);
         }
 
@@ -2056,7 +2058,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       aria-label="Select AI model"
                     >
                       <option value="gemini-flash">🤖 Gemini 3 Flash ⚡ 1</option>
-                      <option value="gemini-pro">🤖 Gemini 2.5 Pro ⚡ 15</option>
+                      <option value="gemini-pro">🤖 Gemini 3 Pro ⚡ 15</option>
                       <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
                       <option value="claude-opus">🧠 Claude Opus 4.6 ⚡ 240</option>
                     </select>

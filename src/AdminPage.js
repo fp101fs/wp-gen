@@ -504,7 +504,7 @@ function AdminPage({ onShowLoginModal }) {
           dayData['Claude Opus 4.1'] = stats['claude-opus'] || 0;
           dayData['Claude Sonnet 4.5'] = stats['claude-sonnet-4-5'] || 0;
           dayData['Claude Sonnet 4'] = stats['claude'] || 0;
-          dayData['Gemini 2.5 Pro'] = stats['gemini'] || 0;
+          dayData['Gemini 3 Pro'] = stats['gemini'] || 0;
           dayData['ChatGPT 4o'] = stats['chatgpt'] || 0;
           dayData['Unknown/Other'] = stats['unknown'] || 0;
 
@@ -597,7 +597,7 @@ function AdminPage({ onShowLoginModal }) {
     switch (model) {
       case 'claude-opus': return 'Claude Opus 4.1';
       case 'claude-sonnet-4-5': return 'Claude Sonnet 4.5';
-      case 'gemini-pro': return 'Gemini 2.5 Pro';
+      case 'gemini-pro': return 'Gemini 3 Pro';
       case 'gemini-flash': return 'Gemini 3 Flash';
       default: return model || 'Unknown';
     }
@@ -1258,7 +1258,7 @@ function AdminPage({ onShowLoginModal }) {
                       />
                       <Line
                         type="monotone"
-                        dataKey="Gemini 2.5 Pro"
+                        dataKey="Gemini 3 Pro"
                         stroke="#F59E0B"
                         strokeWidth={2}
                         connectNulls={false}

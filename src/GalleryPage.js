@@ -14,7 +14,7 @@ import ExtensionCardSkeleton from './components/ExtensionCardSkeleton';
 // Helper function to get display name for AI models
 const getModelDisplayName = (modelId) => {
   const modelNames = {
-    'gemini': 'Gemini 2.5 Pro',
+    'gemini': 'Gemini 3 Pro',
     'chatgpt': 'ChatGPT 4o',
     'claude': 'Claude Sonnet 4',
     'claude-opus': 'Claude Opus 4.1'

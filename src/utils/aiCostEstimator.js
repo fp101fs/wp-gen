@@ -30,13 +30,11 @@ function extractUsage(provider, response) {
         };
       }
     } else if (provider === 'gemini-pro' || provider === 'gemini-flash') {
-      // Google format: response.usageMetadata.promptTokenCount / candidatesTokenCount
-      // Note: For Gemini, the response object has a .response property from generateContent
-      const usageMetadata = response.usageMetadata || response.response?.usageMetadata;
-      if (usageMetadata) {
+      // OpenRouter format (OpenAI-compatible)
+      if (response.usage) {
         return {
-          inputTokens: usageMetadata.promptTokenCount || 0,
-          outputTokens: usageMetadata.candidatesTokenCount || 0
+          inputTokens: response.usage.prompt_tokens || 0,
+          outputTokens: response.usage.completion_tokens || 0
         };
       }
     }

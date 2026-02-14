@@ -131,7 +131,7 @@ function FeaturesModal({ isOpen, onClose }) {
               <div className="text-center">
                 <Sparkles className="w-10 h-10 text-yellow-400 mx-auto mb-3" />
                 <h4 className="text-lg font-semibold text-white mb-2">Multiple AI Models</h4>
-                <p className="text-gray-300 text-sm mb-3">Choose from GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro, and more</p>
+                <p className="text-gray-300 text-sm mb-3">Choose from GPT-4o, Claude Sonnet 4, Gemini 3 Pro, and more</p>
                 <span className="inline-block bg-yellow-500/30 text-yellow-300 px-2 py-1 rounded-full text-xs">
                   90%+ Success Rate
                 </span>

@@ -140,7 +140,7 @@ const FeaturesArticle = () => {
           <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl p-8 text-center border border-purple-300/30">
             <Code className="w-16 h-16 text-purple-400 mx-auto mb-6" />
             <h3 className="text-xl font-semibold text-white mb-4">Multi-Model AI Generation</h3>
-            <p className="text-gray-300 mb-4">Choose from GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro, and more. Each model brings unique strengths to extension development.</p>
+            <p className="text-gray-300 mb-4">Choose from GPT-4o, Claude Sonnet 4, Gemini 3 Pro, and more. Each model brings unique strengths to extension development.</p>
             <div className="space-y-2">
               <div className="bg-purple-500/30 text-purple-300 px-3 py-1 rounded-full text-sm font-medium inline-block">
                 ✨ Natural Language Processing
