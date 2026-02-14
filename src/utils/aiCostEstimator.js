@@ -5,10 +5,10 @@
 
 // Pricing per 1M tokens (as of Feb 2025)
 const AI_PRICING = {
-  'gemini-flash': { input: 0.075, output: 0.30 },     // Gemini 3 Flash
-  'gemini-pro': { input: 1.25, output: 5.00 },        // Gemini Pro
+  'gemini-3-flash': { input: 0.50, output: 3.00 },    // Gemini 3 Flash via OpenRouter
+  'gemini-3-pro': { input: 2.00, output: 12.00 },     // Gemini 3 Pro via OpenRouter
   'claude-sonnet-4-5': { input: 3.00, output: 15.00 }, // Claude Sonnet 4.5
-  'claude-opus': { input: 15.00, output: 75.00 }      // Claude Opus 4.6
+  'claude-opus-4-6': { input: 5.00, output: 25.00 }   // Claude Opus 4.6
 };
 
 /**
@@ -21,7 +21,7 @@ function extractUsage(provider, response) {
   if (!response) return null;
 
   try {
-    if (provider === 'claude-sonnet-4-5' || provider === 'claude-opus') {
+    if (provider === 'claude-sonnet-4-5' || provider === 'claude-opus-4-6') {
       // Anthropic format: response.usage.input_tokens / output_tokens
       if (response.usage) {
         return {
@@ -29,7 +29,7 @@ function extractUsage(provider, response) {
           outputTokens: response.usage.output_tokens || 0
         };
       }
-    } else if (provider === 'gemini-pro' || provider === 'gemini-flash') {
+    } else if (provider === 'gemini-3-pro' || provider === 'gemini-3-flash') {
       // OpenRouter format (OpenAI-compatible)
       if (response.usage) {
         return {

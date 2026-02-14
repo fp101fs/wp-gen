@@ -5,14 +5,14 @@ import { debugLog } from './utils/debugUtils';
 
 function RevisionModal({ extension, onClose, onGenerateRevision }) {
   const [revisionPrompt, setRevisionPrompt] = useState('');
-  const [selectedLLM, setSelectedLLM] = useState('gemini-flash');
+  const [selectedLLM, setSelectedLLM] = useState('gemini-3-flash');
   const { currentTokens, isUnlimited, showUpgradePromptAction } = useTokenContext();
 
   const handleSubmit = () => {
     if (!revisionPrompt.trim()) return;
 
     // Credit costs proportional to API pricing (Flash=1, Pro=15, Sonnet=50, Opus=240)
-    const requiredTokens = selectedLLM === 'claude-opus' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
+    const requiredTokens = selectedLLM === 'claude-opus-4-6' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-3-pro' ? 15 : 1;
     if (!isUnlimited && currentTokens < requiredTokens) {
       showUpgradePromptAction(`Need ${requiredTokens} credit${requiredTokens > 1 ? 's' : ''} to revise extension`);
       return;
@@ -52,10 +52,10 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
               }}
               className="px-4 py-2 bg-gray-700 rounded-full text-white text-sm font-medium hover:bg-gray-600 transition-colors appearance-none focus:outline-none cursor-pointer"
             >
-              <option value="gemini-flash">🤖 Gemini 3 Flash ⚡ 1</option>
-              <option value="gemini-pro">🤖 Gemini 3 Pro ⚡ 15</option>
+              <option value="gemini-3-flash">🤖 Gemini 3 Flash ⚡ 1</option>
+              <option value="gemini-3-pro">🤖 Gemini 3 Pro ⚡ 15</option>
               <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
-              <option value="claude-opus">🧠 Claude Opus 4.6 ⚡ 240</option>
+              <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option>
             </select>
           </div>
         </div>

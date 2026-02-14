@@ -501,7 +501,7 @@ function AdminPage({ onShowLoginModal }) {
           const stats = result.stats[date] || {};
 
           // Add each model's count for this day
-          dayData['Claude Opus 4.1'] = stats['claude-opus'] || 0;
+          dayData['Claude Opus 4.6'] = (stats['claude-opus'] || 0) + (stats['claude-opus-4-6'] || 0);
           dayData['Claude Sonnet 4.5'] = stats['claude-sonnet-4-5'] || 0;
           dayData['Claude Sonnet 4'] = stats['claude'] || 0;
           dayData['Gemini 3 Pro'] = stats['gemini'] || 0;
@@ -595,9 +595,12 @@ function AdminPage({ onShowLoginModal }) {
   // Format model name for display
   const formatModelName = (model) => {
     switch (model) {
-      case 'claude-opus': return 'Claude Opus 4.1';
+      case 'claude-opus-4-6':
+      case 'claude-opus': return 'Claude Opus 4.6';
       case 'claude-sonnet-4-5': return 'Claude Sonnet 4.5';
+      case 'gemini-3-pro':
       case 'gemini-pro': return 'Gemini 3 Pro';
+      case 'gemini-3-flash':
       case 'gemini-flash': return 'Gemini 3 Flash';
       default: return model || 'Unknown';
     }
@@ -1403,10 +1406,10 @@ function AdminPage({ onShowLoginModal }) {
                       </td>
                       <td className="px-2 py-4">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          item.ai_model === 'claude-opus' ? 'bg-purple-700 text-purple-300' :
+                          (item.ai_model === 'claude-opus' || item.ai_model === 'claude-opus-4-6') ? 'bg-purple-700 text-purple-300' :
                           item.ai_model === 'claude-sonnet-4-5' ? 'bg-cyan-700 text-cyan-300' :
-                          item.ai_model === 'gemini-pro' ? 'bg-yellow-700 text-yellow-300' :
-                          item.ai_model === 'gemini-flash' ? 'bg-amber-700 text-amber-300' :
+                          (item.ai_model === 'gemini-pro' || item.ai_model === 'gemini-3-pro') ? 'bg-yellow-700 text-yellow-300' :
+                          (item.ai_model === 'gemini-flash' || item.ai_model === 'gemini-3-flash') ? 'bg-amber-700 text-amber-300' :
                           'bg-gray-700 text-gray-300'
                         }`}>
                           {formatModelName(item.ai_model)}

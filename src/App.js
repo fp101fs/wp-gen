@@ -43,9 +43,13 @@ const StoreSubmissionGuide = lazy(() => import('./StoreSubmissionGuide'));
 // Helper function to get display name for AI models
 const getModelDisplayName = (modelId) => {
   const modelNames = {
+    'gemini-3-flash': 'Gemini 3 Flash',
+    'gemini-3-pro': 'Gemini 3 Pro',
+    'claude-sonnet-4-5': 'Claude Sonnet 4.5',
+    'claude-opus-4-6': 'Claude Opus 4.6',
+    // Legacy model IDs for backward compatibility with existing database records
     'gemini-flash': 'Gemini 3 Flash',
     'gemini-pro': 'Gemini 3 Pro',
-    'claude-sonnet-4-5': 'Claude Sonnet 4.5',
     'claude-opus': 'Claude Opus 4.6'
   };
   return modelNames[modelId] || modelId;
@@ -54,9 +58,13 @@ const getModelDisplayName = (modelId) => {
 // Helper function to get emoji for AI models
 const getModelEmoji = (modelId) => {
   const modelEmojis = {
+    'gemini-3-flash': '🤖',
+    'gemini-3-pro': '🤖',
+    'claude-sonnet-4-5': '🧠',
+    'claude-opus-4-6': '🧠',
+    // Legacy model IDs
     'gemini-flash': '🤖',
     'gemini-pro': '🤖',
-    'claude-sonnet-4-5': '🧠',
     'claude-opus': '🧠'
   };
   return modelEmojis[modelId] || '🤖';
@@ -66,10 +74,14 @@ const getModelEmoji = (modelId) => {
 // Costs are proportional to API pricing (Gemini Flash = 1 credit baseline)
 const getModelCreditCost = (modelId) => {
   const modelCosts = {
-    'gemini-flash': 1,         // baseline
-    'gemini-pro': 15,          // ~17x Flash pricing
+    'gemini-3-flash': 1,       // baseline
+    'gemini-3-pro': 15,        // ~17x Flash pricing
     'claude-sonnet-4-5': 50,   // ~48x Flash pricing
-    'claude-opus': 240         // ~240x Flash pricing
+    'claude-opus-4-6': 240,    // ~240x Flash pricing
+    // Legacy model IDs
+    'gemini-flash': 1,
+    'gemini-pro': 15,
+    'claude-opus': 240
   };
   return modelCosts[modelId] || 1;
 };
@@ -372,32 +384,32 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
   const hasClaudeKey = !!process.env.REACT_APP_ANTHROPIC_API_KEY;
 
   // Check if primary provider has API key
-  if (primaryProvider === 'gemini-flash' && !hasGeminiFlashKey) {
+  if (primaryProvider === 'gemini-3-flash' && !hasGeminiFlashKey) {
     throw new Error('OpenRouter Flash API key not found');
   }
-  if (primaryProvider === 'gemini-pro' && !hasGeminiProKey) {
+  if (primaryProvider === 'gemini-3-pro' && !hasGeminiProKey) {
     throw new Error('OpenRouter Pro API key not found');
   }
-  if ((primaryProvider === 'claude-sonnet-4-5' || primaryProvider === 'claude-opus') && !hasClaudeKey) {
+  if ((primaryProvider === 'claude-sonnet-4-5' || primaryProvider === 'claude-opus-4-6') && !hasClaudeKey) {
     throw new Error('Claude API key not found. Please add REACT_APP_ANTHROPIC_API_KEY to your .env.local file');
   }
 
   // Smart fallback order based on selected provider
   let providersToTry = [primaryProvider];
 
-  if (primaryProvider === 'claude-opus') {
+  if (primaryProvider === 'claude-opus-4-6') {
     if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
-    if (hasGeminiProKey) providersToTry.push('gemini-pro');
-    if (hasGeminiFlashKey) providersToTry.push('gemini-flash');
+    if (hasGeminiProKey) providersToTry.push('gemini-3-pro');
+    if (hasGeminiFlashKey) providersToTry.push('gemini-3-flash');
   } else if (primaryProvider === 'claude-sonnet-4-5') {
-    if (hasGeminiProKey) providersToTry.push('gemini-pro');
-    if (hasGeminiFlashKey) providersToTry.push('gemini-flash');
-  } else if (primaryProvider === 'gemini-pro') {
+    if (hasGeminiProKey) providersToTry.push('gemini-3-pro');
+    if (hasGeminiFlashKey) providersToTry.push('gemini-3-flash');
+  } else if (primaryProvider === 'gemini-3-pro') {
     if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
-    if (hasGeminiFlashKey) providersToTry.push('gemini-flash');
-  } else if (primaryProvider === 'gemini-flash') {
+    if (hasGeminiFlashKey) providersToTry.push('gemini-3-flash');
+  } else if (primaryProvider === 'gemini-3-flash') {
     if (hasClaudeKey) providersToTry.push('claude-sonnet-4-5');
-    if (hasGeminiProKey) providersToTry.push('gemini-pro');
+    if (hasGeminiProKey) providersToTry.push('gemini-3-pro');
   }
 
   // Remove duplicates (shouldn't happen, but just in case)
@@ -435,7 +447,7 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
             debugLog(`Image data prepared: ${imageData.mimeType}, size: ${imageData.size} bytes`);
 
             // Check image size limits (5MB for Claude, 20MB for others)
-            const maxSize = (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus') ? 5 * 1024 * 1024 : 20 * 1024 * 1024;
+            const maxSize = (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus-4-6') ? 5 * 1024 * 1024 : 20 * 1024 * 1024;
             if (imageData.size > maxSize) {
               console.warn(`⚠️  Image size (${Math.round(imageData.size / 1024 / 1024)}MB) exceeds ${currentProvider} limit. Proceeding without image.`);
               imageData = null;
@@ -949,14 +961,14 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
         debugLog('Prompt length:', aiPrompt.length, 'characters');
         debugLog('Full prompt being sent:', aiPrompt);
 
-        if (currentProvider === 'gemini-pro' || currentProvider === 'gemini-flash') {
+        if (currentProvider === 'gemini-3-pro' || currentProvider === 'gemini-3-flash') {
           const OpenAI = (await import('openai')).default;
 
-          const apiKey = currentProvider === 'gemini-flash'
+          const apiKey = currentProvider === 'gemini-3-flash'
             ? process.env.REACT_APP_OPENROUTER_FLASH_KEY
             : process.env.REACT_APP_OPENROUTER_PRO_KEY;
 
-          const modelId = currentProvider === 'gemini-flash'
+          const modelId = currentProvider === 'gemini-3-flash'
             ? 'google/gemini-3-flash-preview'
             : 'google/gemini-3-pro-preview';
 
@@ -966,7 +978,7 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
             dangerouslyAllowBrowser: true
           });
 
-          debugLog(`Making API call to ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini 3 Pro'} via OpenRouter...`);
+          debugLog(`Making API call to ${currentProvider === 'gemini-3-flash' ? 'Gemini 3 Flash' : 'Gemini 3 Pro'} via OpenRouter...`);
 
           const userContent = [];
           if (imageData) {
@@ -980,21 +992,21 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
           const completion = await client.chat.completions.create({
             model: modelId,
             messages: [{ role: 'user', content: userContent }],
-            max_tokens: currentProvider === 'gemini-pro' ? 64000 : 32000
+            max_tokens: currentProvider === 'gemini-3-pro' ? 64000 : 32000
           });
 
           result = completion;
           apiResult = completion;
-          debugLog(`Received result object from ${currentProvider === 'gemini-flash' ? 'Gemini 3 Flash' : 'Gemini 3 Pro'} via OpenRouter:`, result);
+          debugLog(`Received result object from ${currentProvider === 'gemini-3-flash' ? 'Gemini 3 Flash' : 'Gemini 3 Pro'} via OpenRouter:`, result);
 
-        } else if (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus') {
+        } else if (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus-4-6') {
           const { default: Anthropic } = await import('@anthropic-ai/sdk');
           const anthropic = new Anthropic({
             apiKey: process.env.REACT_APP_ANTHROPIC_API_KEY,
             dangerouslyAllowBrowser: true
           });
 
-          const isOpus = currentProvider === 'claude-opus';
+          const isOpus = currentProvider === 'claude-opus-4-6';
           const claudeModel = isOpus ? 'claude-opus-4-6' : 'claude-sonnet-4-5';
           debugLog(`Making API call to ${isOpus ? 'Claude Opus 4.6' : 'Claude Sonnet 4.5'}...`);
 
@@ -1038,9 +1050,9 @@ IMPORTANT: Response must be valid JSON only. The "files" object should contain a
         
         // Extract text from response based on provider
         let text;
-        if (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus') {
+        if (currentProvider === 'claude-sonnet-4-5' || currentProvider === 'claude-opus-4-6') {
           // Claude response processing
-          const modelName = currentProvider === 'claude-opus' ? 'Claude Opus 4.6' : 'Claude Sonnet 4.5';
+          const modelName = currentProvider === 'claude-opus-4-6' ? 'Claude Opus 4.6' : 'Claude Sonnet 4.5';
           if (result.content && result.content.length > 0 && result.content[0].text) {
             text = result.content[0].text;
             debugLog(`${modelName} text extracted successfully`);
@@ -1223,7 +1235,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [userExtensions, setUserExtensions] = useState([]);
   const [loadingMessage, setLoadingMessage] = useState('Activating AI...');
   const [messageIndex, setMessageIndex] = useState(0);
-  const [selectedLLM, setSelectedLLM] = useState('gemini-flash');
+  const [selectedLLM, setSelectedLLM] = useState('gemini-3-flash');
   const [selectedPlatform, setSelectedPlatform] = useState(DEFAULT_PLATFORM);
 
   // Token context integration
@@ -1502,7 +1514,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       setIsRevisionModalOpen(false); // Close the revision modal
 
       // Use the token-integrated generation for revisions with custom token cost for Claude Opus
-      const tokenCost = selectedLLM === 'claude-opus' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
+      const tokenCost = selectedLLM === 'claude-opus-4-6' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-3-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
           // Ensure we have the extension files for revision
@@ -1654,7 +1666,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
       if (showMyExtensions) setShowMyExtensions(false);
 
       // Use the token-integrated generation with custom token cost for Claude Opus
-      const tokenCost = selectedLLM === 'claude-opus' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
+      const tokenCost = selectedLLM === 'claude-opus-4-6' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-3-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
           const aiResult = await executeAIGeneration(prompt, null, null, uploadedImage, selectedLLM, selectedPlatform, setGenerationStatus);
@@ -2057,10 +2069,10 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       disabled={isGenerating}
                       aria-label="Select AI model"
                     >
-                      <option value="gemini-flash">🤖 Gemini 3 Flash ⚡ 1</option>
-                      <option value="gemini-pro">🤖 Gemini 3 Pro ⚡ 15</option>
+                      <option value="gemini-3-flash">🤖 Gemini 3 Flash ⚡ 1</option>
+                      <option value="gemini-3-pro">🤖 Gemini 3 Pro ⚡ 15</option>
                       <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
-                      <option value="claude-opus">🧠 Claude Opus 4.6 ⚡ 240</option>
+                      <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option>
                     </select>
                     {/* Mobile emoji overlay */}
                     <div className="sm:hidden absolute inset-0 pointer-events-none flex items-center justify-center text-lg">
@@ -2668,7 +2680,7 @@ function AppContent() {
       setIsRevisionModalOpen(false); // Close the revision modal
 
       // Use the token-integrated generation for revisions with custom token cost for Claude Opus
-      const tokenCost = selectedLLM === 'claude-opus' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-pro' ? 15 : 1;
+      const tokenCost = selectedLLM === 'claude-opus-4-6' ? 240 : selectedLLM === 'claude-sonnet-4-5' ? 50 : selectedLLM === 'gemini-3-pro' ? 15 : 1;
       const result = await generateWithTokens(
         async () => {
           // Ensure we have the extension files for revision

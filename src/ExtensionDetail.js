@@ -23,10 +23,17 @@ import { debugLog, debugError } from './utils/debugUtils';
 // Helper function to get display name for AI models
 const getModelDisplayName = (modelId) => {
   const modelNames = {
+    'gemini-3-flash': 'Gemini 3 Flash',
+    'gemini-3-pro': 'Gemini 3 Pro',
+    'claude-sonnet-4-5': 'Claude Sonnet 4.5',
+    'claude-opus-4-6': 'Claude Opus 4.6',
+    // Legacy model IDs for backward compatibility
     'gemini': 'Gemini 3 Pro',
+    'gemini-flash': 'Gemini 3 Flash',
+    'gemini-pro': 'Gemini 3 Pro',
     'chatgpt': 'ChatGPT 4o',
     'claude': 'Claude Sonnet 4',
-    'claude-opus': 'Claude Opus 4.1'
+    'claude-opus': 'Claude Opus 4.6'
   };
   return modelNames[modelId] || (modelId ? modelId.charAt(0).toUpperCase() + modelId.slice(1) : 'Unknown');
 };
