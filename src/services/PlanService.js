@@ -80,12 +80,12 @@ export const PLAN_CONFIG = {
       yearly: 990 // 2 months free
     },
     tokens: {
-      included: 10,
+      included: 500,
       renewal: 'monthly',
       rollover: false
     },
     limits: {
-      extensions_per_month: 10,
+      extensions_per_month: 500,
       revisions_per_extension: -1, // Unlimited
       storage_mb: 500,
       team_members: 1
@@ -113,12 +113,12 @@ export const PLAN_CONFIG = {
       yearly: 2990 // 2 months free
     },
     tokens: {
-      included: 50,
+      included: 2000,
       renewal: 'monthly',
       rollover: false
     },
     limits: {
-      extensions_per_month: 50,
+      extensions_per_month: 2000,
       revisions_per_extension: -1, // Unlimited
       storage_mb: 2000,
       team_members: 5
@@ -149,12 +149,12 @@ export const PLAN_CONFIG = {
       yearly: 7990 // 2 months free
     },
     tokens: {
-      included: -1, // Unlimited
+      included: 6000,
       renewal: 'monthly',
       rollover: false
     },
     limits: {
-      extensions_per_month: -1, // Unlimited
+      extensions_per_month: 6000,
       revisions_per_extension: -1, // Unlimited
       storage_mb: -1, // Unlimited
       team_members: -1 // Unlimited

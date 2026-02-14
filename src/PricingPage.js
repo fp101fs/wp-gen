@@ -111,11 +111,11 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
 
   const features = [
     {
-      name: 'Plugins per month',
-      free: '3 plugins',
-      freelancer: '10 plugins',
-      agency: '50 plugins',
-      enterprise: 'Unlimited'
+      name: 'Credits per month',
+      free: '3 credits',
+      freelancer: '500 credits',
+      agency: '2,000 credits',
+      enterprise: '6,000 credits'
     },
     {
       name: 'Team members',
@@ -159,7 +159,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       name: 'Free',
       price: '$0',
       period: 'forever',
-      tokens: '3 plugins/month',
+      tokens: '3 credits/month',
       popular: false,
       description: 'Perfect for trying out the platform',
       buttonText: 'Get Started Free',
@@ -171,7 +171,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       name: 'Freelancer',
       price: annualBilling ? '$82.50' : '$99',
       period: annualBilling ? 'month (billed annually)' : 'month',
-      tokens: '10 plugins/month',
+      tokens: '500 credits/month',
       tokensNote: 'Single user, Email support',
       popular: true,
       description: 'For individual developers and creators',
@@ -184,7 +184,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       name: 'Agency',
       price: annualBilling ? '$249.17' : '$299',
       period: annualBilling ? 'month (billed annually)' : 'month',
-      tokens: '50 plugins/month',
+      tokens: '2,000 credits/month',
       tokensNote: '5 team seats, Priority support, White-label',
       popular: false,
       description: 'For teams and agencies',
@@ -197,7 +197,7 @@ function PricingPage({ session, sessionLoading, onShowLoginModal }) {
       name: 'Enterprise',
       price: annualBilling ? '$665.83' : '$799',
       period: annualBilling ? 'month (billed annually)' : 'month',
-      tokens: 'Unlimited plugins',
+      tokens: '6,000 credits/month',
       tokensNote: 'Unlimited team, API access, Dedicated support',
       popular: false,
       bestValue: true,
