@@ -244,7 +244,11 @@ const parseGeminiResponse = (text, parentExtension = null) => {
     jsonContent = null;
     
     // Look for ```json blocks first - handle both complete and incomplete blocks
-    let jsonBlockMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+    // NOTE: Use greedy match ([\s\S]*) NOT non-greedy ([\s\S]*?) so we capture up to the
+    // LAST ``` in the response, not the first. Generated PHP/JS code often contains ```
+    // inside doc-block comments (markdown examples), which would otherwise terminate the
+    // match early and produce a truncated, unparseable JSON string.
+    let jsonBlockMatch = text.match(/```json\s*([\s\S]*)\s*```/);
     if (jsonBlockMatch) {
       jsonContent = jsonBlockMatch[1].trim();
       debugLog('Found complete JSON block, length:', jsonContent.length);
