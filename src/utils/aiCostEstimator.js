@@ -8,7 +8,14 @@ const AI_PRICING = {
   'gemini-3-flash': { input: 0.50, output: 3.00 },    // Gemini 3 Flash via OpenRouter
   'gemini-3-pro': { input: 2.00, output: 12.00 },     // Gemini 3 Pro via OpenRouter
   'claude-sonnet-4-5': { input: 3.00, output: 15.00 }, // Claude Sonnet 4.5
-  'claude-opus-4-6': { input: 5.00, output: 25.00 }   // Claude Opus 4.6
+  'claude-opus-4-6': { input: 5.00, output: 25.00 },  // Claude Opus 4.6
+  // OpenRouter free tier ($0 API cost)
+  'openrouter/free': { input: 0, output: 0 },
+  'deepseek/deepseek-r1-0528:free': { input: 0, output: 0 },
+  'arcee-ai/trinity-large-preview:free': { input: 0, output: 0 },
+  'stepfun/step-3.5-flash:free': { input: 0, output: 0 },
+  'z-ai/glm-4.5-air:free': { input: 0, output: 0 },
+  'nvidia/nemotron-3-nano-30b-a3b:free': { input: 0, output: 0 },
 };
 
 /**
@@ -29,8 +36,8 @@ function extractUsage(provider, response) {
           outputTokens: response.usage.output_tokens || 0
         };
       }
-    } else if (provider === 'gemini-3-pro' || provider === 'gemini-3-flash') {
-      // OpenRouter format (OpenAI-compatible)
+    } else {
+      // OpenRouter format (OpenAI-compatible) — Gemini and free tier models
       if (response.usage) {
         return {
           inputTokens: response.usage.prompt_tokens || 0,
@@ -59,7 +66,6 @@ function calculateCost(provider, inputTokens, outputTokens) {
     return 0;
   }
 
-  // Convert from per-1M-tokens to actual cost
   const inputCost = (inputTokens / 1_000_000) * pricing.input;
   const outputCost = (outputTokens / 1_000_000) * pricing.output;
 
@@ -82,7 +88,6 @@ export function estimateCost(provider, response) {
 
   const cost = calculateCost(provider, usage.inputTokens, usage.outputTokens);
 
-  // Format cost with appropriate precision
   const formattedCost = cost < 0.01
     ? `$${cost.toFixed(6)}`
     : `$${cost.toFixed(4)}`;
