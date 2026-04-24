@@ -56,6 +56,12 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
               <option value="gemini-3-pro">🤖 Gemini 3 Pro ⚡ 15</option>
               <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
               <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option>
+              <option value="openrouter/free">🆓 OpenRouter Free ⚡ 1</option>
+              <option value="deepseek/deepseek-r1-0528:free">🆓 DeepSeek R1 ⚡ 1</option>
+              <option value="arcee-ai/trinity-large-preview:free">🆓 Trinity Large ⚡ 1</option>
+              <option value="stepfun/step-3.5-flash:free">🆓 Step 3.5 Flash ⚡ 1</option>
+              <option value="z-ai/glm-4.5-air:free">🆓 GLM 4.5 Air ⚡ 1</option>
+              <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 Nemotron Nano 30B ⚡ 1</option>
             </select>
           </div>
         </div>
