@@ -2132,9 +2132,9 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       aria-label="Select AI model"
                     >
                       <option value="gemini-3-flash">🤖 Gemini 3 Flash ⚡ 1</option>
-                      <option value="gemini-3-pro">🤖 Gemini 3 Pro ⚡ 15</option>
-                      <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option>
-                      <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option>
+                      {/* <option value="gemini-3-pro">🤖 Gemini 3 Pro ⚡ 15</option> */}
+                      {/* <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option> */}
+                      {/* <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option> */}
                       <option value="openrouter/free">🆓 OpenRouter Free ⚡ 1</option>
                       <option value="deepseek/deepseek-r1-0528:free">🆓 DeepSeek R1 ⚡ 1</option>
                       <option value="arcee-ai/trinity-large-preview:free">🆓 Trinity Large ⚡ 1</option>
