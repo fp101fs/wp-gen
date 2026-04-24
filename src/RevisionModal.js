@@ -52,7 +52,7 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
               }}
               className="px-4 py-2 bg-gray-700 rounded-full text-white text-sm font-medium hover:bg-gray-600 transition-colors appearance-none focus:outline-none cursor-pointer"
             >
-              <option value="gemini-3-flash">🤖 Gemini 3 Flash ⚡ 1</option>
+              {/* <option value="gemini-3-flash">🤖 Gemini 3 Flash ⚡ 1</option> */}
               {/* <option value="gemini-3-pro">🤖 Gemini 3 Pro ⚡ 15</option> */}
               {/* <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option> */}
               {/* <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option> */}
