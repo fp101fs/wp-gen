@@ -57,15 +57,15 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
               {/* <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option> */}
               {/* <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option> */}
               <option value="openrouter/free">🆓 OpenRouter Free ⚡ 1</option>
+              <option value="nvidia/nemotron-3-super-120b-a12b:free">🆓 NVIDIA Nemotron Super 120B ⚡ 1</option>
+              <option value="tencent/hy3-preview-20260421:free">🆓 Tencent Hunyuan (HY3 Preview) ⚡ 1</option>
               <option value="z-ai/glm-4.5-air:free">🆓 Z.AI GLM 4.5 Air ⚡ 1</option>
               <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 NVIDIA Nemotron Nano 30B ⚡ 1</option>
-              <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 Liquid LFM Thinking (Jan) ⚡ 1</option>
-              <option value="tencent/hy3-preview-20260421:free">🆓 Tencent HY3 Preview ⚡ 1</option>
-              <option value="nvidia/nemotron-3-super-120b-a12b:free">🆓 NVIDIA Nemotron Super 120B ⚡ 1</option>
-              <option value="nvidia/nemotron-nano-12b-v2-vl:free">🆓 NVIDIA Nemotron Nano 12B ⚡ 1</option>
               <option value="nvidia/nemotron-nano-9b-v2:free">🆓 NVIDIA Nemotron Nano 9B ⚡ 1</option>
-              <option value="liquid/lfm-2.5-1.2b-thinking:free">🆓 Liquid LFM Thinking ⚡ 1</option>
+              <option value="nvidia/nemotron-nano-12b-v2-vl:free">🆓 NVIDIA Nemotron Nano 12B ⚡ 1</option>
               <option value="openai/gpt-oss-20b:free">🆓 OpenAI GPT OSS 20B ⚡ 1</option>
+              <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 Liquid LFM Thinking (Jan) ⚡ 1</option>
+              <option value="liquid/lfm-2.5-1.2b-thinking:free">🆓 Liquid LFM Thinking ⚡ 1</option>
             </select>
           </div>
         </div>

@@ -1,14 +1,14 @@
 const FREE_MODELS = [
   'openrouter/free',
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'tencent/hy3-preview-20260421:free',
   'z-ai/glm-4.5-air:free',
   'nvidia/nemotron-3-nano-30b-a3b:free',
-  'liquid/lfm-2.5-1.2b-thinking-20260120:free',
-  'tencent/hy3-preview-20260421:free',
-  'nvidia/nemotron-3-super-120b-a12b:free',
-  'nvidia/nemotron-nano-12b-v2-vl:free',
   'nvidia/nemotron-nano-9b-v2:free',
-  'liquid/lfm-2.5-1.2b-thinking:free',
+  'nvidia/nemotron-nano-12b-v2-vl:free',
   'openai/gpt-oss-20b:free',
+  'liquid/lfm-2.5-1.2b-thinking-20260120:free',
+  'liquid/lfm-2.5-1.2b-thinking:free',
 ];
 
 module.exports = async (req, res) => {

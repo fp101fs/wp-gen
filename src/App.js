@@ -414,7 +414,7 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
   };
   // Determine primary provider and available providers
   const primaryProvider = selectedProvider;
-  const FREE_MODELS = ['openrouter/free', 'z-ai/glm-4.5-air:free', 'nvidia/nemotron-3-nano-30b-a3b:free', 'liquid/lfm-2.5-1.2b-thinking-20260120:free', 'tencent/hy3-preview-20260421:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-nano-12b-v2-vl:free', 'nvidia/nemotron-nano-9b-v2:free', 'liquid/lfm-2.5-1.2b-thinking:free', 'openai/gpt-oss-20b:free'];
+  const FREE_MODELS = ['openrouter/free', 'nvidia/nemotron-3-super-120b-a12b:free', 'tencent/hy3-preview-20260421:free', 'z-ai/glm-4.5-air:free', 'nvidia/nemotron-3-nano-30b-a3b:free', 'nvidia/nemotron-nano-9b-v2:free', 'nvidia/nemotron-nano-12b-v2-vl:free', 'openai/gpt-oss-20b:free', 'liquid/lfm-2.5-1.2b-thinking-20260120:free', 'liquid/lfm-2.5-1.2b-thinking:free'];
   const isFreeTierModel = FREE_MODELS.includes(primaryProvider);
 
   // Check if we have API keys for providers
@@ -1309,7 +1309,7 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
   const [userExtensions, setUserExtensions] = useState([]);
   const [loadingMessage, setLoadingMessage] = useState('Activating AI...');
   const [messageIndex, setMessageIndex] = useState(0);
-  const [selectedLLM, setSelectedLLM] = useState('gemini-3-flash');
+  const [selectedLLM, setSelectedLLM] = useState('openrouter/free');
   const [selectedPlatform, setSelectedPlatform] = useState(DEFAULT_PLATFORM);
 
   // Token context integration
@@ -2148,15 +2148,15 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       {/* <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option> */}
                       {/* <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option> */}
                       <option value="openrouter/free">🆓 OpenRouter Free ⚡ 1</option>
+                      <option value="nvidia/nemotron-3-super-120b-a12b:free">🆓 NVIDIA Nemotron Super 120B ⚡ 1</option>
+                      <option value="tencent/hy3-preview-20260421:free">🆓 Tencent Hunyuan (HY3 Preview) ⚡ 1</option>
                       <option value="z-ai/glm-4.5-air:free">🆓 Z.AI GLM 4.5 Air ⚡ 1</option>
                       <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 NVIDIA Nemotron Nano 30B ⚡ 1</option>
-                      <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 Liquid LFM Thinking (Jan) ⚡ 1</option>
-                      <option value="tencent/hy3-preview-20260421:free">🆓 Tencent HY3 Preview ⚡ 1</option>
-                      <option value="nvidia/nemotron-3-super-120b-a12b:free">🆓 NVIDIA Nemotron Super 120B ⚡ 1</option>
-                      <option value="nvidia/nemotron-nano-12b-v2-vl:free">🆓 NVIDIA Nemotron Nano 12B ⚡ 1</option>
                       <option value="nvidia/nemotron-nano-9b-v2:free">🆓 NVIDIA Nemotron Nano 9B ⚡ 1</option>
-                      <option value="liquid/lfm-2.5-1.2b-thinking:free">🆓 Liquid LFM Thinking ⚡ 1</option>
+                      <option value="nvidia/nemotron-nano-12b-v2-vl:free">🆓 NVIDIA Nemotron Nano 12B ⚡ 1</option>
                       <option value="openai/gpt-oss-20b:free">🆓 OpenAI GPT OSS 20B ⚡ 1</option>
+                      <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 Liquid LFM Thinking (Jan) ⚡ 1</option>
+                      <option value="liquid/lfm-2.5-1.2b-thinking:free">🆓 Liquid LFM Thinking ⚡ 1</option>
                     </select>
                     {/* Mobile emoji overlay */}
                     <div className="sm:hidden absolute inset-0 pointer-events-none flex items-center justify-center text-lg">
