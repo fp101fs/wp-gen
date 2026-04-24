@@ -1,10 +1,13 @@
 const FREE_MODELS = [
   'openrouter/free',
-  'deepseek/deepseek-r1-0528:free',
-  'arcee-ai/trinity-large-preview:free',
-  'stepfun/step-3.5-flash:free',
   'z-ai/glm-4.5-air:free',
   'nvidia/nemotron-3-nano-30b-a3b:free',
+  'liquid/lfm-2.5-1.2b-thinking-20260120:free',
+  'tencent/hy3-preview-20260421:free',
+  'minimax/minimax-m2.5:free',
+  'google/gemma-4-31b-it:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'qwen/qwen3-next-80b-a3b-instruct:free',
 ];
 
 module.exports = async (req, res) => {

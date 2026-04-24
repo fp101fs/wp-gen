@@ -11,11 +11,14 @@ const AI_PRICING = {
   'claude-opus-4-6': { input: 5.00, output: 25.00 },  // Claude Opus 4.6
   // OpenRouter free tier ($0 API cost)
   'openrouter/free': { input: 0, output: 0 },
-  'deepseek/deepseek-r1-0528:free': { input: 0, output: 0 },
-  'arcee-ai/trinity-large-preview:free': { input: 0, output: 0 },
-  'stepfun/step-3.5-flash:free': { input: 0, output: 0 },
   'z-ai/glm-4.5-air:free': { input: 0, output: 0 },
   'nvidia/nemotron-3-nano-30b-a3b:free': { input: 0, output: 0 },
+  'liquid/lfm-2.5-1.2b-thinking-20260120:free': { input: 0, output: 0 },
+  'tencent/hy3-preview-20260421:free': { input: 0, output: 0 },
+  'minimax/minimax-m2.5:free': { input: 0, output: 0 },
+  'google/gemma-4-31b-it:free': { input: 0, output: 0 },
+  'meta-llama/llama-3.3-70b-instruct:free': { input: 0, output: 0 },
+  'qwen/qwen3-next-80b-a3b-instruct:free': { input: 0, output: 0 },
 };
 
 /**

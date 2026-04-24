@@ -53,11 +53,14 @@ const getModelDisplayName = (modelId) => {
     'claude-opus': 'Claude Opus 4.6',
     // OpenRouter free tier models
     'openrouter/free': 'OpenRouter Free',
-    'deepseek/deepseek-r1-0528:free': 'DeepSeek R1',
-    'arcee-ai/trinity-large-preview:free': 'Trinity Large',
-    'stepfun/step-3.5-flash:free': 'Step 3.5 Flash',
     'z-ai/glm-4.5-air:free': 'GLM 4.5 Air',
-    'nvidia/nemotron-3-nano-30b-a3b:free': 'Nemotron Nano 30B'
+    'nvidia/nemotron-3-nano-30b-a3b:free': 'Nemotron Nano 30B',
+    'liquid/lfm-2.5-1.2b-thinking-20260120:free': 'LFM 2.5 Thinking',
+    'tencent/hy3-preview-20260421:free': 'HY3 Preview',
+    'minimax/minimax-m2.5:free': 'MiniMax M2.5',
+    'google/gemma-4-31b-it:free': 'Gemma 4 31B',
+    'meta-llama/llama-3.3-70b-instruct:free': 'Llama 3.3 70B',
+    'qwen/qwen3-next-80b-a3b-instruct:free': 'Qwen3 80B'
   };
   return modelNames[modelId] || modelId;
 };
@@ -75,11 +78,14 @@ const getModelEmoji = (modelId) => {
     'claude-opus': '🧠',
     // OpenRouter free tier models
     'openrouter/free': '🆓',
-    'deepseek/deepseek-r1-0528:free': '🆓',
-    'arcee-ai/trinity-large-preview:free': '🆓',
-    'stepfun/step-3.5-flash:free': '🆓',
     'z-ai/glm-4.5-air:free': '🆓',
-    'nvidia/nemotron-3-nano-30b-a3b:free': '🆓'
+    'nvidia/nemotron-3-nano-30b-a3b:free': '🆓',
+    'liquid/lfm-2.5-1.2b-thinking-20260120:free': '🆓',
+    'tencent/hy3-preview-20260421:free': '🆓',
+    'minimax/minimax-m2.5:free': '🆓',
+    'google/gemma-4-31b-it:free': '🆓',
+    'meta-llama/llama-3.3-70b-instruct:free': '🆓',
+    'qwen/qwen3-next-80b-a3b-instruct:free': '🆓'
   };
   return modelEmojis[modelId] || '🤖';
 };
@@ -98,11 +104,14 @@ const getModelCreditCost = (modelId) => {
     'claude-opus': 240,
     // OpenRouter free tier models
     'openrouter/free': 1,
-    'deepseek/deepseek-r1-0528:free': 1,
-    'arcee-ai/trinity-large-preview:free': 1,
-    'stepfun/step-3.5-flash:free': 1,
     'z-ai/glm-4.5-air:free': 1,
-    'nvidia/nemotron-3-nano-30b-a3b:free': 1
+    'nvidia/nemotron-3-nano-30b-a3b:free': 1,
+    'liquid/lfm-2.5-1.2b-thinking-20260120:free': 1,
+    'tencent/hy3-preview-20260421:free': 1,
+    'minimax/minimax-m2.5:free': 1,
+    'google/gemma-4-31b-it:free': 1,
+    'meta-llama/llama-3.3-70b-instruct:free': 1,
+    'qwen/qwen3-next-80b-a3b-instruct:free': 1
   };
   return modelCosts[modelId] || 1;
 };
@@ -402,7 +411,7 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
   };
   // Determine primary provider and available providers
   const primaryProvider = selectedProvider;
-  const FREE_MODELS = ['openrouter/free', 'deepseek/deepseek-r1-0528:free', 'arcee-ai/trinity-large-preview:free', 'stepfun/step-3.5-flash:free', 'z-ai/glm-4.5-air:free', 'nvidia/nemotron-3-nano-30b-a3b:free'];
+  const FREE_MODELS = ['openrouter/free', 'z-ai/glm-4.5-air:free', 'nvidia/nemotron-3-nano-30b-a3b:free', 'liquid/lfm-2.5-1.2b-thinking-20260120:free', 'tencent/hy3-preview-20260421:free', 'minimax/minimax-m2.5:free', 'google/gemma-4-31b-it:free', 'meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-next-80b-a3b-instruct:free'];
   const isFreeTierModel = FREE_MODELS.includes(primaryProvider);
 
   // Check if we have API keys for providers
@@ -2136,11 +2145,14 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       {/* <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option> */}
                       {/* <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option> */}
                       <option value="openrouter/free">🆓 OpenRouter Free ⚡ 1</option>
-                      <option value="deepseek/deepseek-r1-0528:free">🆓 DeepSeek R1 ⚡ 1</option>
-                      <option value="arcee-ai/trinity-large-preview:free">🆓 Trinity Large ⚡ 1</option>
-                      <option value="stepfun/step-3.5-flash:free">🆓 Step 3.5 Flash ⚡ 1</option>
                       <option value="z-ai/glm-4.5-air:free">🆓 GLM 4.5 Air ⚡ 1</option>
                       <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 Nemotron Nano 30B ⚡ 1</option>
+                      <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 LFM 2.5 Thinking ⚡ 1</option>
+                      <option value="tencent/hy3-preview-20260421:free">🆓 HY3 Preview ⚡ 1</option>
+                      <option value="minimax/minimax-m2.5:free">🆓 MiniMax M2.5 ⚡ 1</option>
+                      <option value="google/gemma-4-31b-it:free">🆓 Gemma 4 31B ⚡ 1</option>
+                      <option value="meta-llama/llama-3.3-70b-instruct:free">🆓 Llama 3.3 70B ⚡ 1</option>
+                      <option value="qwen/qwen3-next-80b-a3b-instruct:free">🆓 Qwen3 80B ⚡ 1</option>
                     </select>
                     {/* Mobile emoji overlay */}
                     <div className="sm:hidden absolute inset-0 pointer-events-none flex items-center justify-center text-lg">

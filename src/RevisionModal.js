@@ -5,7 +5,7 @@ import { debugLog } from './utils/debugUtils';
 
 function RevisionModal({ extension, onClose, onGenerateRevision }) {
   const [revisionPrompt, setRevisionPrompt] = useState('');
-  const [selectedLLM, setSelectedLLM] = useState('gemini-3-flash');
+  const [selectedLLM, setSelectedLLM] = useState('openrouter/free');
   const { currentTokens, isUnlimited, showUpgradePromptAction } = useTokenContext();
 
   const handleSubmit = () => {
@@ -57,11 +57,14 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
               {/* <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option> */}
               {/* <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option> */}
               <option value="openrouter/free">🆓 OpenRouter Free ⚡ 1</option>
-              <option value="deepseek/deepseek-r1-0528:free">🆓 DeepSeek R1 ⚡ 1</option>
-              <option value="arcee-ai/trinity-large-preview:free">🆓 Trinity Large ⚡ 1</option>
-              <option value="stepfun/step-3.5-flash:free">🆓 Step 3.5 Flash ⚡ 1</option>
               <option value="z-ai/glm-4.5-air:free">🆓 GLM 4.5 Air ⚡ 1</option>
               <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 Nemotron Nano 30B ⚡ 1</option>
+              <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 LFM 2.5 Thinking ⚡ 1</option>
+              <option value="tencent/hy3-preview-20260421:free">🆓 HY3 Preview ⚡ 1</option>
+              <option value="minimax/minimax-m2.5:free">🆓 MiniMax M2.5 ⚡ 1</option>
+              <option value="google/gemma-4-31b-it:free">🆓 Gemma 4 31B ⚡ 1</option>
+              <option value="meta-llama/llama-3.3-70b-instruct:free">🆓 Llama 3.3 70B ⚡ 1</option>
+              <option value="qwen/qwen3-next-80b-a3b-instruct:free">🆓 Qwen3 80B ⚡ 1</option>
             </select>
           </div>
         </div>
