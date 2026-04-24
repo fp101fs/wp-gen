@@ -61,20 +61,11 @@ function RevisionModal({ extension, onClose, onGenerateRevision }) {
               <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 NVIDIA Nemotron Nano 30B ⚡ 1</option>
               <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 Liquid LFM Thinking (Jan) ⚡ 1</option>
               <option value="tencent/hy3-preview-20260421:free">🆓 Tencent HY3 Preview ⚡ 1</option>
-              <option value="qwen/qwen3-next-80b-a3b-instruct:free">🆓 Qwen Qwen3 80B ⚡ 1</option>
-              <option value="google/gemma-4-26b-a4b-it:free">🆓 Google Gemma 4 26B ⚡ 1</option>
-              <option value="google/gemma-3-27b-it:free">🆓 Google Gemma 3 27B ⚡ 1</option>
-              <option value="google/gemma-3-4b-it:free">🆓 Google Gemma 3 4B ⚡ 1</option>
-              <option value="google/gemma-3-12b-it:free">🆓 Google Gemma 3 12B ⚡ 1</option>
-              <option value="google/gemma-3n-e2b-it:free">🆓 Google Gemma 3n E2B ⚡ 1</option>
-              <option value="google/gemma-3n-e4b-it:free">🆓 Google Gemma 3n E4B ⚡ 1</option>
-              <option value="nousresearch/hermes-3-llama-3.1-405b:free">🆓 Nous Hermes 3 405B ⚡ 1</option>
-              <option value="meta-llama/llama-3.2-3b-instruct:free">🆓 Meta Llama 3.2 3B ⚡ 1</option>
               <option value="nvidia/nemotron-3-super-120b-a12b:free">🆓 NVIDIA Nemotron Super 120B ⚡ 1</option>
               <option value="nvidia/nemotron-nano-12b-v2-vl:free">🆓 NVIDIA Nemotron Nano 12B ⚡ 1</option>
               <option value="nvidia/nemotron-nano-9b-v2:free">🆓 NVIDIA Nemotron Nano 9B ⚡ 1</option>
               <option value="liquid/lfm-2.5-1.2b-thinking:free">🆓 Liquid LFM Thinking ⚡ 1</option>
-              <option value="liquid/lfm-2.5-1.2b-instruct:free">🆓 Liquid LFM Instruct ⚡ 1</option>
+              <option value="openai/gpt-oss-20b:free">🆓 OpenAI GPT OSS 20B ⚡ 1</option>
             </select>
           </div>
         </div>

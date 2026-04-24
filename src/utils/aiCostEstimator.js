@@ -15,20 +15,11 @@ const AI_PRICING = {
   'nvidia/nemotron-3-nano-30b-a3b:free': { input: 0, output: 0 },
   'liquid/lfm-2.5-1.2b-thinking-20260120:free': { input: 0, output: 0 },
   'tencent/hy3-preview-20260421:free': { input: 0, output: 0 },
-  'qwen/qwen3-next-80b-a3b-instruct:free': { input: 0, output: 0 },
-  'google/gemma-4-26b-a4b-it:free': { input: 0, output: 0 },
-  'google/gemma-3-27b-it:free': { input: 0, output: 0 },
-  'google/gemma-3-4b-it:free': { input: 0, output: 0 },
-  'google/gemma-3-12b-it:free': { input: 0, output: 0 },
-  'google/gemma-3n-e2b-it:free': { input: 0, output: 0 },
-  'google/gemma-3n-e4b-it:free': { input: 0, output: 0 },
-  'nousresearch/hermes-3-llama-3.1-405b:free': { input: 0, output: 0 },
-  'meta-llama/llama-3.2-3b-instruct:free': { input: 0, output: 0 },
   'nvidia/nemotron-3-super-120b-a12b:free': { input: 0, output: 0 },
   'nvidia/nemotron-nano-12b-v2-vl:free': { input: 0, output: 0 },
   'nvidia/nemotron-nano-9b-v2:free': { input: 0, output: 0 },
   'liquid/lfm-2.5-1.2b-thinking:free': { input: 0, output: 0 },
-  'liquid/lfm-2.5-1.2b-instruct:free': { input: 0, output: 0 },
+  'openai/gpt-oss-20b:free': { input: 0, output: 0 },
 };
 
 /**
