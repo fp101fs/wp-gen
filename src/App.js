@@ -55,12 +55,22 @@ const getModelDisplayName = (modelId) => {
     'openrouter/free': 'OpenRouter Free',
     'z-ai/glm-4.5-air:free': 'GLM 4.5 Air',
     'nvidia/nemotron-3-nano-30b-a3b:free': 'Nemotron Nano 30B',
-    'liquid/lfm-2.5-1.2b-thinking-20260120:free': 'LFM 2.5 Thinking',
+    'liquid/lfm-2.5-1.2b-thinking-20260120:free': 'LFM Thinking (Jan)',
     'tencent/hy3-preview-20260421:free': 'HY3 Preview',
-    'minimax/minimax-m2.5:free': 'MiniMax M2.5',
-    'google/gemma-4-31b-it:free': 'Gemma 4 31B',
-    'meta-llama/llama-3.3-70b-instruct:free': 'Llama 3.3 70B',
-    'qwen/qwen3-next-80b-a3b-instruct:free': 'Qwen3 80B'
+    'qwen/qwen3-next-80b-a3b-instruct:free': 'Qwen3 80B',
+    'google/gemma-4-26b-a4b-it:free': 'Gemma 4 26B',
+    'google/gemma-3-27b-it:free': 'Gemma 3 27B',
+    'google/gemma-3-4b-it:free': 'Gemma 3 4B',
+    'google/gemma-3-12b-it:free': 'Gemma 3 12B',
+    'google/gemma-3n-e2b-it:free': 'Gemma 3n E2B',
+    'google/gemma-3n-e4b-it:free': 'Gemma 3n E4B',
+    'nousresearch/hermes-3-llama-3.1-405b:free': 'Hermes 3 405B',
+    'meta-llama/llama-3.2-3b-instruct:free': 'Llama 3.2 3B',
+    'nvidia/nemotron-3-super-120b-a12b:free': 'Nemotron Super 120B',
+    'nvidia/nemotron-nano-12b-v2-vl:free': 'Nemotron Nano 12B',
+    'nvidia/nemotron-nano-9b-v2:free': 'Nemotron Nano 9B',
+    'liquid/lfm-2.5-1.2b-thinking:free': 'LFM Thinking',
+    'liquid/lfm-2.5-1.2b-instruct:free': 'LFM Instruct'
   };
   return modelNames[modelId] || modelId;
 };
@@ -82,10 +92,20 @@ const getModelEmoji = (modelId) => {
     'nvidia/nemotron-3-nano-30b-a3b:free': '🆓',
     'liquid/lfm-2.5-1.2b-thinking-20260120:free': '🆓',
     'tencent/hy3-preview-20260421:free': '🆓',
-    'minimax/minimax-m2.5:free': '🆓',
-    'google/gemma-4-31b-it:free': '🆓',
-    'meta-llama/llama-3.3-70b-instruct:free': '🆓',
-    'qwen/qwen3-next-80b-a3b-instruct:free': '🆓'
+    'qwen/qwen3-next-80b-a3b-instruct:free': '🆓',
+    'google/gemma-4-26b-a4b-it:free': '🆓',
+    'google/gemma-3-27b-it:free': '🆓',
+    'google/gemma-3-4b-it:free': '🆓',
+    'google/gemma-3-12b-it:free': '🆓',
+    'google/gemma-3n-e2b-it:free': '🆓',
+    'google/gemma-3n-e4b-it:free': '🆓',
+    'nousresearch/hermes-3-llama-3.1-405b:free': '🆓',
+    'meta-llama/llama-3.2-3b-instruct:free': '🆓',
+    'nvidia/nemotron-3-super-120b-a12b:free': '🆓',
+    'nvidia/nemotron-nano-12b-v2-vl:free': '🆓',
+    'nvidia/nemotron-nano-9b-v2:free': '🆓',
+    'liquid/lfm-2.5-1.2b-thinking:free': '🆓',
+    'liquid/lfm-2.5-1.2b-instruct:free': '🆓'
   };
   return modelEmojis[modelId] || '🤖';
 };
@@ -108,10 +128,20 @@ const getModelCreditCost = (modelId) => {
     'nvidia/nemotron-3-nano-30b-a3b:free': 1,
     'liquid/lfm-2.5-1.2b-thinking-20260120:free': 1,
     'tencent/hy3-preview-20260421:free': 1,
-    'minimax/minimax-m2.5:free': 1,
-    'google/gemma-4-31b-it:free': 1,
-    'meta-llama/llama-3.3-70b-instruct:free': 1,
-    'qwen/qwen3-next-80b-a3b-instruct:free': 1
+    'qwen/qwen3-next-80b-a3b-instruct:free': 1,
+    'google/gemma-4-26b-a4b-it:free': 1,
+    'google/gemma-3-27b-it:free': 1,
+    'google/gemma-3-4b-it:free': 1,
+    'google/gemma-3-12b-it:free': 1,
+    'google/gemma-3n-e2b-it:free': 1,
+    'google/gemma-3n-e4b-it:free': 1,
+    'nousresearch/hermes-3-llama-3.1-405b:free': 1,
+    'meta-llama/llama-3.2-3b-instruct:free': 1,
+    'nvidia/nemotron-3-super-120b-a12b:free': 1,
+    'nvidia/nemotron-nano-12b-v2-vl:free': 1,
+    'nvidia/nemotron-nano-9b-v2:free': 1,
+    'liquid/lfm-2.5-1.2b-thinking:free': 1,
+    'liquid/lfm-2.5-1.2b-instruct:free': 1
   };
   return modelCosts[modelId] || 1;
 };
@@ -411,7 +441,7 @@ const executeAIGeneration = async (currentPrompt, revisionPrompt, parentExtensio
   };
   // Determine primary provider and available providers
   const primaryProvider = selectedProvider;
-  const FREE_MODELS = ['openrouter/free', 'z-ai/glm-4.5-air:free', 'nvidia/nemotron-3-nano-30b-a3b:free', 'liquid/lfm-2.5-1.2b-thinking-20260120:free', 'tencent/hy3-preview-20260421:free', 'minimax/minimax-m2.5:free', 'google/gemma-4-31b-it:free', 'meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-next-80b-a3b-instruct:free'];
+  const FREE_MODELS = ['openrouter/free', 'z-ai/glm-4.5-air:free', 'nvidia/nemotron-3-nano-30b-a3b:free', 'liquid/lfm-2.5-1.2b-thinking-20260120:free', 'tencent/hy3-preview-20260421:free', 'qwen/qwen3-next-80b-a3b-instruct:free', 'google/gemma-4-26b-a4b-it:free', 'google/gemma-3-27b-it:free', 'google/gemma-3-4b-it:free', 'google/gemma-3-12b-it:free', 'google/gemma-3n-e2b-it:free', 'google/gemma-3n-e4b-it:free', 'nousresearch/hermes-3-llama-3.1-405b:free', 'meta-llama/llama-3.2-3b-instruct:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-nano-12b-v2-vl:free', 'nvidia/nemotron-nano-9b-v2:free', 'liquid/lfm-2.5-1.2b-thinking:free', 'liquid/lfm-2.5-1.2b-instruct:free'];
   const isFreeTierModel = FREE_MODELS.includes(primaryProvider);
 
   // Check if we have API keys for providers
@@ -2145,14 +2175,24 @@ function HomePage({ session, sessionLoading, onShowLoginModal, isRevisionModalOp
                       {/* <option value="claude-sonnet-4-5">🧠 Claude Sonnet 4.5 ⚡ 50</option> */}
                       {/* <option value="claude-opus-4-6">🧠 Claude Opus 4.6 ⚡ 240</option> */}
                       <option value="openrouter/free">🆓 OpenRouter Free ⚡ 1</option>
-                      <option value="z-ai/glm-4.5-air:free">🆓 GLM 4.5 Air ⚡ 1</option>
-                      <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 Nemotron Nano 30B ⚡ 1</option>
-                      <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 LFM 2.5 Thinking ⚡ 1</option>
-                      <option value="tencent/hy3-preview-20260421:free">🆓 HY3 Preview ⚡ 1</option>
-                      <option value="minimax/minimax-m2.5:free">🆓 MiniMax M2.5 ⚡ 1</option>
-                      <option value="google/gemma-4-31b-it:free">🆓 Gemma 4 31B ⚡ 1</option>
-                      <option value="meta-llama/llama-3.3-70b-instruct:free">🆓 Llama 3.3 70B ⚡ 1</option>
-                      <option value="qwen/qwen3-next-80b-a3b-instruct:free">🆓 Qwen3 80B ⚡ 1</option>
+                      <option value="z-ai/glm-4.5-air:free">🆓 Z.AI GLM 4.5 Air ⚡ 1</option>
+                      <option value="nvidia/nemotron-3-nano-30b-a3b:free">🆓 NVIDIA Nemotron Nano 30B ⚡ 1</option>
+                      <option value="liquid/lfm-2.5-1.2b-thinking-20260120:free">🆓 Liquid LFM Thinking (Jan) ⚡ 1</option>
+                      <option value="tencent/hy3-preview-20260421:free">🆓 Tencent HY3 Preview ⚡ 1</option>
+                      <option value="qwen/qwen3-next-80b-a3b-instruct:free">🆓 Qwen Qwen3 80B ⚡ 1</option>
+                      <option value="google/gemma-4-26b-a4b-it:free">🆓 Google Gemma 4 26B ⚡ 1</option>
+                      <option value="google/gemma-3-27b-it:free">🆓 Google Gemma 3 27B ⚡ 1</option>
+                      <option value="google/gemma-3-4b-it:free">🆓 Google Gemma 3 4B ⚡ 1</option>
+                      <option value="google/gemma-3-12b-it:free">🆓 Google Gemma 3 12B ⚡ 1</option>
+                      <option value="google/gemma-3n-e2b-it:free">🆓 Google Gemma 3n E2B ⚡ 1</option>
+                      <option value="google/gemma-3n-e4b-it:free">🆓 Google Gemma 3n E4B ⚡ 1</option>
+                      <option value="nousresearch/hermes-3-llama-3.1-405b:free">🆓 Nous Hermes 3 405B ⚡ 1</option>
+                      <option value="meta-llama/llama-3.2-3b-instruct:free">🆓 Meta Llama 3.2 3B ⚡ 1</option>
+                      <option value="nvidia/nemotron-3-super-120b-a12b:free">🆓 NVIDIA Nemotron Super 120B ⚡ 1</option>
+                      <option value="nvidia/nemotron-nano-12b-v2-vl:free">🆓 NVIDIA Nemotron Nano 12B ⚡ 1</option>
+                      <option value="nvidia/nemotron-nano-9b-v2:free">🆓 NVIDIA Nemotron Nano 9B ⚡ 1</option>
+                      <option value="liquid/lfm-2.5-1.2b-thinking:free">🆓 Liquid LFM Thinking ⚡ 1</option>
+                      <option value="liquid/lfm-2.5-1.2b-instruct:free">🆓 Liquid LFM Instruct ⚡ 1</option>
                     </select>
                     {/* Mobile emoji overlay */}
                     <div className="sm:hidden absolute inset-0 pointer-events-none flex items-center justify-center text-lg">
